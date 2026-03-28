@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CocoBlast OS — Startup Diagnosis Tool</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080808;
+  --surface: #0f0f0f;
+  --surface2: #161616;
+  --surface3: #1e1e1e;
+  --border: #1f1f1f;
+  --border2: #2a2a2a;
+  --accent: #ff5500;
+  --accent2: #ff8c42;
+  --accent-dim: rgba(255,85,0,0.12);
+  --danger: #ff2d2d;
+  --warn: #ffbe00;
+  --ok: #00d166;
+  --text: #efefef;
+  --text2: #aaa;
+  --muted: #555;
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Barlow Condensed', sans-serif;
+  --body: 'Barlow', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* NOISE OVERLAY */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.4;
+}
+
+/* HEADER */
+.header {
+  position: sticky; top: 0; z-index: 900;
+  background: rgba(8,8,8,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 10px;
+}
+.logo-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.logo span { color: var(--muted); }
+.step-bar {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px; color: var(--muted);
+}
+.step-pip {
+  width: 20px; height: 3px; background: var(--border2);
+  transition: background 0.4s;
+}
+.step-pip.done { background: var(--accent); }
+.step-pip.active { background: var(--accent2); }
+.lang-toggle {
+  font-family: var(--mono); font-size: 10px; cursor: pointer;
+  border: 1px solid var(--border2); padding: 4px 10px;
+  color: var(--muted); transition: all 0.2s;
+  letter-spacing: 1px;
+}
+.lang-toggle:hover { color: var(--accent); border-color: var(--accent); }
+
+/* SECTIONS */
+.section { display: none; max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; animation: fadeUp 0.4s ease; }
+.section.active { display: block; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+
+/* STEP 1 — HERO */
+.eyebrow {
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 8px;
+}
+.eyebrow::before { content:''; display:block; width:32px; height:1px; background:var(--accent); }
+h1 {
+  font-family: var(--display);
+  font-size: clamp(42px, 9vw, 88px);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -1px;
+  margin-bottom: 24px;
+  text-transform: uppercase;
+}
+h1 em { font-style: normal; color: var(--accent); }
+.hero-sub {
+  font-family: var(--mono); font-size: 12px; color: var(--text2);
+  line-height: 1.8; max-width: 480px; margin-bottom: 48px;
+}
+.section-label {
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  letter-spacing: 3px; text-transform: uppercase;
+  margin-bottom: 16px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.section-label span { color: var(--accent); }
+
+/* INDUSTRY GRID */
+.industry-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 8px;
+  margin-bottom: 40px;
+}
+.industry-card {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 22px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative; overflow: hidden;
+}
+.industry-card::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 2px; background: var(--accent);
+  transform: scaleX(0); transition: transform 0.25s;
+  transform-origin: left;
+}
+.industry-card:hover::after, .industry-card.selected::after { transform: scaleX(1); }
+.industry-card:hover, .industry-card.selected {
+  border-color: var(--border2);
+  background: var(--surface2);
+}
+.industry-card.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.ind-icon { font-size: 28px; margin-bottom: 12px; display: block; }
+.ind-name { font-family: var(--display); font-size: 18px; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+.ind-desc { font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.5; }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 28px; font-family: var(--mono);
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  cursor: pointer; border: none; transition: all 0.2s;
+  text-transform: uppercase;
+}
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+.btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border2); }
+.btn-ghost:hover { color: var(--text); border-color: var(--text2); }
+.btn-row { display: flex; gap: 10px; margin-top: 32px; flex-wrap: wrap; align-items: center; }
+
+/* FORM */
+.form-section-title {
+  font-family: var(--mono); font-size: 9px; color: var(--accent);
+  letter-spacing: 3px; text-transform: uppercase;
+  margin: 32px 0 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.form-section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media(max-width:560px){ .form-grid { grid-template-columns: 1fr; } }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-family: var(--mono); font-size: 10px; color: var(--text2); line-height: 1.4; }
+.field label .bench { color: var(--accent2); font-size: 9px; }
+.input-wrap { position: relative; }
+.field input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 10px 36px 10px 12px;
+  font-family: var(--mono); font-size: 13px;
+  outline: none; transition: border-color 0.2s;
+  -webkit-appearance: none; appearance: none;
+}
+.field input:focus { border-color: var(--accent); background: var(--surface2); }
+.field input::placeholder { color: var(--muted); }
+.status-dot {
+  position: absolute; right: 12px; top: 50%;
+  transform: translateY(-50%);
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--border2); transition: background 0.3s, box-shadow 0.3s;
+}
+.status-dot.ok { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+.status-dot.warn { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+.status-dot.danger { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+
+/* RESULTS */
+.result-header {
+  border-left: 3px solid var(--accent);
+  padding: 20px 24px;
+  background: var(--surface);
+  margin-bottom: 24px;
+}
+.result-header h2 { font-family: var(--display); font-size: 24px; font-weight: 800; text-transform: uppercase; margin-bottom: 4px; }
+.result-header p { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+.score-block { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.score-card {
+  flex: 1; min-width: 90px;
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 16px 12px; text-align: center;
+}
+.score-val { font-family: var(--display); font-size: 36px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+.score-val.critical { color: var(--danger); }
+.score-val.warning { color: var(--warn); }
+.score-val.healthy { color: var(--ok); }
+.score-label { font-family: var(--mono); font-size: 8px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.health-bar-wrap { height: 2px; background: var(--border); margin-top: 8px; }
+.health-bar { height: 100%; transition: width 1s ease; }
+.verdict-box {
+  padding: 14px 18px; margin-bottom: 8px;
+  font-family: var(--mono); font-size: 11px; line-height: 1.7;
+  border-left: 3px solid;
+}
+
+/* CORE CARDS */
+.core-card { border: 1px solid var(--border); margin-bottom: 8px; overflow: hidden; }
+.core-header {
+  padding: 16px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; transition: background 0.2s;
+}
+.core-header:hover { background: var(--surface2); }
+.core-title-group { display: flex; align-items: center; gap: 12px; }
+.core-num { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 2px; }
+.core-name { font-family: var(--display); font-size: 16px; font-weight: 700; text-transform: uppercase; }
+.severity-badge {
+  font-family: var(--mono); font-size: 8px;
+  padding: 3px 8px; letter-spacing: 2px; font-weight: 700;
+}
+.severity-badge.KRITIS,.severity-badge.CRITICAL { background: rgba(255,45,45,0.12); color: var(--danger); border: 1px solid rgba(255,45,45,0.3); }
+.severity-badge.SERIUS,.severity-badge.SERIOUS { background: rgba(255,190,0,0.08); color: var(--warn); border: 1px solid rgba(255,190,0,0.3); }
+.severity-badge.PERLU,.severity-badge.ATTENTION { background: rgba(0,209,102,0.08); color: var(--ok); border: 1px solid rgba(0,209,102,0.25); }
+.core-body { display: none; padding: 0 20px 20px; border-top: 1px solid var(--border); }
+.core-body.open { display: block; }
+.diag-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 18px; }
+@media(max-width:600px){ .diag-row { grid-template-columns: 1fr; } }
+.diag-block-title { font-family: var(--mono); font-size: 8px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.diag-block-content { font-size: 12px; line-height: 1.65; color: #bbb; }
+.metrics-triggered {
+  margin-top: 14px; padding: 12px 14px;
+  background: rgba(255,45,45,0.04);
+  border: 1px solid rgba(255,45,45,0.15);
+}
+.metrics-triggered-title { font-family: var(--mono); font-size: 8px; color: var(--danger); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+.metric-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-family: var(--mono); font-size: 10px; flex-wrap: wrap; gap: 4px;
+}
+.metric-row:last-child { border-bottom: none; }
+.metric-row .lbl { color: var(--text2); flex: 1; min-width: 120px; }
+.metric-row .your { color: var(--danger); }
+.metric-row .bench { color: var(--ok); }
+.warning-box {
+  margin-top: 12px; padding: 10px 14px;
+  background: rgba(255,190,0,0.04);
+  border-left: 2px solid var(--warn);
+  font-family: var(--mono); font-size: 10px; color: var(--warn); line-height: 1.6;
+}
+.solution-box {
+  margin-top: 12px; padding: 14px;
+  background: rgba(0,209,102,0.04);
+  border: 1px solid rgba(0,209,102,0.15);
+}
+.solution-box-title { font-family: var(--mono); font-size: 8px; color: var(--ok); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+.solution-box p { font-size: 12px; line-height: 1.7; color: #bbb; }
+
+/* ROADMAP */
+.roadmap-phases { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 10px; }
+@media(max-width:600px){ .roadmap-phases { grid-template-columns: 1fr; } }
+.phase-col { background: var(--surface); border: 1px solid var(--border); padding: 18px; }
+.phase-label {
+  font-family: var(--mono); font-size: 8px; color: var(--accent);
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.phase-period { font-family: var(--display); font-size: 22px; font-weight: 800; margin-bottom: 14px; text-transform: uppercase; }
+.phase-action {
+  font-size: 12px; color: #bbb; padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  line-height: 1.5; display: flex; gap: 8px;
+}
+.phase-action:last-child { border-bottom: none; }
+.phase-action::before { content: '→'; color: var(--accent); font-family: var(--mono); flex-shrink: 0; }
+.kpi-tag {
+  display: inline-block; font-family: var(--mono); font-size: 9px;
+  padding: 2px 6px; background: var(--accent-dim); color: var(--accent2);
+  margin-top: 4px;
+}
+
+/* GATE */
+.gate-section {
+  margin-top: 24px; border: 1px solid var(--border);
+  background: var(--surface); padding: 22px;
+}
+.gate-title { font-family: var(--mono); font-size: 9px; color: var(--accent); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+.gate-item { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); line-height: 1.5; }
+.gate-item:last-child { border-bottom: none; }
+.gate-box { width: 14px; height: 14px; border: 1px solid var(--border2); flex-shrink: 0; margin-top: 2px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 8px; color: var(--muted); }
+
+.divider { height: 1px; background: var(--border); margin: 32px 0; }
+.tag { font-family: var(--mono); font-size: 8px; color: var(--accent); background: var(--accent-dim); padding: 2px 6px; letter-spacing: 1px; }
+
+/* DATA NOTICE */
+.data-notice {
+  padding: 14px 18px; margin-bottom: 32px;
+  background: rgba(255,85,0,0.06); border: 1px solid rgba(255,85,0,0.2);
+  font-family: var(--mono); font-size: 10px; color: var(--text2); line-height: 1.7;
+}
+.data-notice strong { color: var(--accent); }
+
+/* AI RISK SELECT PANEL */
+.ai-risk-panel {
+  margin-bottom: 40px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  overflow: hidden;
+}
+.ai-risk-header {
+  padding: 14px 18px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 9px;
+  color: var(--accent); letter-spacing: 3px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.ai-risk-header::before { content:'⚠'; color: var(--accent); }
+.ai-risk-body { padding: 18px; }
+.ai-risk-options { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+@media(max-width:560px){ .ai-risk-options { grid-template-columns: 1fr; } }
+.risk-option {
+  border: 1px solid var(--border);
+  padding: 14px 12px;
+  cursor: pointer; transition: all 0.2s;
+  position: relative;
+}
+.risk-option:hover { border-color: var(--border2); background: var(--surface2); }
+.risk-option.selected-low  { border-color: var(--ok);     background: rgba(0,209,102,0.06); }
+.risk-option.selected-med  { border-color: var(--warn);   background: rgba(255,190,0,0.06); }
+.risk-option.selected-high { border-color: var(--danger); background: rgba(255,45,45,0.06); }
+.risk-level {
+  font-family: var(--display); font-size: 15px; font-weight: 800;
+  text-transform: uppercase; margin-bottom: 5px;
+}
+.risk-level.low  { color: var(--ok); }
+.risk-level.med  { color: var(--warn); }
+.risk-level.high { color: var(--danger); }
+.risk-desc { font-family: var(--mono); font-size: 9px; color: var(--muted); line-height: 1.6; }
+.risk-check {
+  position: absolute; top: 10px; right: 10px;
+  width: 14px; height: 14px;
+  border: 1px solid var(--border2); font-family: var(--mono); font-size: 8px;
+  display: flex; align-items: center; justify-content: center; color: transparent;
+}
+.risk-option.selected-low .risk-check  { border-color: var(--ok);     color: var(--ok); }
+.risk-option.selected-med .risk-check  { border-color: var(--warn);   color: var(--warn); }
+.risk-option.selected-high .risk-check { border-color: var(--danger); color: var(--danger); }
+
+/* AGENTIC READINESS */
+.agentic-panel {
+  margin-bottom: 40px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  overflow: hidden;
+}
+.agentic-header {
+  padding: 14px 18px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 9px;
+  color: var(--accent2); letter-spacing: 3px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.agentic-header::before { content:'⚡'; }
+.agentic-body { padding: 18px; }
+.agentic-checks { display: flex; flex-direction: column; gap: 8px; }
+.agentic-check-item {
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; padding: 10px 12px;
+  border: 1px solid var(--border);
+  transition: all 0.2s; user-select: none;
+}
+.agentic-check-item:hover { background: var(--surface2); border-color: var(--border2); }
+.agentic-check-item.checked { background: rgba(255,140,66,0.05); border-color: rgba(255,140,66,0.3); }
+.agentic-checkbox {
+  width: 16px; height: 16px; flex-shrink: 0;
+  border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 9px; color: transparent;
+  transition: all 0.2s;
+}
+.agentic-check-item.checked .agentic-checkbox {
+  border-color: var(--accent2); color: var(--accent2);
+  background: rgba(255,140,66,0.1);
+}
+.agentic-check-label { font-family: var(--mono); font-size: 10px; color: var(--text2); }
+.agentic-check-item.checked .agentic-check-label { color: var(--text); }
+.agentic-score-bar {
+  margin-top: 12px; height: 3px; background: var(--border);
+  position: relative;
+}
+.agentic-score-fill {
+  height: 100%; background: var(--accent2);
+  transition: width 0.4s ease;
+  width: 0%;
+}
+.agentic-score-label {
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  margin-top: 6px; display: flex; justify-content: space-between;
+}
+
+/* BENCHMARK HINT */
+.bench-hint {
+  font-family: var(--mono); font-size: 9px;
+  padding: 5px 8px; margin-top: 4px;
+  border-left: 2px solid transparent;
+  transition: all 0.3s;
+  display: none;
+  line-height: 1.5;
+}
+.bench-hint.visible { display: block; }
+.bench-hint.ok    { border-color: var(--ok);     background: rgba(0,209,102,0.04);  color: var(--ok); }
+.bench-hint.warn  { border-color: var(--warn);   background: rgba(255,190,0,0.04);  color: var(--warn); }
+.bench-hint.bad   { border-color: var(--danger); background: rgba(255,45,45,0.04);  color: var(--danger); }
+
+/* MOAT SCORE PANEL in Results */
+.moat-panel {
+  margin-top: 0; margin-bottom: 8px;
+  border: 1px solid var(--border2);
+  background: var(--surface);
+  overflow: hidden;
+}
+.moat-panel-header {
+  padding: 16px 20px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.moat-panel-title {
+  font-family: var(--display); font-size: 16px; font-weight: 700;
+  text-transform: uppercase; display: flex; align-items: center; gap: 10px;
+}
+.moat-panel-title span { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 2px; }
+.moat-score-badge {
+  font-family: var(--display); font-size: 26px; font-weight: 900;
+  display: flex; align-items: baseline; gap: 4px;
+}
+.moat-score-badge sub { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+.moat-body { padding: 18px 20px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+@media(max-width:600px){ .moat-body { grid-template-columns: 1fr; } }
+.moat-row { display: flex; flex-direction: column; gap: 4px; }
+.moat-row-label { font-family: var(--mono); font-size: 8px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+.moat-row-val { font-family: var(--mono); font-size: 11px; line-height: 1.5; }
+.moat-row-bar { height: 2px; background: var(--border); margin-top: 6px; }
+.moat-row-fill { height: 100%; transition: width 0.8s ease; }
+.moat-threat {
+  margin: 0 20px 18px; padding: 10px 14px;
+  background: rgba(255,45,45,0.04);
+  border: 1px solid rgba(255,45,45,0.15);
+  font-family: var(--mono); font-size: 10px; line-height: 1.6; color: var(--danger);
+}
+.moat-boost {
+  margin: 0 20px 18px; padding: 10px 14px;
+  background: rgba(0,209,102,0.04);
+  border: 1px solid rgba(0,209,102,0.15);
+  font-family: var(--mono); font-size: 10px; line-height: 1.6; color: var(--ok);
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    CocoBlast <span>//</span> OS
+  </div>
+  <div class="step-bar">
+    <div class="step-pip active" id="pip1"></div>
+    <div class="step-pip" id="pip2"></div>
+    <div class="step-pip" id="pip3"></div>
+    <span id="stepLabel" style="margin-left:4px">STEP 1/3</span>
+  </div>
+  <div class="lang-toggle" onclick="toggleLang()" id="langBtn">EN</div>
+</div>
+
+<!-- STEP 1 -->
+<div class="section active" id="step1">
+  <div class="eyebrow" id="s1eyebrow">// Startup Diagnosis Framework 2025</div>
+  <h1 id="s1h1">Bedah bisnis lo<br>dengan <em>data.</em></h1>
+  <p class="hero-sub" id="s1sub">Input metrics aktual → sistem diagnosa pakai framework CocoBlast OS → diagnosis lengkap + roadmap 30/60/90 hari. Bukan asumsi. Bukan feeling.</p>
+
+  <div class="data-notice" id="dataNotice">
+    <strong>// PRE-DIAGNOSIS</strong> — Kumpulkan data aktual sebelum mulai. Kalau &gt;40% data tidak tersedia, jalankan data collection sprint 1-2 minggu dulu. Diagnosis tanpa data = tebakan.
+  </div>
+
+  <div class="section-label"><span>01</span> — <span id="pickIndustryLabel">Pilih Industri</span></div>
+  <div class="industry-grid">
+    <div class="industry-card" onclick="selectIndustry('saas',this)">
+      <span class="ind-icon">⚡</span>
+      <div class="ind-name">SaaS / Tech</div>
+      <div class="ind-desc">B2B software, platform digital</div>
+    </div>
+    <div class="industry-card" onclick="selectIndustry('ecom',this)">
+      <span class="ind-icon">📦</span>
+      <div class="ind-name">E-Commerce</div>
+      <div class="ind-desc">D2C, marketplace seller</div>
+    </div>
+    <div class="industry-card" onclick="selectIndustry('fintech',this)">
+      <span class="ind-icon">🏦</span>
+      <div class="ind-name">Fintech</div>
+      <div class="ind-desc">Lending, payment, wealth</div>
+    </div>
+    <div class="industry-card" onclick="selectIndustry('fnb',this)">
+      <span class="ind-icon">🍽️</span>
+      <div class="ind-name">F&B / Kedai</div>
+      <div class="ind-desc">Restoran, kedai, catering</div>
+    </div>
+    <div class="industry-card" onclick="selectIndustry('health',this)">
+      <span class="ind-icon">🏥</span>
+      <div class="ind-name">Healthcare</div>
+      <div class="ind-desc">Klinik, healthtech, wellness</div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="goToStep2()" id="btn1" disabled id="s1btn">
+      <span id="s1btnText">Lanjut Input Metrics</span> →
+    </button>
+  </div>
+
+  <!-- AI SUBSTITUTION RISK -->
+  <div id="aiRiskSection" style="display:none;margin-top:40px">
+    <div class="section-label"><span>02</span> — <span id="aiRiskLabel">AI Substitution Risk</span></div>
+    <div class="ai-risk-panel">
+      <div class="ai-risk-header" id="aiRiskHeader">AI SUBSTITUTION RISK — CORE 05 MOAT INPUT</div>
+      <div class="ai-risk-body">
+        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.7" id="aiRiskDesc">Seberapa mudah bisnis ini bisa digantikan oleh Claude/GPT-5 + RAG dalam 6–18 bulan ke depan?</p>
+        <div class="ai-risk-options">
+          <div class="risk-option" onclick="selectRisk('low',this)" id="riskLow">
+            <div class="risk-check">✓</div>
+            <div class="risk-level low" id="riskLowLabel">LOW</div>
+            <div class="risk-desc" id="riskLowDesc">Data proprietary + closed-loop feedback. Moat kuat. LLM tidak bisa replicate tanpa data lo.</div>
+          </div>
+          <div class="risk-option" onclick="selectRisk('med',this)" id="riskMed">
+            <div class="risk-check">✓</div>
+            <div class="risk-level med" id="riskMedLabel">MEDIUM</div>
+            <div class="risk-desc" id="riskMedDesc">API wrapper + beberapa data unik. Bisa di-copy, tapi butuh 6–12 bulan effort.</div>
+          </div>
+          <div class="risk-option" onclick="selectRisk('high',this)" id="riskHigh">
+            <div class="risk-check">✓</div>
+            <div class="risk-level high" id="riskHighLabel">HIGH</div>
+            <div class="risk-desc" id="riskHighDesc">Feature-only, no unique data. Bisa di-copy LLM dalam &lt;1 jam prompt engineering.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AGENTIC READINESS -->
+    <div class="section-label" style="margin-top:32px"><span>03</span> — <span id="agenticLabel">Agentic Readiness</span></div>
+    <div class="agentic-panel">
+      <div class="agentic-header" id="agenticHeader">AGENTIC READINESS — INFRASTRUKTUR AI-NATIVE</div>
+      <div class="agentic-body">
+        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.7" id="agenticDesc">Centang semua yang sudah ada di sistem lo sekarang:</p>
+        <div class="agentic-checks" id="agenticChecks">
+          <div class="agentic-check-item" onclick="toggleAgentic(0,this)" data-idx="0">
+            <div class="agentic-checkbox">✓</div>
+            <div class="agentic-check-label" id="ag0">Event-driven architecture (trigger otomatis berdasarkan event)</div>
+          </div>
+          <div class="agentic-check-item" onclick="toggleAgentic(1,this)" data-idx="1">
+            <div class="agentic-checkbox">✓</div>
+            <div class="agentic-check-label" id="ag1">Real-time dashboard operasional (bukan laporan manual)</div>
+          </div>
+          <div class="agentic-check-item" onclick="toggleAgentic(2,this)" data-idx="2">
+            <div class="agentic-checkbox">✓</div>
+            <div class="agentic-check-label" id="ag2">Task audit log otomatis (semua aksi tercatat + bisa di-audit)</div>
+          </div>
+          <div class="agentic-check-item" onclick="toggleAgentic(3,this)" data-idx="3">
+            <div class="agentic-checkbox">✓</div>
+            <div class="agentic-check-label" id="ag3">External action trigger (notif, API call, atau workflow dipicu oleh data)</div>
+          </div>
+          <div class="agentic-check-item" onclick="toggleAgentic(4,this)" data-idx="4">
+            <div class="agentic-checkbox">✓</div>
+            <div class="agentic-check-label" id="ag4">Feedback loop ke model/sistem (data pengguna dipakai improve output)</div>
+          </div>
+        </div>
+        <div class="agentic-score-bar"><div class="agentic-score-fill" id="agenticFill"></div></div>
+        <div class="agentic-score-label">
+          <span id="agenticScoreLabel">Agentic Score: 0/5</span>
+          <span id="agenticReadinessLabel" style="color:var(--muted)">NOT AGENTIC</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="section" id="step2">
+  <div class="eyebrow" id="s2eyebrow">// Data Input</div>
+  <h1 style="font-size:clamp(32px,6vw,56px)" id="s2h1">Input Metrics <em>Aktual</em></h1>
+  <p class="hero-sub" id="s2sub" style="margin-bottom:16px">Isi angka nyata. Status dot akan update real-time. Kosongkan kalau data belum ada.</p>
+  <div id="formContainer"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="runDiagnosis()" id="s2runBtn"><span id="s2runText">▶ Run Diagnosis</span></button>
+    <button class="btn btn-ghost" onclick="goToStep1()"><span id="s2backText">← Balik</span></button>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="section" id="step3">
+  <div id="resultsContainer"></div>
+</div>
+
+<script>
+// ─── LANGUAGE ─────────────────────────────────────────────
+let lang = 'id';
+const T = {
+  id: {
+    eyebrow1: '// Startup Diagnosis Framework 2025',
+    h1: 'Bedah bisnis lo<br>dengan <em>data.</em>',
+    sub1: 'Input metrics aktual → sistem diagnosa pakai framework CocoBlast OS → diagnosis lengkap + roadmap 30/60/90 hari. Bukan asumsi. Bukan feeling.',
+    dataNotice: '<strong>// PRE-DIAGNOSIS</strong> — Kumpulkan data aktual sebelum mulai. Kalau >40% data tidak tersedia, jalankan data collection sprint 1-2 minggu dulu. Diagnosis tanpa data = tebakan.',
+    pickIndustry: 'Pilih Industri',
+    s1btn: 'Lanjut Input Metrics',
+    eyebrow2: '// Data Input',
+    h2: 'Input Metrics <em>Aktual</em>',
+    sub2: 'Isi angka nyata. Status dot akan update real-time. Kosongkan kalau data belum ada.',
+    runBtn: '▶ Run Diagnosis',
+    backBtn: '← Balik',
+    newDiag: '← Diagnosis Baru',
+    gejala: 'Gejala',
+    rootcause: 'Root Cause',
+    severity: 'Severity',
+    triggered: 'Metrics Triggered',
+    solusi: 'Solusi',
+    roadmap: 'Priority Action Roadmap — 90 Hari',
+    phase1: 'Quick Win',
+    phase2: 'Mid-Term',
+    phase3: 'Foundation',
+    days1: '0–30 Hari',
+    days2: '30–60 Hari',
+    days3: '60–90 Hari',
+    gateTitle: 'Gate Conditions — Kapan Boleh Scale',
+    verdictReady: 'Sistem lo cukup stabil untuk scale. Monitor metrics tiap 30 hari.',
+    verdictNotReady: 'Jangan scale dulu. Selesaikan system debt — scaling sekarang hanya memperbesar masalah.',
+    engineVerdict: 'ENGINE VERDICT',
+    healthScore: 'Health Score',
+    status: 'Status',
+    coreSehat: 'Core Sehat',
+    scalingGate: 'Scaling Gate',
+    readyScale: '🚀 READY TO SCALE',
+    fixFirst: '✋ FIX DULU',
+    breakdown: '4-Core Diagnosis Breakdown',
+    your: 'Lo',
+    target: 'Target',
+    sehat: 'SEHAT',
+    perluPerhatian: 'PERLU PERHATIAN',
+    kritis: 'KRITIS',
+  },
+  en: {
+    eyebrow1: '// Startup Diagnosis Framework 2025',
+    h1: 'Diagnose your business<br>with <em>data.</em>',
+    sub1: 'Input actual metrics → CocoBlast OS framework diagnoses your system → full diagnosis + 30/60/90-day roadmap. No assumptions. No guessing.',
+    dataNotice: '<strong>// PRE-DIAGNOSIS</strong> — Collect actual data before starting. If >40% data unavailable, run a 1-2 week data collection sprint first. Diagnosis without data = guesswork.',
+    pickIndustry: 'Select Industry',
+    s1btn: 'Next: Input Metrics',
+    eyebrow2: '// Data Input',
+    h2: 'Input <em>Actual</em> Metrics',
+    sub2: 'Fill in real numbers. Status dots update in real-time. Leave blank if data unavailable.',
+    runBtn: '▶ Run Diagnosis',
+    backBtn: '← Back',
+    newDiag: '← New Diagnosis',
+    gejala: 'Symptoms',
+    rootcause: 'Root Cause',
+    severity: 'Severity',
+    triggered: 'Metrics Triggered',
+    solusi: 'Solution',
+    roadmap: 'Priority Action Roadmap — 90 Days',
+    phase1: 'Quick Win',
+    phase2: 'Mid-Term',
+    phase3: 'Foundation',
+    days1: '0–30 Days',
+    days2: '30–60 Days',
+    days3: '60–90 Days',
+    gateTitle: 'Gate Conditions — When to Scale',
+    verdictReady: "Your system is stable enough to scale. Monitor metrics every 30 days.",
+    verdictNotReady: "Don't scale yet. Fix system debt first — scaling now only amplifies problems.",
+    engineVerdict: 'ENGINE VERDICT',
+    healthScore: 'Health Score',
+    status: 'Status',
+    coreSehat: 'Healthy Cores',
+    scalingGate: 'Scaling Gate',
+    readyScale: '🚀 READY TO SCALE',
+    fixFirst: '✋ FIX FIRST',
+    breakdown: '4-Core Diagnosis Breakdown',
+    your: 'You',
+    target: 'Target',
+    sehat: 'HEALTHY',
+    perluPerhatian: 'NEEDS ATTENTION',
+    kritis: 'CRITICAL',
+  }
+};
+
+function t(key) { return T[lang][key] || key; }
+
+function toggleLang() {
+  lang = lang === 'id' ? 'en' : 'id';
+  document.getElementById('langBtn').textContent = lang === 'id' ? 'EN' : 'ID';
+  applyLang();
+  if (selectedIndustry) applyLangAiRisk();
+}
+
+function applyLang() {
+  document.getElementById('s1eyebrow').textContent = t('eyebrow1');
+  document.getElementById('s1h1').innerHTML = t('h1');
+  document.getElementById('s1sub').textContent = t('sub1');
+  document.getElementById('dataNotice').innerHTML = t('dataNotice');
+  document.getElementById('pickIndustryLabel').textContent = t('pickIndustry');
+  document.getElementById('s1btnText').textContent = t('s1btn');
+  document.getElementById('s2eyebrow').textContent = t('eyebrow2');
+  document.getElementById('s2h1').innerHTML = t('h2');
+  document.getElementById('s2sub').textContent = t('sub2');
+  document.getElementById('s2runText').textContent = t('runBtn');
+  document.getElementById('s2backText').textContent = t('backBtn');
+}
+
+// ─── DATA ─────────────────────────────────────────────────────
+const INDUSTRIES = {
+  saas:   { label:'SaaS / Tech',   labelEn:'SaaS / Tech',   icon:'⚡' },
+  ecom:   { label:'E-Commerce',    labelEn:'E-Commerce',    icon:'📦' },
+  fintech:{ label:'Fintech',       labelEn:'Fintech',       icon:'🏦' },
+  fnb:    { label:'F&B / Kedai',   labelEn:'F&B / Outlet',  icon:'🍽️' },
+  health: { label:'Healthcare',    labelEn:'Healthcare',    icon:'🏥' },
+};
+
+const FORMS = {
+  saas: [
+    { section:'CORE 01 — Systems Operasional', sectionEn:'CORE 01 — Operational Systems', fields:[
+      { id:'onboarding_days',  label:'Onboarding time rata-rata',    labelEn:'Average onboarding time',   bench:'benchmark: 3–5 hari', benchEn:'benchmark: 3–5 days', unit:'hari', unitEn:'days', thresholds:[5,10], dir:'high' },
+      { id:'support_tickets',  label:'Support ticket backlog/minggu', labelEn:'Support ticket backlog/week',bench:'benchmark: <20',      benchEn:'benchmark: <20',      unit:'tiket',unitEn:'tickets',thresholds:[20,50],dir:'high' },
+      { id:'csat',             label:'CSAT score',                    labelEn:'CSAT score',                bench:'benchmark: >80%',     benchEn:'benchmark: >80%',     unit:'%',    unitEn:'%',    thresholds:[80,60],dir:'low'  },
+      { id:'ticket_resolution',label:'Ticket resolution time',        labelEn:'Ticket resolution time',    bench:'benchmark: <48 jam',  benchEn:'benchmark: <48 hrs',  unit:'jam',  unitEn:'hrs',  thresholds:[48,72], dir:'high' },
+    ]},
+    { section:'CORE 02 — Customer & Marketing', sectionEn:'CORE 02 — Customer & Marketing', fields:[
+      { id:'trial_paid',    label:'Trial-to-paid rate',      labelEn:'Trial-to-paid rate',      bench:'benchmark: >20%',   benchEn:'benchmark: >20%',   unit:'%',  unitEn:'%',  thresholds:[20,15],dir:'low'  },
+      { id:'churn',         label:'Churn rate per bulan',    labelEn:'Monthly churn rate',      bench:'benchmark: 3–5%',   benchEn:'benchmark: 3–5%',   unit:'%',  unitEn:'%',  thresholds:[5,8],  dir:'high' },
+      { id:'nps',           label:'NPS score',               labelEn:'NPS score',               bench:'benchmark: >30',    benchEn:'benchmark: >30',    unit:'pts',unitEn:'pts',thresholds:[30,0], dir:'low'  },
+      { id:'activation',    label:'Activation rate (7 hari)',labelEn:'Activation rate (7 days)',bench:'benchmark: >40%',   benchEn:'benchmark: >40%',   unit:'%',  unitEn:'%',  thresholds:[40,30],dir:'low'  },
+      { id:'week2_retention',label:'Week-2 retention',       labelEn:'Week-2 retention',        bench:'benchmark: >50%',   benchEn:'benchmark: >50%',   unit:'%',  unitEn:'%',  thresholds:[50,35],dir:'low'  },
+    ]},
+    { section:'CORE 03 — Team & Execution', sectionEn:'CORE 03 — Team & Execution', fields:[
+      { id:'founder_ops',    label:'Founder ops hours/minggu',labelEn:'Founder ops hours/week',  bench:'benchmark: <20 jam',benchEn:'benchmark: <20 hrs',unit:'jam',unitEn:'hrs',thresholds:[20,40],dir:'high' },
+      { id:'sprint_completion',label:'Sprint completion rate',labelEn:'Sprint completion rate',  bench:'benchmark: >80%',   benchEn:'benchmark: >80%',   unit:'%',  unitEn:'%',  thresholds:[80,60],dir:'low'  },
+      { id:'task_completion',label:'Task completion rate',    labelEn:'Task completion rate',    bench:'benchmark: >60%',   benchEn:'benchmark: >60%',   unit:'%',  unitEn:'%',  thresholds:[60,40],dir:'low'  },
+    ]},
+    { section:'CORE 04 — Scaling Process', sectionEn:'CORE 04 — Scaling Process', fields:[
+      { id:'uptime',    label:'System uptime',          labelEn:'System uptime',        bench:'benchmark: >99%',   benchEn:'benchmark: >99%',  unit:'%',  unitEn:'%',  thresholds:[99,95],dir:'low'  },
+      { id:'bug_rate',  label:'Bug rate per minggu',    labelEn:'Bug rate per week',    bench:'benchmark: <5',     benchEn:'benchmark: <5',    unit:'bug',unitEn:'bugs',thresholds:[5,15], dir:'high' },
+    ]},
+  ],
+  ecom: [
+    { section:'CORE 01 — Systems Operasional', sectionEn:'CORE 01 — Operational Systems', fields:[
+      { id:'order_to_ship',label:'Order-to-ship time',       labelEn:'Order-to-ship time',      bench:'benchmark: <24 jam',benchEn:'benchmark: <24 hrs',unit:'jam',unitEn:'hrs',thresholds:[24,48],dir:'high' },
+      { id:'return_rate',  label:'Return rate',              labelEn:'Return rate',             bench:'benchmark: 5–10%',  benchEn:'benchmark: 5–10%',  unit:'%',  unitEn:'%',  thresholds:[10,15],dir:'high' },
+      { id:'delay_rate',   label:'Fulfillment delay rate',   labelEn:'Fulfillment delay rate',  bench:'benchmark: <5%',    benchEn:'benchmark: <5%',    unit:'%',  unitEn:'%',  thresholds:[5,15], dir:'high' },
+      { id:'cs_complaints',label:'CS complaints/bulan',      labelEn:'CS complaints/month',     bench:'benchmark: <50',    benchEn:'benchmark: <50',    unit:'kasus',unitEn:'cases',thresholds:[50,100],dir:'high' },
+    ]},
+    { section:'CORE 02 — Customer & Marketing', sectionEn:'CORE 02 — Customer & Marketing', fields:[
+      { id:'repeat_purchase',label:'Repeat purchase rate',   labelEn:'Repeat purchase rate',    bench:'benchmark: 30–40%', benchEn:'benchmark: 30–40%', unit:'%',  unitEn:'%',  thresholds:[30,20],dir:'low'  },
+      { id:'roas',          label:'ROAS channel utama',      labelEn:'Main channel ROAS',       bench:'benchmark: >3.5x',  benchEn:'benchmark: >3.5x',  unit:'x',  unitEn:'x',  thresholds:[3.5,2.5],dir:'low'},
+      { id:'cac_ltv',       label:'CAC:LTV ratio (LTV/CAC)',labelEn:'CAC:LTV ratio (LTV/CAC)', bench:'benchmark: >1:3',   benchEn:'benchmark: >1:3',   unit:'x',  unitEn:'x',  thresholds:[3,2],  dir:'low'  },
+      { id:'margin_sku',    label:'Margin per SKU rata-rata',labelEn:'Avg margin per SKU',      bench:'benchmark: >20%',   benchEn:'benchmark: >20%',   unit:'%',  unitEn:'%',  thresholds:[20,15],dir:'low'  },
+    ]},
+    { section:'CORE 03 — Team & Execution', sectionEn:'CORE 03 — Team & Execution', fields:[
+      { id:'cross_team',    label:'Cross-team completion',   labelEn:'Cross-team completion',   bench:'benchmark: >70%',   benchEn:'benchmark: >70%',   unit:'%',  unitEn:'%',  thresholds:[70,50],dir:'low'  },
+      { id:'meeting_hours', label:'Meeting hours/minggu',    labelEn:'Meeting hours/week',      bench:'benchmark: <10 jam',benchEn:'benchmark: <10 hrs',unit:'jam',unitEn:'hrs',thresholds:[10,20],dir:'high' },
+    ]},
+    { section:'CORE 04 — Scaling Process', sectionEn:'CORE 04 — Scaling Process', fields:[
+      { id:'automation_cov',label:'Automation coverage ops', labelEn:'Ops automation coverage', bench:'benchmark: >60%',   benchEn:'benchmark: >60%',   unit:'%',  unitEn:'%',  thresholds:[60,30],dir:'low'  },
+      { id:'headcount_growth',label:'Ops headcount growth YoY',labelEn:'Ops headcount growth YoY',bench:'benchmark: <30%',benchEn:'benchmark: <30%',   unit:'%',  unitEn:'%',  thresholds:[30,50],dir:'high' },
+    ]},
+  ],
+  fintech: [
+    { section:'CORE 01 — Systems Operasional', sectionEn:'CORE 01 — Operational Systems', fields:[
+      { id:'approval_time',     label:'Approval process time',          labelEn:'Approval process time',        bench:'benchmark: <24 jam', benchEn:'benchmark: <24 hrs',unit:'jam', unitEn:'hrs',thresholds:[24,48],dir:'high' },
+      { id:'audit_pass',        label:'Audit pass rate',                labelEn:'Audit pass rate',              bench:'benchmark: >85%',    benchEn:'benchmark: >85%',   unit:'%',   unitEn:'%',  thresholds:[85,70],dir:'low'  },
+      { id:'compliance_inc',    label:'Compliance incidents/kuartal',   labelEn:'Compliance incidents/quarter', bench:'benchmark: 0–1',     benchEn:'benchmark: 0–1',    unit:'inc', unitEn:'inc',thresholds:[1,3],  dir:'high' },
+    ]},
+    { section:'CORE 02 — Customer & Marketing', sectionEn:'CORE 02 — Customer & Marketing', fields:[
+      { id:'day30_retention',label:'Day-30 user retention',  labelEn:'Day-30 user retention', bench:'benchmark: >50%',   benchEn:'benchmark: >50%',  unit:'%',   unitEn:'%',  thresholds:[50,30],dir:'low'  },
+      { id:'trust_score',   label:'Trust score (1–10)',      labelEn:'Trust score (1–10)',    bench:'benchmark: >7.5',   benchEn:'benchmark: >7.5',  unit:'/10', unitEn:'/10',thresholds:[7.5,5],dir:'low'  },
+      { id:'referral_rate', label:'Referral rate',           labelEn:'Referral rate',         bench:'benchmark: >5%',    benchEn:'benchmark: >5%',   unit:'%',   unitEn:'%',  thresholds:[5,2],  dir:'low'  },
+    ]},
+    { section:'CORE 03 — Team & Execution', sectionEn:'CORE 03 — Team & Execution', fields:[
+      { id:'ops_overtime',  label:'Ops overtime/minggu',     labelEn:'Ops overtime/week',     bench:'benchmark: <10 jam',benchEn:'benchmark: <10 hrs',unit:'jam',unitEn:'hrs',thresholds:[10,20],dir:'high' },
+      { id:'okr_achievement',label:'OKR achievement rate',  labelEn:'OKR achievement rate',  bench:'benchmark: >70%',   benchEn:'benchmark: >70%',  unit:'%',   unitEn:'%',  thresholds:[70,50],dir:'low'  },
+    ]},
+    { section:'CORE 04 — Scaling Process', sectionEn:'CORE 04 — Scaling Process', fields:[
+      { id:'cac_ltv_ft',    label:'CAC:LTV ratio (LTV/CAC)',labelEn:'CAC:LTV ratio (LTV/CAC)',bench:'benchmark: >1:3',  benchEn:'benchmark: >1:3',  unit:'x',   unitEn:'x',  thresholds:[3,2],  dir:'low'  },
+      { id:'burn_rate',     label:'Burn rate vs revenue',   labelEn:'Burn rate vs revenue',  bench:'benchmark: <20%',   benchEn:'benchmark: <20%',  unit:'%',   unitEn:'%',  thresholds:[20,30],dir:'high' },
+    ]},
+  ],
+  fnb: [
+    { section:'CORE 01 — Systems Operasional', sectionEn:'CORE 01 — Operational Systems', fields:[
+      { id:'service_time',  label:'Service time rata-rata',  labelEn:'Average service time',  bench:'benchmark: <10 mnt',benchEn:'benchmark: <10 min',unit:'mnt',unitEn:'min',thresholds:[10,20],dir:'high' },
+      { id:'waste_rate',    label:'Food waste rate',         labelEn:'Food waste rate',       bench:'benchmark: <5%',    benchEn:'benchmark: <5%',    unit:'%',  unitEn:'%',  thresholds:[5,10], dir:'high' },
+      { id:'stock_accuracy',label:'Stock accuracy rate',     labelEn:'Stock accuracy rate',   bench:'benchmark: >95%',   benchEn:'benchmark: >95%',   unit:'%',  unitEn:'%',  thresholds:[95,85],dir:'low'  },
+    ]},
+    { section:'CORE 02 — Customer & Marketing', sectionEn:'CORE 02 — Customer & Marketing', fields:[
+      { id:'repeat_visit',  label:'Repeat customer rate',    labelEn:'Repeat customer rate',  bench:'benchmark: >40%',   benchEn:'benchmark: >40%',   unit:'%',  unitEn:'%',  thresholds:[40,25],dir:'low'  },
+      { id:'avg_order',     label:'Average order value',     labelEn:'Average order value',   bench:'benchmark: >Rp 50k',benchEn:'benchmark: >50k IDR',unit:'rb IDR',unitEn:'k IDR',thresholds:[50,30],dir:'low' },
+      { id:'review_rating', label:'Rating platform (1-5)',   labelEn:'Platform rating (1-5)', bench:'benchmark: >4.2',   benchEn:'benchmark: >4.2',   unit:'/5', unitEn:'/5', thresholds:[4.2,3.5],dir:'low'},
+    ]},
+    { section:'CORE 03 — Team & Execution', sectionEn:'CORE 03 — Team & Execution', fields:[
+      { id:'staff_turnover',label:'Staff turnover rate/tahun',labelEn:'Staff turnover/year',  bench:'benchmark: <30%',   benchEn:'benchmark: <30%',   unit:'%',  unitEn:'%',  thresholds:[30,50],dir:'high' },
+      { id:'sop_compliance',label:'SOP compliance rate',     labelEn:'SOP compliance rate',   bench:'benchmark: >85%',   benchEn:'benchmark: >85%',   unit:'%',  unitEn:'%',  thresholds:[85,70],dir:'low'  },
+    ]},
+    { section:'CORE 04 — Scaling Process', sectionEn:'CORE 04 — Scaling Process', fields:[
+      { id:'cogs_ratio',    label:'COGS ratio dari revenue', labelEn:'COGS ratio of revenue', bench:'benchmark: <35%',   benchEn:'benchmark: <35%',   unit:'%',  unitEn:'%',  thresholds:[35,45],dir:'high' },
+      { id:'table_turnover',label:'Table turnover/hari',     labelEn:'Table turnover/day',    bench:'benchmark: >2.5x',  benchEn:'benchmark: >2.5x',  unit:'x',  unitEn:'x',  thresholds:[2.5,1.5],dir:'low'},
+    ]},
+  ],
+  health: [
+    { section:'CORE 01 — Systems Operasional', sectionEn:'CORE 01 — Operational Systems', fields:[
+      { id:'wait_time',     label:'Patient wait time',       labelEn:'Patient wait time',     bench:'benchmark: <30 mnt',benchEn:'benchmark: <30 min',unit:'mnt',unitEn:'min',thresholds:[30,60],dir:'high' },
+      { id:'appt_cancel',   label:'Appointment cancel rate', labelEn:'Appointment cancel rate',bench:'benchmark: <15%',  benchEn:'benchmark: <15%',   unit:'%',  unitEn:'%',  thresholds:[15,25],dir:'high' },
+      { id:'compliance_doc',label:'Compliance documentation',labelEn:'Compliance documentation',bench:'benchmark: >95%', benchEn:'benchmark: >95%',   unit:'%',  unitEn:'%',  thresholds:[95,80],dir:'low'  },
+    ]},
+    { section:'CORE 02 — Customer & Marketing', sectionEn:'CORE 02 — Customer & Marketing', fields:[
+      { id:'patient_retention',label:'Patient retention rate',labelEn:'Patient retention rate',bench:'benchmark: >60%',  benchEn:'benchmark: >60%',   unit:'%',  unitEn:'%',  thresholds:[60,40],dir:'low'  },
+      { id:'referral_patients',label:'Referral rate pasien',  labelEn:'Patient referral rate', bench:'benchmark: >15%',  benchEn:'benchmark: >15%',   unit:'%',  unitEn:'%',  thresholds:[15,8], dir:'low'  },
+      { id:'patient_sat',   label:'Patient satisfaction (1-10)',labelEn:'Patient satisfaction (1-10)',bench:'benchmark: >8', benchEn:'benchmark: >8', unit:'/10',unitEn:'/10',thresholds:[8,6],  dir:'low'  },
+    ]},
+    { section:'CORE 03 — Team & Execution', sectionEn:'CORE 03 — Team & Execution', fields:[
+      { id:'staff_util',    label:'Staff utilization rate',  labelEn:'Staff utilization rate',bench:'benchmark: 70–85%',  benchEn:'benchmark: 70–85%',unit:'%',  unitEn:'%',  thresholds:[70,55],dir:'low'  },
+      { id:'protocol_adhere',label:'Protocol adherence rate',labelEn:'Protocol adherence rate',bench:'benchmark: >90%',  benchEn:'benchmark: >90%',   unit:'%',  unitEn:'%',  thresholds:[90,75],dir:'low'  },
+    ]},
+    { section:'CORE 04 — Scaling Process', sectionEn:'CORE 04 — Scaling Process', fields:[
+      { id:'revenue_per_patient',label:'Revenue per patient',labelEn:'Revenue per patient',   bench:'benchmark: >Rp 300k',benchEn:'benchmark: >300k IDR',unit:'rb IDR',unitEn:'k IDR',thresholds:[300,200],dir:'low'},
+      { id:'occupancy_rate',label:'Occupancy / utilization', labelEn:'Occupancy / utilization',bench:'benchmark: >75%',  benchEn:'benchmark: >75%',   unit:'%',  unitEn:'%',  thresholds:[75,55],dir:'low'  },
+    ]},
+  ],
+};
+
+const DIAGNOSIS = {
+  saas: {
+    cores:[
+      { num:'CORE 01', name:'Systems Operasional', nameEn:'Operational Systems', severity:'KRITIS', severityEn:'CRITICAL',
+        gejala:'Onboarding user molor (7-10 hari), support ticket backlog >50/minggu, CSAT rendah.',
+        gejalaEn:'User onboarding slow (7-10 days), support ticket backlog >50/week, low CSAT.',
+        rootCause:'Tidak ada SOP tertulis — tiap orang handle dengan cara masing-masing, zero knowledge base.',
+        rootCauseEn:'No written SOPs — everyone handles differently, zero knowledge base.',
+        metrics:[{label:'Onboarding time',fieldId:'onboarding_days',benchmarkText:'3–5 hari',benchmarkTextEn:'3–5 days',compare:'high'},
+                 {label:'CSAT',fieldId:'csat',benchmarkText:'>80%',benchmarkTextEn:'>80%',compare:'low'},
+                 {label:'Ticket backlog/minggu',fieldId:'support_tickets',benchmarkText:'<20',benchmarkTextEn:'<20',compare:'high'}],
+        warning:'Onboarding >10 hari & CSAT <50% → risiko churn enterprise naik 3x dalam 60 hari pertama.',
+        warningEn:'Onboarding >10 days & CSAT <50% → enterprise churn risk 3x higher within 60 days.',
+        solusi:'Onboarding playbook per user segment + automated workflow trigger + CS knowledge base.',
+        soluziEn:'Onboarding playbook per user segment + automated workflow triggers + CS knowledge base.',
+      },
+      { num:'CORE 02', name:'Customer & Marketing', nameEn:'Customer & Marketing', severity:'KRITIS', severityEn:'CRITICAL',
+        gejala:'Trial-to-paid <20%, user drop di minggu ke-2 >50%, NPS tidak diukur.',
+        gejalaEn:'Trial-to-paid <20%, users drop in week 2 >50%, NPS unmeasured.',
+        rootCause:'Tidak ada touchpoint sistematis setelah signup — user explore sendiri tanpa guidance.',
+        rootCauseEn:'No systematic touchpoints post-signup — users explore alone without guidance.',
+        metrics:[{label:'Trial-to-paid',fieldId:'trial_paid',benchmarkText:'>20%',benchmarkTextEn:'>20%',compare:'low'},
+                 {label:'Churn/bulan',fieldId:'churn',benchmarkText:'3–5%',benchmarkTextEn:'3–5%',compare:'high'},
+                 {label:'Activation rate',fieldId:'activation',benchmarkText:'>40%',benchmarkTextEn:'>40%',compare:'low'}],
+        warning:'Trial-to-paid <15% dengan CAC tinggi = unit economics tidak akan pernah sehat tanpa intervensi.',
+        warningEn:'Trial-to-paid <15% with high CAC = unit economics will never be healthy without intervention.',
+        solusi:'Relationship engine: onboarding email sequence + success milestone loop + NPS trigger otomatis.',
+        soluziEn:'Relationship engine: onboarding email sequence + success milestone loop + automated NPS triggers.',
+      },
+      { num:'CORE 03', name:'Team & Execution', nameEn:'Team & Execution', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Sprint berantakan (deadline miss >40%), founder jadi bottleneck semua keputusan.',
+        gejalaEn:'Sprints chaotic (deadline miss >40%), founder bottleneck for all decisions.',
+        rootCause:'Prioritas berubah tiap minggu — tidak ada ritme kerja konsisten dan ownership matrix.',
+        rootCauseEn:'Priorities shift weekly — no consistent work rhythm and ownership matrix.',
+        metrics:[{label:'Founder ops hours/minggu',fieldId:'founder_ops',benchmarkText:'<20 jam',benchmarkTextEn:'<20 hrs',compare:'high'},
+                 {label:'Sprint completion rate',fieldId:'sprint_completion',benchmarkText:'>80%',benchmarkTextEn:'>80%',compare:'low'}],
+        warning:'Founder bottleneck di >5 keputusan/hari = tanda clear bahwa delegation system belum ada.',
+        warningEn:'Founder bottleneck at >5 decisions/day = clear sign delegation system doesn\'t exist.',
+        solusi:'Weekly execution rhythm + task ownership matrix + async protocol + decision log.',
+        soluziEn:'Weekly execution rhythm + task ownership matrix + async protocol + decision log.',
+      },
+      { num:'CORE 04', name:'Scaling Process', nameEn:'Scaling Process', severity:'KRITIS', severityEn:'CRITICAL',
+        gejala:'Mau scale tapi sistem jobol, technical debt menumpuk, bug rate tinggi.',
+        gejalaEn:'Want to scale but system breaks, technical debt accumulates, high bug rate.',
+        rootCause:'Scale sebelum proses stabil — growth pressure mengalahkan system readiness.',
+        rootCauseEn:'Scaling before processes stabilize — growth pressure overcomes system readiness.',
+        metrics:[{label:'System uptime',fieldId:'uptime',benchmarkText:'>99%',benchmarkTextEn:'>99%',compare:'low'},
+                 {label:'Bug rate/minggu',fieldId:'bug_rate',benchmarkText:'<5',benchmarkTextEn:'<5',compare:'high'}],
+        warning:'Scale dengan system uptime <95% = setiap user baru adalah beban tambahan, bukan revenue.',
+        warningEn:'Scaling with uptime <95% = every new user is additional burden, not revenue.',
+        solusi:'System readiness checklist sebelum ekspansi + automation audit + dedicated debt sprint.',
+        soluziEn:'System readiness checklist before expansion + automation audit + dedicated debt sprint.',
+      }
+    ],
+    roadmap: {
+      id: {
+        q1: { actions:['Dokumentasi 3 SOP kritis + setup project management tool','Onboarding audit — identifikasi drop-off point'], kpi:'SOP adoption >80% · Task visibility 100%' },
+        q2: { actions:['Onboarding playbook live per user segment','Relationship engine aktif — email sequence + NPS trigger'], kpi:'Onboarding <5 hari · Activation rate >40%' },
+        q3: { actions:['Full automation workflow aktif','Churn dashboard real-time terpantau'], kpi:'Churn <5% · CSAT >80%' },
+      },
+      en: {
+        q1: { actions:['Document 3 critical SOPs + set up project management tool','Onboarding audit — identify drop-off points'], kpi:'SOP adoption >80% · Task visibility 100%' },
+        q2: { actions:['Onboarding playbook live per user segment','Relationship engine active — email sequence + NPS trigger'], kpi:'Onboarding <5 days · Activation rate >40%' },
+        q3: { actions:['Full automation workflow active','Real-time churn dashboard monitored'], kpi:'Churn <5% · CSAT >80%' },
+      }
+    },
+    gates: {
+      id:['System uptime >99% selama 30 hari berturut-turut','Onboarding time <5 hari untuk semua user segment','Churn rate <5% selama 2 bulan berturut-turut','Founder time on ops <25 jam/minggu (delegation proven)'],
+      en:['System uptime >99% for 30 consecutive days','Onboarding time <5 days for all user segments','Churn rate <5% for 2 consecutive months','Founder time on ops <25 hrs/week (delegation proven)'],
+    },
+    gateCheck: (d) => (d.uptime >= 99) && (d.onboarding_days <= 5) && (d.churn <= 5),
+  },
+  ecom: {
+    cores:[
+      { num:'CORE 01', name:'Systems Operasional', nameEn:'Operational Systems', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Fulfillment delay tinggi, CS overload, return rate naik di atas 10%.',
+        gejalaEn:'High fulfillment delays, CS overload, return rate above 10%.',
+        rootCause:'Proses order-to-ship tanpa single source of truth — tiap channel sistem sendiri.',
+        rootCauseEn:'Order-to-ship process without single source of truth — each channel runs its own system.',
+        metrics:[{label:'Order-to-ship time',fieldId:'order_to_ship',benchmarkText:'<24 jam',benchmarkTextEn:'<24 hrs',compare:'high'},
+                 {label:'Return rate',fieldId:'return_rate',benchmarkText:'5–10%',benchmarkTextEn:'5–10%',compare:'high'},
+                 {label:'Delay rate',fieldId:'delay_rate',benchmarkText:'<5%',benchmarkTextEn:'<5%',compare:'high'}],
+        warning:'Return rate >15% dua bulan berturut = indikasi sistemik, bukan quality issue.',
+        warningEn:'Return rate >15% two months in a row = systemic issue, not just quality.',
+        solusi:'SOP fulfillment per SKU/channel + daily ops checklist + single inventory dashboard.',
+        soluziEn:'Fulfillment SOP per SKU/channel + daily ops checklist + single inventory dashboard.',
+      },
+      { num:'CORE 02', name:'Customer & Marketing', nameEn:'Customer & Marketing', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Repeat purchase <15%, ROAS makin mahal, LTV tidak pernah dihitung.',
+        gejalaEn:'Repeat purchase <15%, ROAS increasing, LTV never calculated.',
+        rootCause:'Fokus akuisisi terus — zero retention system yang berjalan otomatis.',
+        rootCauseEn:'Perpetual acquisition focus — zero automated retention system.',
+        metrics:[{label:'Repeat purchase rate',fieldId:'repeat_purchase',benchmarkText:'30–40%',benchmarkTextEn:'30–40%',compare:'low'},
+                 {label:'ROAS',fieldId:'roas',benchmarkText:'>3.5x',benchmarkTextEn:'>3.5x',compare:'low'},
+                 {label:'CAC:LTV ratio',fieldId:'cac_ltv',benchmarkText:'>1:3',benchmarkTextEn:'>1:3',compare:'low'}],
+        warning:'CAC:LTV <1:2 = setiap customer yang lo akuisisi merugi. Scaling memperbesar kerugian.',
+        warningEn:'CAC:LTV <1:2 = every acquired customer is unprofitable. Scaling amplifies losses.',
+        solusi:'Post-purchase journey + loyalty trigger + win-back automation per segment.',
+        soluziEn:'Post-purchase journey + loyalty triggers + win-back automation per segment.',
+      },
+      { num:'CORE 03', name:'Team & Execution', nameEn:'Team & Execution', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Koordinasi ops-marketing-CS miskomunikasi, blame game antar divisi.',
+        gejalaEn:'Ops-marketing-CS miscommunication, blame game between divisions.',
+        rootCause:'Silos antar divisi — tidak ada shared dashboard, KPI tidak dikaitkan.',
+        rootCauseEn:'Division silos — no shared dashboard, KPIs not linked.',
+        metrics:[{label:'Cross-team completion',fieldId:'cross_team',benchmarkText:'>70%',benchmarkTextEn:'>70%',compare:'low'},
+                 {label:'Meeting hours/minggu',fieldId:'meeting_hours',benchmarkText:'<10 jam',benchmarkTextEn:'<10 hrs',compare:'high'}],
+        warning:'>10 miskomunikasi/minggu = biaya tersembunyi setara 1 headcount penuh.',
+        warningEn:'>10 miscommunications/week = hidden cost equivalent to 1 full headcount.',
+        solusi:'Cross-team SOP + daily standup berbasis metrik + shared KPI dashboard real-time.',
+        soluziEn:'Cross-team SOP + metric-based daily standup + real-time shared KPI dashboard.',
+      },
+      { num:'CORE 04', name:'Scaling Process', nameEn:'Scaling Process', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Nambah channel tapi margin tipis (<15%), tim exhausted.',
+        gejalaEn:'Adding channels but thin margins (<15%), team exhausted.',
+        rootCause:'Automation belum jalan — scale = tambah headcount, bukan efisiensi.',
+        rootCauseEn:'Automation not running — scaling = adding headcount, not efficiency.',
+        metrics:[{label:'Margin per SKU',fieldId:'margin_sku',benchmarkText:'>20%',benchmarkTextEn:'>20%',compare:'low'},
+                 {label:'Automation coverage',fieldId:'automation_cov',benchmarkText:'>60%',benchmarkTextEn:'>60%',compare:'low'}],
+        warning:'Channel baru dengan margin <15% tanpa automation audit = margin compression pasti.',
+        warningEn:'New channels with margin <15% without automation audit = guaranteed margin compression.',
+        solusi:'Automation audit + margin threshold gate + channel profitability matrix per SKU.',
+        soluziEn:'Automation audit + margin threshold gate + channel profitability matrix per SKU.',
+      }
+    ],
+    roadmap: {
+      id: {
+        q1: { actions:['Audit fulfillment flow + fix bottleneck terbesar','Set up single inventory dashboard lintas channel'], kpi:'Order-to-ship <24 jam · Delay rate <5%' },
+        q2: { actions:['Post-purchase loop otomatis aktif','Loyalty trigger per segment berjalan'], kpi:'Repeat purchase >25% · CAC:LTV >1:4' },
+        q3: { actions:['Retention > akuisisi ratio sehat','Margin per SKU terpantau di semua channel'], kpi:'Margin >25% · Customer lifetime >12 bln' },
+      },
+      en: {
+        q1: { actions:['Audit fulfillment flow + fix biggest bottleneck','Set up single cross-channel inventory dashboard'], kpi:'Order-to-ship <24 hrs · Delay rate <5%' },
+        q2: { actions:['Automated post-purchase loop active','Loyalty triggers per segment running'], kpi:'Repeat purchase >25% · CAC:LTV >1:4' },
+        q3: { actions:['Retention > acquisition ratio healthy','Margin per SKU monitored across all channels'], kpi:'Margin >25% · Customer lifetime >12 months' },
+      }
+    },
+    gates: {
+      id:['Fulfillment delay rate <5% selama 30 hari','Repeat purchase rate >25% (retention proven)','Margin per SKU >20% di semua channel aktif','Automation coverage >60% untuk repetitive ops tasks'],
+      en:['Fulfillment delay rate <5% for 30 days','Repeat purchase rate >25% (retention proven)','Margin per SKU >20% across all active channels','Automation coverage >60% for repetitive ops tasks'],
+    },
+    gateCheck: (d) => (d.delay_rate <= 5) && (d.repeat_purchase >= 25) && (d.margin_sku >= 20),
+  },
+  fintech: {
+    cores:[
+      { num:'CORE 01', name:'Systems Operasional', nameEn:'Operational Systems', severity:'KRITIS', severityEn:'CRITICAL',
+        gejala:'Compliance gap muncul (audit findings >5), approval lambat >72 jam, dokumen berserakan.',
+        gejalaEn:'Compliance gaps appear (audit findings >5), slow approval >72 hrs, scattered documents.',
+        rootCause:'Tidak ada checklist approval berjenjang — dokumen di email, chat, dan drive terpisah.',
+        rootCauseEn:'No layered approval checklist — documents scattered across email, chat, and drives.',
+        metrics:[{label:'Approval time',fieldId:'approval_time',benchmarkText:'<24 jam',benchmarkTextEn:'<24 hrs',compare:'high'},
+                 {label:'Audit pass rate',fieldId:'audit_pass',benchmarkText:'>85%',benchmarkTextEn:'>85%',compare:'low'},
+                 {label:'Compliance incidents/kuartal',fieldId:'compliance_inc',benchmarkText:'0–1',benchmarkTextEn:'0–1',compare:'high'}],
+        warning:'>3 major audit findings berturut-turut bisa trigger regulatory action OJK/BI.',
+        warningEn:'>3 consecutive major audit findings can trigger OJK/BI regulatory action.',
+        solusi:'Audit trail SOP + approval workflow terdokumentasi + compliance calendar otomatis.',
+        soluziEn:'Audit trail SOP + documented approval workflow + automated compliance calendar.',
+      },
+      { num:'CORE 02', name:'Customer & Marketing', nameEn:'Customer & Marketing', severity:'KRITIS', severityEn:'CRITICAL',
+        gejala:'User aktif drop >70% setelah bulan pertama, referral hampir nol (<2%).',
+        gejalaEn:'Active users drop >70% after first month, referrals near zero (<2%).',
+        rootCause:'Trust belum dibangun — komunikasi produk terlalu teknis dan generik.',
+        rootCauseEn:'Trust not built — product communication too technical and generic.',
+        metrics:[{label:'Day-30 retention',fieldId:'day30_retention',benchmarkText:'>50%',benchmarkTextEn:'>50%',compare:'low'},
+                 {label:'Trust score',fieldId:'trust_score',benchmarkText:'>7.5/10',benchmarkTextEn:'>7.5/10',compare:'low'},
+                 {label:'Referral rate',fieldId:'referral_rate',benchmarkText:'>5%',benchmarkTextEn:'>5%',compare:'low'}],
+        warning:'Trust score <4/10 = barrier to adoption yang tidak bisa diselesaikan hanya dengan fitur.',
+        warningEn:'Trust score <4/10 = adoption barrier that cannot be solved with features alone.',
+        solusi:'Brand voice bible + edukasi finansial berkala + social proof systemized + community loop.',
+        soluziEn:'Brand voice bible + regular financial education + systematized social proof + community loop.',
+      },
+      { num:'CORE 03', name:'Team & Execution', nameEn:'Team & Execution', severity:'PERLU', severityEn:'ATTENTION',
+        gejala:'Tim remote susah dimonitor, output tidak konsisten, meeting overload.',
+        gejalaEn:'Remote team hard to monitor, inconsistent output, meeting overload.',
+        rootCause:'KPI ada tapi tidak cascade ke daily behavior — OKR tidak nyambung ke task harian.',
+        rootCauseEn:'KPIs exist but don\'t cascade to daily behavior — OKRs disconnected from daily tasks.',
+        metrics:[{label:'Ops overtime/minggu',fieldId:'ops_overtime',benchmarkText:'<10 jam',benchmarkTextEn:'<10 hrs',compare:'high'},
+                 {label:'OKR achievement rate',fieldId:'okr_achievement',benchmarkText:'>70%',benchmarkTextEn:'>70%',compare:'low'}],
+        warning:'Meeting >20 jam/minggu adalah tanda bahwa trust antar tim rendah.',
+        warningEn:'Meetings >20 hrs/week signal low trust between team members.',
+        solusi:'OKR-to-daily-task cascade + output-based discipline OS + async-first protocol.',
+        soluziEn:'OKR-to-daily-task cascade + output-based discipline OS + async-first protocol.',
+      },
+      { num:'CORE 04', name:'Scaling Process', nameEn:'Scaling Process', severity:'KRITIS', severityEn:'CRITICAL',
+        gejala:'Investor minta growth tapi unit economics belum sehat, tim burnout.',
+        gejalaEn:'Investors demand growth but unit economics unhealthy, team burned out.',
+        rootCause:'Pressure eksternal lebih kuat dari kesiapan internal — scaling roadmap tidak berbasis data.',
+        rootCauseEn:'External pressure stronger than internal readiness — scaling roadmap not data-driven.',
+        metrics:[{label:'CAC:LTV ratio',fieldId:'cac_ltv_ft',benchmarkText:'>1:3',benchmarkTextEn:'>1:3',compare:'low'},
+                 {label:'Burn rate vs revenue',fieldId:'burn_rate',benchmarkText:'<20%',benchmarkTextEn:'<20%',compare:'high'}],
+        warning:'CAC:LTV <1:2 + burn rate naik 30% = runway diperpendek tanpa jaminan unit economics membaik.',
+        warningEn:'CAC:LTV <1:2 + burn rate up 30% = runway shortened with no guarantee of improving unit economics.',
+        solusi:'Scaling roadmap berbasis CAC:LTV + burn rate gate + team capacity planning per sprint.',
+        soluziEn:'CAC:LTV-based scaling roadmap + burn rate gate + team capacity planning per sprint.',
+      }
+    ],
+    roadmap: {
+      id: {
+        q1: { actions:['Approval workflow bersih + SOP compliance terdokumentasi','Compliance calendar otomatis aktif'], kpi:'Approval <24 jam · Audit pass >85%' },
+        q2: { actions:['Trust content calendar berjalan','Onboarding friction dihapus satu per satu'], kpi:'Trust score >7/10 · Activation >50%' },
+        q3: { actions:['Unit economics dashboard real-time','Scaling gate conditions terpenuhi'], kpi:'CAC:LTV >1:3 · Burn rate <20% rev' },
+      },
+      en: {
+        q1: { actions:['Clean approval workflow + documented compliance SOP','Automated compliance calendar active'], kpi:'Approval <24 hrs · Audit pass >85%' },
+        q2: { actions:['Trust content calendar running','Onboarding friction removed one by one'], kpi:'Trust score >7/10 · Activation >50%' },
+        q3: { actions:['Real-time unit economics dashboard','Scaling gate conditions met'], kpi:'CAC:LTV >1:3 · Burn rate <20% rev' },
+      }
+    },
+    gates: {
+      id:['Audit pass rate >85% (compliance proven)','CAC:LTV ratio >1:3 selama 2 kuartal berturut-turut','Day-30 user retention >50%','Burn rate <20% dari revenue bulanan'],
+      en:['Audit pass rate >85% (compliance proven)','CAC:LTV ratio >1:3 for 2 consecutive quarters','Day-30 user retention >50%','Burn rate <20% of monthly revenue'],
+    },
+    gateCheck: (d) => (d.audit_pass >= 85) && (d.cac_ltv_ft >= 3) && (d.day30_retention >= 50),
+  },
+  fnb: {
+    cores:[
+      { num:'CORE 01', name:'Systems Operasional', nameEn:'Operational Systems', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Service lambat, food waste tinggi, stok sering tidak sinkron.',
+        gejalaEn:'Slow service, high food waste, stock frequently out of sync.',
+        rootCause:'Tidak ada SOP standar per item/shift — tiap staff handle berbeda-beda.',
+        rootCauseEn:'No standard SOP per item/shift — each staff handles differently.',
+        metrics:[{label:'Service time',fieldId:'service_time',benchmarkText:'<10 mnt',benchmarkTextEn:'<10 min',compare:'high'},
+                 {label:'Food waste rate',fieldId:'waste_rate',benchmarkText:'<5%',benchmarkTextEn:'<5%',compare:'high'},
+                 {label:'Stock accuracy',fieldId:'stock_accuracy',benchmarkText:'>95%',benchmarkTextEn:'>95%',compare:'low'}],
+        warning:'Food waste >10% selama 2 bulan = kebocoran biaya yang lebih besar dari kelihatannya.',
+        warningEn:'Food waste >10% for 2 months = cost leak bigger than it appears.',
+        solusi:'SOP per menu item + daily opening/closing checklist + weekly stock audit.',
+        soluziEn:'SOP per menu item + daily opening/closing checklist + weekly stock audit.',
+      },
+      { num:'CORE 02', name:'Customer & Marketing', nameEn:'Customer & Marketing', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Repeat customer rendah, rating platform stagnan, average order kecil.',
+        gejalaEn:'Low repeat customers, stagnant platform rating, low average order.',
+        rootCause:'Tidak ada sistem retention — tidak ada alasan untuk balik lagi selain produk itu sendiri.',
+        rootCauseEn:'No retention system — no reason to return beyond the product itself.',
+        metrics:[{label:'Repeat customer rate',fieldId:'repeat_visit',benchmarkText:'>40%',benchmarkTextEn:'>40%',compare:'low'},
+                 {label:'Average order value',fieldId:'avg_order',benchmarkText:'>Rp 50k',benchmarkTextEn:'>50k IDR',compare:'low'},
+                 {label:'Platform rating',fieldId:'review_rating',benchmarkText:'>4.2',benchmarkTextEn:'>4.2',compare:'low'}],
+        warning:'Rating <3.8 di platform = visibility turun otomatis, akuisisi organik terhenti.',
+        warningEn:'Rating <3.8 on platform = visibility drops automatically, organic acquisition stops.',
+        solusi:'Loyalty program sederhana + aktif reply review + upsell menu strategy.',
+        soluziEn:'Simple loyalty program + active review responses + upsell menu strategy.',
+      },
+      { num:'CORE 03', name:'Team & Execution', nameEn:'Team & Execution', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Staff turnover tinggi, SOP tidak diikuti konsisten, kualitas tidak stabil.',
+        gejalaEn:'High staff turnover, SOPs not followed consistently, unstable quality.',
+        rootCause:'Tidak ada sistem training terstruktur — pengetahuan ada di kepala orang, bukan di sistem.',
+        rootCauseEn:'No structured training system — knowledge in people\'s heads, not in systems.',
+        metrics:[{label:'Staff turnover/tahun',fieldId:'staff_turnover',benchmarkText:'<30%',benchmarkTextEn:'<30%',compare:'high'},
+                 {label:'SOP compliance rate',fieldId:'sop_compliance',benchmarkText:'>85%',benchmarkTextEn:'>85%',compare:'low'}],
+        warning:'Staff turnover >50% per tahun = training cost lebih besar dari operasional cost.',
+        warningEn:'Staff turnover >50% per year = training costs exceed operational costs.',
+        solusi:'Training manual visual + daily briefing 5 menit + weekly quality check per station.',
+        soluziEn:'Visual training manual + 5-minute daily briefing + weekly quality check per station.',
+      },
+      { num:'CORE 04', name:'Scaling Process', nameEn:'Scaling Process', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Mau buka cabang tapi margin tipis, table turnover rendah.',
+        gejalaEn:'Want to open branches but thin margins, low table turnover.',
+        rootCause:'Unit economics belum proven di outlet pertama — scale akan multiplikasi masalah.',
+        rootCauseEn:'Unit economics not proven at first outlet — scaling will multiply problems.',
+        metrics:[{label:'COGS ratio',fieldId:'cogs_ratio',benchmarkText:'<35%',benchmarkTextEn:'<35%',compare:'high'},
+                 {label:'Table turnover/hari',fieldId:'table_turnover',benchmarkText:'>2.5x',benchmarkTextEn:'>2.5x',compare:'low'}],
+        warning:'COGS >45% + table turnover <1.5x = outlet belum profitable secara struktural.',
+        warningEn:'COGS >45% + table turnover <1.5x = outlet not structurally profitable.',
+        solusi:'Menu engineering — kurangi SKU, tingkatkan margin SKU unggulan. Fix unit economics dulu.',
+        soluziEn:'Menu engineering — reduce SKUs, increase margin on hero items. Fix unit economics first.',
+      }
+    ],
+    roadmap: {
+      id: {
+        q1: { actions:['Audit menu — identifikasi SKU profitabel vs pemborot','SOP per station terdokumentasi + training visual'], kpi:'Food waste <5% · SOP compliance >80%' },
+        q2: { actions:['Loyalty program aktif (stamp card / digital)','Upsell strategy berjalan di semua shift'], kpi:'Repeat visit >35% · Avg order naik 20%' },
+        q3: { actions:['Table turnover system optimized','Unit economics proven → siap evaluasi ekspansi'], kpi:'COGS <35% · Table turnover >2.5x' },
+      },
+      en: {
+        q1: { actions:['Menu audit — identify profitable vs cost-heavy SKUs','SOP per station documented + visual training'], kpi:'Food waste <5% · SOP compliance >80%' },
+        q2: { actions:['Loyalty program active (stamp card / digital)','Upsell strategy running across all shifts'], kpi:'Repeat visit >35% · Avg order up 20%' },
+        q3: { actions:['Table turnover system optimized','Unit economics proven → ready to evaluate expansion'], kpi:'COGS <35% · Table turnover >2.5x' },
+      }
+    },
+    gates: {
+      id:['COGS ratio <35% dari revenue (margin proven)','Repeat customer rate >35% (retention terbukti)','Staff turnover <30% per tahun','Table turnover >2.5x per hari di jam peak'],
+      en:['COGS ratio <35% of revenue (margin proven)','Repeat customer rate >35% (retention proven)','Staff turnover <30% per year','Table turnover >2.5x per day during peak hours'],
+    },
+    gateCheck: (d) => (d.cogs_ratio <= 35) && (d.repeat_visit >= 35) && (d.staff_turnover <= 30),
+  },
+  health: {
+    cores:[
+      { num:'CORE 01', name:'Systems Operasional', nameEn:'Operational Systems', severity:'KRITIS', severityEn:'CRITICAL',
+        gejala:'Pasien menunggu lama, banyak cancel appointment, dokumentasi compliance tidak lengkap.',
+        gejalaEn:'Patients wait long, high appointment cancellations, incomplete compliance documentation.',
+        rootCause:'Tidak ada sistem jadwal yang terintegrasi — reminder manual, follow-up tidak konsisten.',
+        rootCauseEn:'No integrated scheduling system — manual reminders, inconsistent follow-ups.',
+        metrics:[{label:'Patient wait time',fieldId:'wait_time',benchmarkText:'<30 mnt',benchmarkTextEn:'<30 min',compare:'high'},
+                 {label:'Appointment cancel rate',fieldId:'appt_cancel',benchmarkText:'<15%',benchmarkTextEn:'<15%',compare:'high'},
+                 {label:'Compliance documentation',fieldId:'compliance_doc',benchmarkText:'>95%',benchmarkTextEn:'>95%',compare:'low'}],
+        warning:'Wait time >60 mnt + cancel rate >25% = pasien pindah ke kompetitor dalam 30 hari.',
+        warningEn:'Wait time >60 min + cancel rate >25% = patients switch to competitors within 30 days.',
+        solusi:'Integrated appointment system + automated reminder + compliance checklist per visit.',
+        soluziEn:'Integrated appointment system + automated reminders + compliance checklist per visit.',
+      },
+      { num:'CORE 02', name:'Customer & Marketing', nameEn:'Customer & Marketing', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Pasien tidak balik setelah kunjungan pertama, referral dari pasien rendah.',
+        gejalaEn:'Patients don\'t return after first visit, low patient referrals.',
+        rootCause:'Tidak ada follow-up sistematis post-visit — pasien merasa tidak diperhatikan.',
+        rootCauseEn:'No systematic post-visit follow-up — patients feel uncared for.',
+        metrics:[{label:'Patient retention rate',fieldId:'patient_retention',benchmarkText:'>60%',benchmarkTextEn:'>60%',compare:'low'},
+                 {label:'Patient referral rate',fieldId:'referral_patients',benchmarkText:'>15%',benchmarkTextEn:'>15%',compare:'low'},
+                 {label:'Patient satisfaction',fieldId:'patient_sat',benchmarkText:'>8/10',benchmarkTextEn:'>8/10',compare:'low'}],
+        warning:'Patient satisfaction <6/10 = review negatif di platform kesehatan turunkan kepercayaan baru.',
+        warningEn:'Patient satisfaction <6/10 = negative reviews on health platforms reduce new patient trust.',
+        solusi:'Post-visit follow-up SOP + reminder checkup berkala + program referral pasien.',
+        soluziEn:'Post-visit follow-up SOP + periodic checkup reminders + patient referral program.',
+      },
+      { num:'CORE 03', name:'Team & Execution', nameEn:'Team & Execution', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Utilisasi staff rendah di jam tertentu, protocol tidak diikuti konsisten.',
+        gejalaEn:'Low staff utilization at certain hours, protocols not followed consistently.',
+        rootCause:'Jadwal tidak data-driven — tidak ada analisis peak vs slow hours untuk alokasi tim.',
+        rootCauseEn:'Scheduling not data-driven — no peak vs slow hour analysis for team allocation.',
+        metrics:[{label:'Staff utilization rate',fieldId:'staff_util',benchmarkText:'70–85%',benchmarkTextEn:'70–85%',compare:'low'},
+                 {label:'Protocol adherence',fieldId:'protocol_adhere',benchmarkText:'>90%',benchmarkTextEn:'>90%',compare:'low'}],
+        warning:'Staff utilization <55% di jam peak = scheduling problem, bukan staffing problem.',
+        warningEn:'Staff utilization <55% during peak hours = scheduling problem, not staffing problem.',
+        solusi:'Data-driven scheduling + protocol checklist per procedure + weekly team debrief.',
+        soluziEn:'Data-driven scheduling + protocol checklist per procedure + weekly team debrief.',
+      },
+      { num:'CORE 04', name:'Scaling Process', nameEn:'Scaling Process', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Revenue per pasien rendah, occupancy tidak optimal.',
+        gejalaEn:'Low revenue per patient, occupancy not optimized.',
+        rootCause:'Tidak ada strategi service bundling — tiap kunjungan diperlakukan sama.',
+        rootCauseEn:'No service bundling strategy — every visit treated the same.',
+        metrics:[{label:'Revenue per patient',fieldId:'revenue_per_patient',benchmarkText:'>Rp 300k',benchmarkTextEn:'>300k IDR',compare:'low'},
+                 {label:'Occupancy rate',fieldId:'occupancy_rate',benchmarkText:'>75%',benchmarkTextEn:'>75%',compare:'low'}],
+        warning:'Occupancy <55% dengan overhead tetap = break-even point makin sulit dicapai.',
+        warningEn:'Occupancy <55% with fixed overhead = break-even point increasingly difficult.',
+        solusi:'Service bundling + preventive care packages + occupancy optimization per time slot.',
+        soluziEn:'Service bundling + preventive care packages + occupancy optimization per time slot.',
+      }
+    ],
+    roadmap: {
+      id: {
+        q1: { actions:['Implement appointment reminder otomatis','Audit compliance documentation — identifikasi gap'], kpi:'Cancel rate <15% · Compliance doc >90%' },
+        q2: { actions:['Post-visit follow-up SOP berjalan','Program referral pasien diluncurkan'], kpi:'Patient retention >50% · Satisfaction >7.5/10' },
+        q3: { actions:['Service bundling aktif','Occupancy optimization per time slot'], kpi:'Revenue/patient >Rp 300k · Occupancy >75%' },
+      },
+      en: {
+        q1: { actions:['Implement automated appointment reminders','Compliance documentation audit — identify gaps'], kpi:'Cancel rate <15% · Compliance doc >90%' },
+        q2: { actions:['Post-visit follow-up SOP running','Patient referral program launched'], kpi:'Patient retention >50% · Satisfaction >7.5/10' },
+        q3: { actions:['Service bundling active','Occupancy optimization per time slot'], kpi:'Revenue/patient >300k IDR · Occupancy >75%' },
+      }
+    },
+    gates: {
+      id:['Patient wait time <30 mnt konsisten 30 hari','Appointment cancel rate <15%','Patient satisfaction score >8/10','Occupancy rate >75% di jam operasional'],
+      en:['Patient wait time <30 min consistently for 30 days','Appointment cancel rate <15%','Patient satisfaction score >8/10','Occupancy rate >75% during operating hours'],
+    },
+    gateCheck: (d) => (d.wait_time <= 30) && (d.patient_retention >= 60) && (d.occupancy_rate >= 75),
+  },
+};
+
+// ─── STATE ────────────────────────────────────────────────────
+let selectedIndustry = null;
+let inputValues = {};
+let selectedRisk = null;
+let agenticChecked = [false,false,false,false,false];
+
+// ─── STEP 1 ───────────────────────────────────────────────────
+function selectIndustry(ind, el) {
+  document.querySelectorAll('.industry-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedIndustry = ind;
+  const btn = document.getElementById('btn1');
+  btn.disabled = false;
+  document.getElementById('aiRiskSection').style.display = 'block';
+  applyLangAiRisk();
+}
+
+function goToStep1() { showStep(1); }
+
+function goToStep2() {
+  if (!selectedIndustry) return;
+  buildForm(selectedIndustry);
+  showStep(2);
+}
+
+// ─── AI RISK ─────────────────────────────────────────────────
+function selectRisk(level, el) {
+  selectedRisk = level;
+  ['riskLow','riskMed','riskHigh'].forEach(id => {
+    const e = document.getElementById(id);
+    e.classList.remove('selected-low','selected-med','selected-high');
+  });
+  el.classList.add(`selected-${level}`);
+}
+
+// ─── AGENTIC ─────────────────────────────────────────────────
+function toggleAgentic(idx, el) {
+  agenticChecked[idx] = !agenticChecked[idx];
+  el.classList.toggle('checked', agenticChecked[idx]);
+  const score = agenticChecked.filter(Boolean).length;
+  document.getElementById('agenticFill').style.width = (score/5*100)+'%';
+  const labels = lang==='id'
+    ? ['NOT AGENTIC','BARELY AGENTIC','PARTIAL','GOOD','ADVANCED','AGENTIC-NATIVE']
+    : ['NOT AGENTIC','BARELY AGENTIC','PARTIAL','GOOD','ADVANCED','AGENTIC-NATIVE'];
+  document.getElementById('agenticScoreLabel').textContent = `${lang==='id'?'Agentic Score':'Agentic Score'}: ${score}/5`;
+  document.getElementById('agenticReadinessLabel').textContent = labels[score];
+  document.getElementById('agenticReadinessLabel').style.color =
+    score<=1?'var(--danger)':score<=3?'var(--warn)':'var(--ok)';
+}
+
+// ─── BENCHMARK HINTS ─────────────────────────────────────────
+const BENCH_HINTS = {
+  onboarding_days: { id:'Onboarding lo {v} hari → benchmark SaaS 2026: 3–5 hari. {d}', en:'Your onboarding: {v} days → 2026 SaaS benchmark: 3–5 days. {d}',
+    ok:'✓ On target. Good friction control.', warn:'⚠ 1.4–2x slower. Churn risk +12%.', bad:'⚡ {m}x slower than benchmark. Churn risk +22%. Immediate fix needed.' },
+  csat: { id:'CSAT lo {v}% → benchmark: >80%. {d}', en:'Your CSAT: {v}% → benchmark: >80%. {d}',
+    ok:'✓ Above benchmark. Strong support ops.', warn:'⚠ Below threshold. 1 in 5 users dissatisfied.', bad:'⚡ Critical. High churn correlation.' },
+  support_tickets: { id:'Backlog {v} tiket/minggu → benchmark: <20. {d}', en:'{v} tickets/week → benchmark: <20. {d}',
+    ok:'✓ Under control.', warn:'⚠ Scaling warning — CS team approaching capacity.', bad:'⚡ Overflow risk. Team burnout likely.' },
+  trial_paid: { id:'Trial-to-paid lo {v}% → benchmark: >20%. {d}', en:'Your trial-to-paid: {v}% → benchmark: >20%. {d}',
+    ok:'✓ Strong conversion.', warn:'⚠ Needs improvement. Check activation flow.', bad:'⚡ Below floor. Unit economics broken at scale.' },
+  churn: { id:'Churn lo {v}%/bln → benchmark: 3–5%. {d}', en:'Your monthly churn: {v}% → benchmark: 3–5%. {d}',
+    ok:'✓ Healthy retention.', warn:'⚠ Watch trend. Improve activation.', bad:'⚡ Leaky bucket. CAC will never recover.' },
+  founder_ops: { id:'Lo habis {v} jam/minggu di ops → benchmark: <20 jam. {d}', en:'You spend {v} hrs/week on ops → benchmark: <20 hrs. {d}',
+    ok:'✓ Good delegation.', warn:'⚠ Bottleneck forming. Start delegating now.', bad:'⚡ Founder = single point of failure.' },
+  sprint_completion: { id:'Sprint completion lo {v}% → benchmark: >80%. {d}', en:'Your sprint completion: {v}% → benchmark: >80%. {d}',
+    ok:'✓ Strong execution rhythm.', warn:'⚠ Priorities unclear or scope creep.', bad:'⚡ Execution broken. Roadmap at risk.' },
+  uptime: { id:'System uptime {v}% → benchmark: >99%. {d}', en:'System uptime: {v}% → benchmark: >99%. {d}',
+    ok:'✓ Reliable infrastructure.', warn:'⚠ SLA risk. Track incident patterns.', bad:'⚡ Every downtime minute = lost revenue + churn.' },
+  repeat_purchase: { id:'Repeat purchase {v}% → benchmark: 30–40%. {d}', en:'Repeat purchase: {v}% → benchmark: 30–40%. {d}',
+    ok:'✓ Loyal customer base.', warn:'⚠ Retention needs work.', bad:'⚡ Acquisition-only mode = unsustainable CAC.' },
+  roas: { id:'ROAS lo {v}x → benchmark: >3.5x. {d}', en:'Your ROAS: {v}x → benchmark: >3.5x. {d}',
+    ok:'✓ Efficient spend.', warn:'⚠ Margin squeeze. Optimize creative/targeting.', bad:'⚡ Losing money on ads. Pause & audit.' },
+};
+
+function showBenchHint(id, val, dir, thresholds) {
+  const hint = document.getElementById(`hint_${id}`);
+  if (!hint) return;
+  const cfg = BENCH_HINTS[id];
+  if (!cfg || val === '' || isNaN(val)) { hint.classList.remove('visible','ok','warn','bad'); return; }
+  const v = parseFloat(val);
+  let level;
+  if (dir==='high') level = v<=thresholds[0]?'ok':v<=thresholds[1]?'warn':'bad';
+  else              level = v>=thresholds[0]?'ok':v>=thresholds[1]?'warn':'bad';
+  const tmpl = lang==='id' ? cfg.id : cfg.en;
+  const msg = cfg[level];
+  const mult = dir==='high' ? (v/thresholds[0]).toFixed(1) : (thresholds[0]/v).toFixed(1);
+  const text = tmpl.replace('{v}',v).replace('{d}',msg).replace('{m}',mult);
+  hint.textContent = text;
+  hint.className = `bench-hint visible ${level}`;
+}
+
+// ─── FORM ─────────────────────────────────────────────────────
+function buildForm(ind) {
+  const container = document.getElementById('formContainer');
+  let html = '';
+  FORMS[ind].forEach(section => {
+    const title = lang === 'id' ? section.section : section.sectionEn;
+    html += `<div class="form-section-title">${title}</div><div class="form-grid">`;
+    section.fields.forEach(f => {
+      const lbl = lang === 'id' ? f.label : f.labelEn;
+      const bnch = lang === 'id' ? f.bench : f.benchEn;
+      const unt = lang === 'id' ? f.unit : f.unitEn;
+      html += `<div class="field">
+        <label>${lbl} <span class="bench">[${bnch}]</span></label>
+        <div class="input-wrap">
+          <input type="number" step="0.01" id="inp_${f.id}"
+            placeholder="${unt}"
+            oninput="updateDot('${f.id}',this.value,${JSON.stringify(f.thresholds)},'${f.dir}');showBenchHint('${f.id}',this.value,'${f.dir}',${JSON.stringify(f.thresholds)})" />
+          <div class="status-dot" id="dot_${f.id}"></div>
+        </div>
+        <div class="bench-hint" id="hint_${f.id}"></div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  container.innerHTML = html;
+}
+
+function updateDot(id, val, thresholds, dir) {
+  const dot = document.getElementById(`dot_${id}`);
+  if (val === '' || isNaN(val)) { dot.className = 'status-dot'; return; }
+  const v = parseFloat(val);
+  inputValues[id] = v;
+  let s;
+  if (dir === 'high') s = v <= thresholds[0] ? 'ok' : v <= thresholds[1] ? 'warn' : 'danger';
+  else                s = v >= thresholds[0] ? 'ok' : v >= thresholds[1] ? 'warn' : 'danger';
+  dot.className = `status-dot ${s}`;
+}
+
+// ─── DIAGNOSIS ────────────────────────────────────────────────
+function runDiagnosis() {
+  // collect values
+  inputValues = {};
+  FORMS[selectedIndustry].forEach(s => s.fields.forEach(f => {
+    const el = document.getElementById(`inp_${f.id}`);
+    if (el && el.value !== '') inputValues[f.id] = parseFloat(el.value);
+  }));
+
+  const diag = DIAGNOSIS[selectedIndustry];
+  const ind  = INDUSTRIES[selectedIndustry];
+  const indLabel = lang === 'id' ? ind.label : ind.labelEn;
+
+  // score each core
+  const coreScores = diag.cores.map(core => {
+    let triggered = 0, total = 0;
+    const triggeredMetrics = [];
+    core.metrics.forEach(m => {
+      const val = inputValues[m.fieldId];
+      if (val === undefined) return;
+      total++;
+      const ff = FORMS[selectedIndustry].flatMap(s => s.fields).find(f => f.id === m.fieldId);
+      if (!ff) return;
+      const bad = ff.dir === 'high' ? val > ff.thresholds[0] : val < ff.thresholds[0];
+      if (bad) {
+        triggered++;
+        const bText = lang === 'id' ? m.benchmarkText : m.benchmarkTextEn;
+        const unt = lang === 'id' ? ff.unit : ff.unitEn;
+        triggeredMetrics.push({ label:m.label, your:val, bench:bText, unit:unt });
+      }
+    });
+    return { triggered, total, triggeredMetrics };
+  });
+
+  const totalTriggered = coreScores.reduce((a,b) => a+b.triggered, 0);
+  const totalMetrics   = coreScores.reduce((a,b) => a+b.total, 0);
+  const healthScore    = totalMetrics > 0 ? Math.round((1 - totalTriggered/totalMetrics)*100) : 50;
+  const warningCount   = coreScores.filter(s => s.triggered > 0).length;
+
+  let overallStatus = t('sehat'), overallColor = 'healthy';
+  if (healthScore < 50)      { overallStatus = t('kritis');        overallColor = 'critical'; }
+  else if (healthScore < 75) { overallStatus = t('perluPerhatian');overallColor = 'warning';  }
+
+  const gateReady = diag.gateCheck(inputValues);
+  const barColor  = overallColor === 'critical' ? 'var(--danger)' : overallColor === 'warning' ? 'var(--warn)' : 'var(--ok)';
+  const rm = diag.roadmap[lang];
+  const gates = diag.gates[lang];
+
+  let html = `
+    <div class="result-header">
+      <h2>${ind.icon} ${lang==='id'?'Diagnosis Result':'Diagnosis Result'} — ${indLabel}</h2>
+      <p>${new Date().toLocaleDateString(lang==='id'?'id-ID':'en-US',{day:'numeric',month:'long',year:'numeric'})} · CocoBlast OS Framework 2025 · Ferry Hidayanto</p>
+    </div>
+
+    <div class="score-block">
+      <div class="score-card">
+        <div class="score-val ${overallColor}">${healthScore}<span style="font-size:18px">%</span></div>
+        <div class="score-label">${t('healthScore')}</div>
+        <div class="health-bar-wrap"><div class="health-bar" style="width:${healthScore}%;background:${barColor}"></div></div>
+      </div>
+      <div class="score-card">
+        <div class="score-val ${overallColor}" style="font-size:${overallStatus.length>8?'14px':'36px'};line-height:1.2">${overallStatus}</div>
+        <div class="score-label">${t('status')}</div>
+      </div>
+      <div class="score-card">
+        <div class="score-val ${totalTriggered>3?'critical':totalTriggered>0?'warning':'healthy'}">${totalTriggered}</div>
+        <div class="score-label">${lang==='id'?'Triggered':'Triggered'}</div>
+      </div>
+      <div class="score-card">
+        <div class="score-val">${4-warningCount}</div>
+        <div class="score-label">${t('coreSehat')}</div>
+      </div>
+      <div class="score-card" style="border-color:${gateReady?'var(--ok)':'var(--danger)'}">
+        <div class="score-val ${gateReady?'healthy':'critical'}" style="font-size:10px;line-height:1.5">${gateReady?t('readyScale'):t('fixFirst')}</div>
+        <div class="score-label">${t('scalingGate')}</div>
+      </div>
+    </div>
+
+    <div class="verdict-box" style="border-color:${gateReady?'var(--ok)':'var(--danger)'};background:${gateReady?'rgba(0,209,102,0.05)':'rgba(255,45,45,0.05)'};color:${gateReady?'var(--ok)':'var(--danger)'}">
+      <strong>${t('engineVerdict')}:</strong> ${gateReady?t('verdictReady'):t('verdictNotReady')}
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label"><span>02</span> — ${t('breakdown')}</div>
+  `;
+
+  diag.cores.forEach((core, i) => {
+    const cs = coreScores[i];
+    const hasIssues = cs.triggered > 0;
+    const name = lang === 'id' ? core.name : core.nameEn;
+    const sev = lang === 'id' ? core.severity : core.severityEn;
+    const gejala = lang === 'id' ? core.gejala : core.gejalaEn;
+    const rootCause = lang === 'id' ? core.rootCause : core.rootCauseEn;
+    const warning = lang === 'id' ? core.warning : core.warningEn;
+    const solusi = lang === 'id' ? core.solusi : core.soluziEn;
+
+    html += `
+      <div class="core-card">
+        <div class="core-header" onclick="toggleCore('core${i}')">
+          <div class="core-title-group">
+            <span class="core-num">${core.num}</span>
+            <span class="core-name">${name}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+            <span style="font-family:var(--mono);font-size:10px;color:${hasIssues?'var(--danger)':'var(--ok)'}">${cs.triggered}/${cs.total}</span>
+            <span class="severity-badge ${core.severity}">${sev}</span>
+            <span style="color:var(--muted);font-family:var(--mono)" id="arrow_core${i}">▼</span>
+          </div>
+        </div>
+        <div class="core-body ${i===0?'open':''}" id="core${i}">
+          <div class="diag-row">
+            <div><div class="diag-block-title">${t('gejala')}</div><div class="diag-block-content">${gejala}</div></div>
+            <div><div class="diag-block-title">${t('rootcause')}</div><div class="diag-block-content">${rootCause}</div></div>
+            <div><div class="diag-block-title">${t('severity')}</div><div class="diag-block-content"><span class="severity-badge ${core.severity}">${sev}</span><br><br>${cs.triggered}/${cs.total} metric triggered.</div></div>
+          </div>`;
+
+    if (cs.triggeredMetrics.length > 0) {
+      html += `<div class="metrics-triggered"><div class="metrics-triggered-title">⚠ ${t('triggered')}</div>`;
+      cs.triggeredMetrics.forEach(m => {
+        html += `<div class="metric-row"><span class="lbl">${m.label}</span><span class="your">${t('your')}: ${m.your}${m.unit}</span><span style="color:var(--muted);margin:0 6px">vs</span><span class="bench">${t('target')}: ${m.bench}</span></div>`;
+      });
+      html += `</div>`;
+    }
+    if (hasIssues) html += `<div class="warning-box">⚡ ${warning}</div>`;
+    html += `<div class="solution-box"><div class="solution-box-title">✓ ${t('solusi')}</div><p>${solusi}</p></div>
+        </div>
+      </div>`;
+  });
+
+  // ROADMAP 30/60/90
+  // MOAT SCORE PANEL
+  const agScore = agenticChecked.filter(Boolean).length;
+  const riskLevel = selectedRisk || 'med';
+  const riskLabels = { low:{id:'Low — Moat Kuat',en:'Low — Strong Moat'}, med:{id:'Medium — Perlu Ditingkatkan',en:'Medium — Needs Strengthening'}, high:{id:'High — Rentan Digantikan AI',en:'High — Vulnerable to AI Replacement'} };
+  const riskColors = { low:'var(--ok)', med:'var(--warn)', high:'var(--danger)' };
+  const proprietary = riskLevel==='low'?{score:85,label:'Strong — Closed-loop feedback data'}:riskLevel==='med'?{score:45,label:'Medium — Some unique data, no feedback loop'}:{score:15,label:'Weak — No proprietary data layer'};
+  const agReadiness = agScore===0?'Not Agentic':agScore<=2?'Barely Agentic':agScore<=3?'Partial':agScore===4?'Advanced':'Agentic-Native';
+  const agColor = agScore<=1?'var(--danger)':agScore<=3?'var(--warn)':'var(--ok)';
+  const moatScore = Math.round((proprietary.score * 0.4) + (agScore/5*100 * 0.35) + (riskLevel==='low'?90:riskLevel==='med'?50:15) * 0.25);
+  const moatColor = moatScore>=70?'var(--ok)':moatScore>=45?'var(--warn)':'var(--danger)';
+  const killerThreat = riskLevel==='high'
+    ? (lang==='id'?'⚡ Bisa di-copy oleh Claude/GPT-5 + RAG dalam &lt;6 bulan. Zero switching cost untuk user.':'⚡ Copyable by Claude/GPT-5 + RAG in &lt;6 months. Zero switching cost for users.')
+    : riskLevel==='med'
+    ? (lang==='id'?'⚠ Potensi disintermediation dalam 12–18 bulan jika tidak membangun proprietary data loop.':'⚠ Potential disintermediation in 12–18 months without proprietary data loop.')
+    : (lang==='id'?'✓ Posisi defensibel. Fokus perluas data moat + agentic infrastructure.':'✓ Defensible position. Focus on expanding data moat + agentic infrastructure.');
+  const boostAction = riskLevel==='high'
+    ? (lang==='id'?'→ Prioritas 30 hari: Identifikasi 1 data stream yang hanya ada di sistem lo. Buat feedback loop dari output ke model.':'→ 30-day priority: Identify 1 data stream unique to your system. Build output-to-model feedback loop.')
+    : riskLevel==='med'
+    ? (lang==='id'?'→ Bangun outcome tracking — catat hasil dari setiap interaksi user. Data ini yang bikin lo tidak bisa di-copy.':'→ Build outcome tracking — log results from every user interaction. This data makes you uncopyable.')
+    : (lang==='id'?'→ Dokumentasikan data moat lo. Buat investor narrative: "Setelah 12 bulan, kami punya X data points yang tidak bisa dibeli."':'→ Document your data moat. Build investor narrative: "After 12 months, we have X data points that cannot be purchased."');
+
+  html += `
+    <div class="divider"></div>
+    <div class="section-label"><span>03</span> — 🛡️ ${lang==='id'?'MOAT SCORE & AI RISK ANALYSIS':'MOAT SCORE & AI RISK ANALYSIS'} <span class="tag" style="margin-left:8px">Core 05</span></div>
+    <div class="moat-panel">
+      <div class="moat-panel-header">
+        <div class="moat-panel-title">🛡️ Moat Score <span>CORE 05 — DEFENSIBILITY</span></div>
+        <div class="moat-score-badge" style="color:${moatColor}">${moatScore}<sub>/100</sub></div>
+      </div>
+      <div class="moat-body">
+        <div class="moat-row">
+          <div class="moat-row-label">AI Substitution Risk</div>
+          <div class="moat-row-val" style="color:${riskColors[riskLevel]}">${riskLabels[riskLevel][lang]}</div>
+          <div class="moat-row-bar"><div class="moat-row-fill" style="width:${riskLevel==='low'?90:riskLevel==='med'?50:15}%;background:${riskColors[riskLevel]}"></div></div>
+        </div>
+        <div class="moat-row">
+          <div class="moat-row-label">Proprietary Data</div>
+          <div class="moat-row-val" style="color:${riskColors[riskLevel]}">${proprietary.label}</div>
+          <div class="moat-row-bar"><div class="moat-row-fill" style="width:${proprietary.score}%;background:${riskColors[riskLevel]}"></div></div>
+        </div>
+        <div class="moat-row">
+          <div class="moat-row-label">Agentic Readiness</div>
+          <div class="moat-row-val" style="color:${agColor}">${agReadiness} (${agScore}/5 signals)</div>
+          <div class="moat-row-bar"><div class="moat-row-fill" style="width:${agScore/5*100}%;background:${agColor}"></div></div>
+        </div>
+      </div>
+      <div class="moat-threat">⚠ KILLER THREAT: ${killerThreat}</div>
+      <div class="moat-boost">✓ MOAT BOOST ACTION: ${boostAction}</div>
+    </div>
+  `;
+
+  html += `
+    <div class="divider"></div>
+    <div class="section-label"><span>04</span> — ${t('roadmap')} <span class="tag" style="margin-left:8px">Engine Generated</span></div>
+    <div class="roadmap-phases">
+      <div class="phase-col">
+        <div class="phase-label">${t('phase1')}</div>
+        <div class="phase-period">${t('days1')}</div>
+        ${rm.q1.actions.map(a=>`<div class="phase-action">${a}</div>`).join('')}
+        <div class="kpi-tag" style="margin-top:12px">KPI: ${rm.q1.kpi}</div>
+      </div>
+      <div class="phase-col">
+        <div class="phase-label">${t('phase2')}</div>
+        <div class="phase-period">${t('days2')}</div>
+        ${rm.q2.actions.map(a=>`<div class="phase-action">${a}</div>`).join('')}
+        <div class="kpi-tag" style="margin-top:12px">KPI: ${rm.q2.kpi}</div>
+      </div>
+      <div class="phase-col">
+        <div class="phase-label">${t('phase3')}</div>
+        <div class="phase-period">${t('days3')}</div>
+        ${rm.q3.actions.map(a=>`<div class="phase-action">${a}</div>`).join('')}
+        <div class="kpi-tag" style="margin-top:12px">KPI: ${rm.q3.kpi}</div>
+      </div>
+    </div>
+
+    <div class="gate-section">
+      <div class="gate-title">${t('gateTitle')}</div>
+      ${gates.map(g=>`<div class="gate-item"><div class="gate-box">□</div><span>${g}</span></div>`).join('')}
+    </div>
+
+    <div class="btn-row" style="margin-top:40px">
+      <button class="btn btn-ghost" onclick="resetDiagnosis()">${t('newDiag')}</button>
+    </div>
+
+    <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.8">
+      CocoBlast OS Startup Diagnosis Framework 2025 · Ferry Hidayanto · Systems Thinking for Bootstrapped Founders<br>
+      "Data doesn't lie. Systems don't break. People execute."
+    </div>
+  `;
+
+  document.getElementById('resultsContainer').innerHTML = html;
+  showStep(3);
+}
+
+// ─── UTILS ────────────────────────────────────────────────────
+function showStep(n) {
+  document.querySelectorAll('.section').forEach((s,i) => s.classList.toggle('active', i+1===n));
+  ['pip1','pip2','pip3'].forEach((id,i) => {
+    const pip = document.getElementById(id);
+    pip.className = 'step-pip' + (i+1 < n ? ' done' : i+1 === n ? ' active' : '');
+  });
+  document.getElementById('stepLabel').textContent = `STEP ${n}/3`;
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+function toggleCore(id) {
+  const body = document.getElementById(id);
+  const arrow = document.getElementById(`arrow_${id}`);
+  body.classList.toggle('open');
+  arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function resetDiagnosis() {
+  selectedIndustry = null; inputValues = {};
+  selectedRisk = null; agenticChecked = [false,false,false,false,false];
+  document.querySelectorAll('.industry-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('btn1').disabled = true;
+  document.getElementById('aiRiskSection').style.display = 'none';
+  ['riskLow','riskMed','riskHigh'].forEach(id => {
+    const e = document.getElementById(id);
+    e.classList.remove('selected-low','selected-med','selected-high');
+  });
+  document.querySelectorAll('.agentic-check-item').forEach(e => e.classList.remove('checked'));
+  document.getElementById('agenticFill').style.width = '0%';
+  document.getElementById('agenticScoreLabel').textContent = 'Agentic Score: 0/5';
+  document.getElementById('agenticReadinessLabel').textContent = 'NOT AGENTIC';
+  showStep(1);
+}
+
+function applyLangAiRisk() {
+  if (lang === 'en') {
+    document.getElementById('aiRiskLabel').textContent = 'AI Substitution Risk';
+    document.getElementById('aiRiskHeader').textContent = 'AI SUBSTITUTION RISK — CORE 05 MOAT INPUT';
+    document.getElementById('aiRiskDesc').textContent = 'How easily could this business be replaced by Claude/GPT-5 + RAG in the next 6–18 months?';
+    document.getElementById('riskLowLabel').textContent = 'LOW';
+    document.getElementById('riskLowDesc').textContent = 'Proprietary data + closed-loop feedback. Strong moat. LLM cannot replicate without your data.';
+    document.getElementById('riskMedLabel').textContent = 'MEDIUM';
+    document.getElementById('riskMedDesc').textContent = 'API wrapper + some unique data. Copyable, but needs 6–12 months of effort.';
+    document.getElementById('riskHighLabel').textContent = 'HIGH';
+    document.getElementById('riskHighDesc').textContent = 'Feature-only, no unique data. Replicable by LLM in <1 hour of prompt engineering.';
+    document.getElementById('agenticLabel').textContent = 'Agentic Readiness';
+    document.getElementById('agenticHeader').textContent = 'AGENTIC READINESS — AI-NATIVE INFRASTRUCTURE';
+    document.getElementById('agenticDesc').textContent = 'Check all that currently exist in your system:';
+    document.getElementById('ag0').textContent = 'Event-driven architecture (automatic triggers based on events)';
+    document.getElementById('ag1').textContent = 'Real-time operational dashboard (not manual reports)';
+    document.getElementById('ag2').textContent = 'Automated task audit log (all actions logged + auditable)';
+    document.getElementById('ag3').textContent = 'External action trigger (notifications, API calls, or workflows triggered by data)';
+    document.getElementById('ag4').textContent = 'Feedback loop to model/system (user data used to improve output)';
+  } else {
+    document.getElementById('aiRiskLabel').textContent = 'AI Substitution Risk';
+    document.getElementById('aiRiskHeader').textContent = 'AI SUBSTITUTION RISK — CORE 05 MOAT INPUT';
+    document.getElementById('aiRiskDesc').textContent = 'Seberapa mudah bisnis ini bisa digantikan oleh Claude/GPT-5 + RAG dalam 6–18 bulan ke depan?';
+    document.getElementById('riskLowLabel').textContent = 'LOW';
+    document.getElementById('riskLowDesc').textContent = 'Data proprietary + closed-loop feedback. Moat kuat. LLM tidak bisa replicate tanpa data lo.';
+    document.getElementById('riskMedLabel').textContent = 'MEDIUM';
+    document.getElementById('riskMedDesc').textContent = 'API wrapper + beberapa data unik. Bisa di-copy, tapi butuh 6–12 bulan effort.';
+    document.getElementById('riskHighLabel').textContent = 'HIGH';
+    document.getElementById('riskHighDesc').textContent = 'Feature-only, no unique data. Bisa di-copy LLM dalam <1 jam prompt engineering.';
+    document.getElementById('agenticLabel').textContent = 'Agentic Readiness';
+    document.getElementById('agenticHeader').textContent = 'AGENTIC READINESS — INFRASTRUKTUR AI-NATIVE';
+    document.getElementById('agenticDesc').textContent = 'Centang semua yang sudah ada di sistem lo sekarang:';
+    document.getElementById('ag0').textContent = 'Event-driven architecture (trigger otomatis berdasarkan event)';
+    document.getElementById('ag1').textContent = 'Real-time dashboard operasional (bukan laporan manual)';
+    document.getElementById('ag2').textContent = 'Task audit log otomatis (semua aksi tercatat + bisa di-audit)';
+    document.getElementById('ag3').textContent = 'External action trigger (notif, API call, atau workflow dipicu oleh data)';
+    document.getElementById('ag4').textContent = 'Feedback loop ke model/sistem (data pengguna dipakai improve output)';
+  }
+}
+</script>
+</body>
+</html>

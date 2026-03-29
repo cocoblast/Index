@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CocoBlast OS — Sistem Diagnosis Startup</title>
+<title>CocoBlast OS — Startup Diagnosis Tool</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -442,6 +442,192 @@ h1 em { font-style: normal; color: var(--accent); }
 .bench-hint.warn  { border-color: var(--warn);   background: rgba(255,190,0,0.04);  color: var(--warn); }
 .bench-hint.bad   { border-color: var(--danger); background: rgba(255,45,45,0.04);  color: var(--danger); }
 
+.context-box {
+  background: rgba(90,200,250,0.05);
+  border: 1px solid rgba(90,200,250,0.2);
+  border-left: 3px solid #5AC8FA;
+  padding: 14px 16px;
+  margin-top: 12px;
+  border-radius: 2px;
+}
+.context-box-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: #5AC8FA;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.context-box p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.65;
+}
+.anticipasi-box {
+  background: rgba(255,190,0,0.05);
+  border: 1px solid rgba(255,190,0,0.2);
+  border-left: 3px solid var(--warn);
+  padding: 14px 16px;
+  margin-top: 8px;
+  border-radius: 2px;
+}
+.anticipasi-box-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--warn);
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+.anticipasi-box p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.65;
+}
+
+
+/* ── AI INTELLIGENCE PANEL ────────────────────────────── */
+.ai-panel {
+  border: 1px solid rgba(255,85,0,0.3);
+  background: rgba(255,85,0,0.03);
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.ai-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+.ai-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255,85,0,0.15);
+}
+.ai-panel-tag {
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--accent);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+.ai-panel-badge {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 8px;
+  color: var(--muted);
+  border: 1px solid var(--border2);
+  padding: 2px 8px;
+  letter-spacing: 1px;
+}
+.ai-panel-body {
+  padding: 18px;
+}
+
+/* Executive Summary */
+.exec-summary {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text);
+  margin-bottom: 0;
+}
+
+/* Killer Risk */
+.killer-risk-box {
+  background: rgba(255,45,45,0.06);
+  border: 1px solid rgba(255,45,45,0.25);
+  border-left: 3px solid var(--danger);
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+.killer-risk-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--danger);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.killer-risk-content {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.65;
+}
+.killer-risk-timeline {
+  margin-top: 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--danger);
+  opacity: 0.8;
+}
+
+/* Custom Insight */
+.custom-insight-box {
+  background: rgba(255,190,0,0.04);
+  border: 1px solid rgba(255,190,0,0.2);
+  border-left: 3px solid var(--warn);
+  padding: 16px 18px;
+}
+.custom-insight-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--warn);
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+.custom-insight-content {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.65;
+}
+
+/* Loading / Streaming state */
+.ai-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 18px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--muted);
+}
+.ai-loading-dots span {
+  display: inline-block;
+  width: 4px; height: 4px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin: 0 2px;
+  animation: dotPulse 1.2s infinite;
+}
+.ai-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.ai-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotPulse {
+  0%,100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+.ai-error-box {
+  padding: 14px 18px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+.stream-cursor {
+  display: inline-block;
+  width: 2px; height: 14px;
+  background: var(--accent);
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: blink 0.8s infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
+
 /* MOAT SCORE PANEL in Results */
 .moat-panel {
   margin-top: 0; margin-bottom: 8px;
@@ -505,11 +691,11 @@ h1 em { font-style: normal; color: var(--accent); }
 <!-- STEP 1 -->
 <div class="section active" id="step1">
   <div class="eyebrow" id="s1eyebrow">// Startup Diagnosis Framework 2025</div>
-  <h1 id="s1h1">Analisis bisnis Anda<br>dengan <em>data.</em></h1>
-  <p class="hero-sub" id="s1sub">Masukkan metrik aktual → sistem diagnosis menggunakan framework CocoBlast OS → diagnosis lengkap + roadmap 30/60/90 hari. Tanpa asumsi. Tanpa perkiraan.</p>
+  <h1 id="s1h1">Bedah bisnis lo<br>dengan <em>data.</em></h1>
+  <p class="hero-sub" id="s1sub">Input metrics aktual → sistem diagnosa pakai framework CocoBlast OS → diagnosis lengkap + roadmap 30/60/90 hari. Bukan asumsi. Bukan feeling.</p>
 
   <div class="data-notice" id="dataNotice">
-    <strong>// PRE-DIAGNOSIS</strong> — Kumpulkan data aktual sebelum memulai. Jika lebih dari 40% data tidak tersedia, jalankan data collection sprint 1–2 minggu terlebih dahulu. Diagnosis tanpa data = tebakan.
+    <strong>// PRE-DIAGNOSIS</strong> — Kumpulkan data aktual sebelum mulai. Kalau &gt;40% data tidak tersedia, jalankan data collection sprint 1-2 minggu dulu. Diagnosis tanpa data = tebakan.
   </div>
 
   <div class="section-label"><span>01</span> — <span id="pickIndustryLabel">Pilih Industri</span></div>
@@ -543,7 +729,7 @@ h1 em { font-style: normal; color: var(--accent); }
 
   <div class="btn-row">
     <button class="btn btn-primary" onclick="goToStep2()" id="btn1" disabled id="s1btn">
-      <span id="s1btnText">Lanjut Input Metrik</span> →
+      <span id="s1btnText">Lanjut Input Metrics</span> →
     </button>
   </div>
 
@@ -553,22 +739,22 @@ h1 em { font-style: normal; color: var(--accent); }
     <div class="ai-risk-panel">
       <div class="ai-risk-header" id="aiRiskHeader">AI SUBSTITUTION RISK — CORE 05 MOAT INPUT</div>
       <div class="ai-risk-body">
-        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.7" id="aiRiskDesc">Seberapa mudah bisnis ini dapat digantikan oleh Claude/GPT-5 + RAG dalam 6–18 bulan ke depan?</p>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.7" id="aiRiskDesc">Seberapa mudah bisnis ini bisa digantikan oleh Claude/GPT-5 + RAG dalam 6–18 bulan ke depan?</p>
         <div class="ai-risk-options">
           <div class="risk-option" onclick="selectRisk('low',this)" id="riskLow">
             <div class="risk-check">✓</div>
             <div class="risk-level low" id="riskLowLabel">LOW</div>
-            <div class="risk-desc" id="riskLowDesc">Data proprietary + closed-loop feedback. Moat kuat. LLM tidak dapat mereplikasi tanpa data Anda.</div>
+            <div class="risk-desc" id="riskLowDesc">Data proprietary + closed-loop feedback. Moat kuat. LLM tidak bisa replicate tanpa data lo.</div>
           </div>
           <div class="risk-option" onclick="selectRisk('med',this)" id="riskMed">
             <div class="risk-check">✓</div>
             <div class="risk-level med" id="riskMedLabel">MEDIUM</div>
-            <div class="risk-desc" id="riskMedDesc">API wrapper + beberapa data unik. Dapat ditiru, namun membutuhkan 6–12 bulan upaya.</div>
+            <div class="risk-desc" id="riskMedDesc">API wrapper + beberapa data unik. Bisa di-copy, tapi butuh 6–12 bulan effort.</div>
           </div>
           <div class="risk-option" onclick="selectRisk('high',this)" id="riskHigh">
             <div class="risk-check">✓</div>
             <div class="risk-level high" id="riskHighLabel">HIGH</div>
-            <div class="risk-desc" id="riskHighDesc">Feature-only, tanpa data unik. Dapat direplikasi LLM dalam &lt;1 jam prompt engineering.</div>
+            <div class="risk-desc" id="riskHighDesc">Feature-only, no unique data. Bisa di-copy LLM dalam &lt;1 jam prompt engineering.</div>
           </div>
         </div>
       </div>
@@ -579,7 +765,7 @@ h1 em { font-style: normal; color: var(--accent); }
     <div class="agentic-panel">
       <div class="agentic-header" id="agenticHeader">AGENTIC READINESS — INFRASTRUKTUR AI-NATIVE</div>
       <div class="agentic-body">
-        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.7" id="agenticDesc">Centang semua yang sudah ada di sistem Anda saat ini:</p>
+        <p style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-bottom:14px;line-height:1.7" id="agenticDesc">Centang semua yang sudah ada di sistem lo sekarang:</p>
         <div class="agentic-checks" id="agenticChecks">
           <div class="agentic-check-item" onclick="toggleAgentic(0,this)" data-idx="0">
             <div class="agentic-checkbox">✓</div>
@@ -591,15 +777,15 @@ h1 em { font-style: normal; color: var(--accent); }
           </div>
           <div class="agentic-check-item" onclick="toggleAgentic(2,this)" data-idx="2">
             <div class="agentic-checkbox">✓</div>
-            <div class="agentic-check-label" id="ag2">Task audit log otomatis (semua aksi tercatat + dapat diaudit)</div>
+            <div class="agentic-check-label" id="ag2">Task audit log otomatis (semua aksi tercatat + bisa di-audit)</div>
           </div>
           <div class="agentic-check-item" onclick="toggleAgentic(3,this)" data-idx="3">
             <div class="agentic-checkbox">✓</div>
-            <div class="agentic-check-label" id="ag3">External action trigger (notifikasi, API call, atau workflow dipicu oleh data)</div>
+            <div class="agentic-check-label" id="ag3">External action trigger (notif, API call, atau workflow dipicu oleh data)</div>
           </div>
           <div class="agentic-check-item" onclick="toggleAgentic(4,this)" data-idx="4">
             <div class="agentic-checkbox">✓</div>
-            <div class="agentic-check-label" id="ag4">Feedback loop ke model/sistem (data pengguna digunakan untuk meningkatkan output)</div>
+            <div class="agentic-check-label" id="ag4">Feedback loop ke model/sistem (data pengguna dipakai improve output)</div>
           </div>
         </div>
         <div class="agentic-score-bar"><div class="agentic-score-fill" id="agenticFill"></div></div>
@@ -615,12 +801,12 @@ h1 em { font-style: normal; color: var(--accent); }
 <!-- STEP 2 -->
 <div class="section" id="step2">
   <div class="eyebrow" id="s2eyebrow">// Data Input</div>
-  <h1 style="font-size:clamp(32px,6vw,56px)" id="s2h1">Masukkan Metrik <em>Aktual</em></h1>
-  <p class="hero-sub" id="s2sub" style="margin-bottom:16px">Isi dengan angka nyata. Status dot akan diperbarui secara real-time. Kosongkan jika data belum tersedia.</p>
+  <h1 style="font-size:clamp(32px,6vw,56px)" id="s2h1">Input Metrics <em>Aktual</em></h1>
+  <p class="hero-sub" id="s2sub" style="margin-bottom:16px">Isi angka nyata. Status dot akan update real-time. Kosongkan kalau data belum ada.</p>
   <div id="formContainer"></div>
   <div class="btn-row">
-    <button class="btn btn-primary" onclick="runDiagnosis()" id="s2runBtn"><span id="s2runText">▶ Jalankan Diagnosis</span></button>
-    <button class="btn btn-ghost" onclick="goToStep1()"><span id="s2backText">← Kembali</span></button>
+    <button class="btn btn-primary" onclick="runDiagnosis()" id="s2runBtn"><span id="s2runText">▶ Run Diagnosis</span></button>
+    <button class="btn btn-ghost" onclick="goToStep1()"><span id="s2backText">← Balik</span></button>
   </div>
 </div>
 
@@ -635,16 +821,16 @@ let lang = 'id';
 const T = {
   id: {
     eyebrow1: '// Startup Diagnosis Framework 2025',
-    h1: 'Analisis bisnis Anda<br>dengan <em>data.</em>',
-    sub1: 'Masukkan metrik aktual → sistem diagnosis menggunakan framework CocoBlast OS → diagnosis lengkap + roadmap 30/60/90 hari. Tanpa asumsi. Tanpa perkiraan.',
-    dataNotice: '<strong>// PRE-DIAGNOSIS</strong> — Kumpulkan data aktual sebelum memulai. Jika lebih dari 40% data tidak tersedia, jalankan data collection sprint 1–2 minggu terlebih dahulu. Diagnosis tanpa data = tebakan.',
+    h1: 'Bedah bisnis lo<br>dengan <em>data.</em>',
+    sub1: 'Input metrics aktual → sistem diagnosa pakai framework CocoBlast OS → diagnosis lengkap + roadmap 30/60/90 hari. Bukan asumsi. Bukan feeling.',
+    dataNotice: '<strong>// PRE-DIAGNOSIS</strong> — Kumpulkan data aktual sebelum mulai. Kalau >40% data tidak tersedia, jalankan data collection sprint 1-2 minggu dulu. Diagnosis tanpa data = tebakan.',
     pickIndustry: 'Pilih Industri',
-    s1btn: 'Lanjut Input Metrik',
+    s1btn: 'Lanjut Input Metrics',
     eyebrow2: '// Data Input',
-    h2: 'Masukkan Metrik <em>Aktual</em>',
-    sub2: 'Isi dengan angka nyata. Status dot akan diperbarui secara real-time. Kosongkan jika data belum tersedia.',
-    runBtn: '▶ Jalankan Diagnosis',
-    backBtn: '← Kembali',
+    h2: 'Input Metrics <em>Aktual</em>',
+    sub2: 'Isi angka nyata. Status dot akan update real-time. Kosongkan kalau data belum ada.',
+    runBtn: '▶ Run Diagnosis',
+    backBtn: '← Balik',
     newDiag: '← Diagnosis Baru',
     gejala: 'Gejala',
     rootcause: 'Root Cause',
@@ -659,17 +845,17 @@ const T = {
     days2: '30–60 Hari',
     days3: '60–90 Hari',
     gateTitle: 'Gate Conditions — Kapan Boleh Scale',
-    verdictReady: 'Sistem Anda cukup stabil untuk scale. Monitor metrik setiap 30 hari.',
-    verdictNotReady: 'Jangan scale terlebih dahulu. Selesaikan system debt — scaling sekarang hanya memperbesar masalah.',
+    verdictReady: 'Sistem lo cukup stabil untuk scale. Monitor metrics tiap 30 hari.',
+    verdictNotReady: 'Jangan scale dulu. Selesaikan system debt — scaling sekarang hanya memperbesar masalah.',
     engineVerdict: 'ENGINE VERDICT',
     healthScore: 'Health Score',
     status: 'Status',
     coreSehat: 'Core Sehat',
     scalingGate: 'Scaling Gate',
     readyScale: '🚀 READY TO SCALE',
-    fixFirst: '✋ PERBAIKI DULU',
+    fixFirst: '✋ FIX DULU',
     breakdown: '4-Core Diagnosis Breakdown',
-    your: 'Anda',
+    your: 'Lo',
     target: 'Target',
     sehat: 'SEHAT',
     perluPerhatian: 'PERLU PERHATIAN',
@@ -775,6 +961,12 @@ const FORMS = {
       { id:'uptime',    label:'System uptime',          labelEn:'System uptime',        bench:'benchmark: >99%',   benchEn:'benchmark: >99%',  unit:'%',  unitEn:'%',  thresholds:[99,95],dir:'low'  },
       { id:'bug_rate',  label:'Bug rate per minggu',    labelEn:'Bug rate per week',    bench:'benchmark: <5',     benchEn:'benchmark: <5',    unit:'bug',unitEn:'bugs',thresholds:[5,15], dir:'high' },
     ]},
+    { section:'CORE 05 — Moat & AI Resilience', sectionEn:'CORE 05 — Moat & AI Resilience', fields:[
+      { id:'c5_data_depth',   label:'Proprietary data depth (0-10)',  labelEn:'Proprietary data depth (0-10)', bench:'benchmark: >7',     benchEn:'benchmark: >7',    unit:'/10',unitEn:'/10',thresholds:[7,4],  dir:'low'  },
+      { id:'c5_switching',    label:'Estimated switching cost (0-10)',labelEn:'Estimated switching cost (0-10)',bench:'benchmark: >7',     benchEn:'benchmark: >7',    unit:'/10',unitEn:'/10',thresholds:[7,4],  dir:'low'  },
+      { id:'c5_feedback_loop',label:'Feedback loop ke model (0-10)',  labelEn:'Feedback loop to model (0-10)', bench:'benchmark: >6',     benchEn:'benchmark: >6',    unit:'/10',unitEn:'/10',thresholds:[6,3],  dir:'low'  },
+      { id:'c5_network_effect',label:'Network effect score (0-10)',   labelEn:'Network effect score (0-10)',   bench:'benchmark: >5',     benchEn:'benchmark: >5',    unit:'/10',unitEn:'/10',thresholds:[5,2],  dir:'low'  },
+    ]},
   ],
   ecom: [
     { section:'CORE 01 — Systems Operasional', sectionEn:'CORE 01 — Operational Systems', fields:[
@@ -797,6 +989,12 @@ const FORMS = {
       { id:'automation_cov',label:'Automation coverage ops', labelEn:'Ops automation coverage', bench:'benchmark: >60%',   benchEn:'benchmark: >60%',   unit:'%',  unitEn:'%',  thresholds:[60,30],dir:'low'  },
       { id:'headcount_growth',label:'Ops headcount growth YoY',labelEn:'Ops headcount growth YoY',bench:'benchmark: <30%',benchEn:'benchmark: <30%',   unit:'%',  unitEn:'%',  thresholds:[30,50],dir:'high' },
     ]},
+    { section:'CORE 05 — Moat & AI Resilience', sectionEn:'CORE 05 — Moat & AI Resilience', fields:[
+      { id:'c5_data_depth',   label:'Data pelanggan proprietary (0-10)',labelEn:'Proprietary customer data (0-10)',bench:'benchmark: >7',  benchEn:'benchmark: >7',   unit:'/10',unitEn:'/10',thresholds:[7,4],  dir:'low'  },
+      { id:'c5_switching',    label:'Switching cost ke kompetitor (0-10)',labelEn:'Switching cost to competitor (0-10)',bench:'benchmark: >6',benchEn:'benchmark: >6', unit:'/10',unitEn:'/10',thresholds:[6,3],  dir:'low'  },
+      { id:'c5_feedback_loop',label:'Personalisasi berbasis data (0-10)',labelEn:'Data-driven personalization (0-10)',bench:'benchmark: >6', benchEn:'benchmark: >6',  unit:'/10',unitEn:'/10',thresholds:[6,3],  dir:'low'  },
+      { id:'c5_brand_moat',   label:'Brand equity / community (0-10)', labelEn:'Brand equity / community (0-10)',  bench:'benchmark: >6',  benchEn:'benchmark: >6',   unit:'/10',unitEn:'/10',thresholds:[6,3],  dir:'low'  },
+    ]},
   ],
   fintech: [
     { section:'CORE 01 — Systems Operasional', sectionEn:'CORE 01 — Operational Systems', fields:[
@@ -816,6 +1014,12 @@ const FORMS = {
     { section:'CORE 04 — Scaling Process', sectionEn:'CORE 04 — Scaling Process', fields:[
       { id:'cac_ltv_ft',    label:'CAC:LTV ratio (LTV/CAC)',labelEn:'CAC:LTV ratio (LTV/CAC)',bench:'benchmark: >1:3',  benchEn:'benchmark: >1:3',  unit:'x',   unitEn:'x',  thresholds:[3,2],  dir:'low'  },
       { id:'burn_rate',     label:'Burn rate vs revenue',   labelEn:'Burn rate vs revenue',  bench:'benchmark: <20%',   benchEn:'benchmark: <20%',  unit:'%',   unitEn:'%',  thresholds:[20,30],dir:'high' },
+    ]},
+    { section:'CORE 05 — Moat & AI Resilience', sectionEn:'CORE 05 — Moat & AI Resilience', fields:[
+      { id:'c5_data_depth',   label:'Data transaksi proprietary (0-10)',labelEn:'Proprietary transaction data (0-10)',bench:'benchmark: >8', benchEn:'benchmark: >8',  unit:'/10',unitEn:'/10',thresholds:[8,5],  dir:'low'  },
+      { id:'c5_switching',    label:'Regulatory switching barrier (0-10)',labelEn:'Regulatory switching barrier (0-10)',bench:'benchmark: >7',benchEn:'benchmark: >7', unit:'/10',unitEn:'/10',thresholds:[7,4],  dir:'low'  },
+      { id:'c5_feedback_loop',label:'Model improvement loop (0-10)',   labelEn:'Model improvement loop (0-10)',    bench:'benchmark: >6',  benchEn:'benchmark: >6',   unit:'/10',unitEn:'/10',thresholds:[6,3],  dir:'low'  },
+      { id:'c5_compliance_moat',label:'Compliance moat score (0-10)', labelEn:'Compliance moat score (0-10)',     bench:'benchmark: >7',  benchEn:'benchmark: >7',   unit:'/10',unitEn:'/10',thresholds:[7,4],  dir:'low'  },
     ]},
   ],
   fnb: [
@@ -837,6 +1041,12 @@ const FORMS = {
       { id:'cogs_ratio',    label:'COGS ratio dari revenue', labelEn:'COGS ratio of revenue', bench:'benchmark: <35%',   benchEn:'benchmark: <35%',   unit:'%',  unitEn:'%',  thresholds:[35,45],dir:'high' },
       { id:'table_turnover',label:'Table turnover/hari',     labelEn:'Table turnover/day',    bench:'benchmark: >2.5x',  benchEn:'benchmark: >2.5x',  unit:'x',  unitEn:'x',  thresholds:[2.5,1.5],dir:'low'},
     ]},
+    { section:'CORE 05 — Moat & AI Resilience', sectionEn:'CORE 05 — Moat & AI Resilience', fields:[
+      { id:'c5_data_depth',   label:'Data pelanggan & preferensi (0-10)',labelEn:'Customer & preference data (0-10)',bench:'benchmark: >5', benchEn:'benchmark: >5',  unit:'/10',unitEn:'/10',thresholds:[5,2],  dir:'low'  },
+      { id:'c5_switching',    label:'Keunikan produk / experience (0-10)',labelEn:'Product / experience uniqueness (0-10)',bench:'benchmark: >7',benchEn:'benchmark: >7',unit:'/10',unitEn:'/10',thresholds:[7,4],dir:'low'  },
+      { id:'c5_feedback_loop',label:'Feedback dari pelanggan (0-10)',  labelEn:'Customer feedback loop (0-10)',    bench:'benchmark: >5',  benchEn:'benchmark: >5',   unit:'/10',unitEn:'/10',thresholds:[5,2],  dir:'low'  },
+      { id:'c5_community',    label:'Komunitas / loyalitas lokal (0-10)',labelEn:'Community / local loyalty (0-10)', bench:'benchmark: >6',  benchEn:'benchmark: >6',  unit:'/10',unitEn:'/10',thresholds:[6,3],  dir:'low'  },
+    ]},
   ],
   health: [
     { section:'CORE 01 — Systems Operasional', sectionEn:'CORE 01 — Operational Systems', fields:[
@@ -857,6 +1067,12 @@ const FORMS = {
       { id:'revenue_per_patient',label:'Revenue per patient',labelEn:'Revenue per patient',   bench:'benchmark: >Rp 300k',benchEn:'benchmark: >300k IDR',unit:'rb IDR',unitEn:'k IDR',thresholds:[300,200],dir:'low'},
       { id:'occupancy_rate',label:'Occupancy / utilization', labelEn:'Occupancy / utilization',bench:'benchmark: >75%',  benchEn:'benchmark: >75%',   unit:'%',  unitEn:'%',  thresholds:[75,55],dir:'low'  },
     ]},
+    { section:'CORE 05 — Moat & AI Resilience', sectionEn:'CORE 05 — Moat & AI Resilience', fields:[
+      { id:'c5_data_depth',   label:'Data medis pasien proprietary (0-10)',labelEn:'Proprietary patient medical data (0-10)',bench:'benchmark: >7',benchEn:'benchmark: >7',unit:'/10',unitEn:'/10',thresholds:[7,4],dir:'low'  },
+      { id:'c5_switching',    label:'Trust & relationship barrier (0-10)',labelEn:'Trust & relationship barrier (0-10)',bench:'benchmark: >8',benchEn:'benchmark: >8', unit:'/10',unitEn:'/10',thresholds:[8,5],  dir:'low'  },
+      { id:'c5_feedback_loop',label:'Clinical outcome tracking (0-10)', labelEn:'Clinical outcome tracking (0-10)',  bench:'benchmark: >6',  benchEn:'benchmark: >6',  unit:'/10',unitEn:'/10',thresholds:[6,3],  dir:'low'  },
+      { id:'c5_compliance_moat',label:'Lisensi & compliance barrier (0-10)',labelEn:'License & compliance barrier (0-10)',bench:'benchmark: >8',benchEn:'benchmark: >8',unit:'/10',unitEn:'/10',thresholds:[8,5],dir:'low'  },
+    ]},
   ],
 };
 
@@ -866,8 +1082,8 @@ const DIAGNOSIS = {
       { num:'CORE 01', name:'Systems Operasional', nameEn:'Operational Systems', severity:'KRITIS', severityEn:'CRITICAL',
         gejala:'Onboarding user molor (7-10 hari), support ticket backlog >50/minggu, CSAT rendah.',
         gejalaEn:'User onboarding slow (7-10 days), support ticket backlog >50/week, low CSAT.',
-        rootCause:'Tidak ada SOP tertulis — sesetiap orang menangani dengan cara masing-masing, tanpa knowledge base.',
-        rootCauseEn:'No written SOPs — everyone handles differently, tanpa knowledge base.',
+        rootCause:'Tidak ada SOP tertulis — tiap orang handle dengan cara masing-masing, zero knowledge base.',
+        rootCauseEn:'No written SOPs — everyone handles differently, zero knowledge base.',
         metrics:[{label:'Onboarding time',fieldId:'onboarding_days',benchmarkText:'3–5 hari',benchmarkTextEn:'3–5 days',compare:'high'},
                  {label:'CSAT',fieldId:'csat',benchmarkText:'>80%',benchmarkTextEn:'>80%',compare:'low'},
                  {label:'Ticket backlog/minggu',fieldId:'support_tickets',benchmarkText:'<20',benchmarkTextEn:'<20',compare:'high'}],
@@ -892,7 +1108,7 @@ const DIAGNOSIS = {
       { num:'CORE 03', name:'Team & Execution', nameEn:'Team & Execution', severity:'SERIUS', severityEn:'SERIOUS',
         gejala:'Sprint berantakan (deadline miss >40%), founder jadi bottleneck semua keputusan.',
         gejalaEn:'Sprints chaotic (deadline miss >40%), founder bottleneck for all decisions.',
-        rootCause:'Prioritas berubah setiap minggu — tidak ada ritme kerja konsisten dan ownership matrix.',
+        rootCause:'Prioritas berubah tiap minggu — tidak ada ritme kerja konsisten dan ownership matrix.',
         rootCauseEn:'Priorities shift weekly — no consistent work rhythm and ownership matrix.',
         metrics:[{label:'Founder ops hours/minggu',fieldId:'founder_ops',benchmarkText:'<20 jam',benchmarkTextEn:'<20 hrs',compare:'high'},
                  {label:'Sprint completion rate',fieldId:'sprint_completion',benchmarkText:'>80%',benchmarkTextEn:'>80%',compare:'low'}],
@@ -902,7 +1118,7 @@ const DIAGNOSIS = {
         soluziEn:'Weekly execution rhythm + task ownership matrix + async protocol + decision log.',
       },
       { num:'CORE 04', name:'Scaling Process', nameEn:'Scaling Process', severity:'KRITIS', severityEn:'CRITICAL',
-        gejala:'Ingin scale namun sistem bermasalah, technical debt menumpuk, bug rate tinggi.',
+        gejala:'Mau scale tapi sistem jobol, technical debt menumpuk, bug rate tinggi.',
         gejalaEn:'Want to scale but system breaks, technical debt accumulates, high bug rate.',
         rootCause:'Scale sebelum proses stabil — growth pressure mengalahkan system readiness.',
         rootCauseEn:'Scaling before processes stabilize — growth pressure overcomes system readiness.',
@@ -912,6 +1128,24 @@ const DIAGNOSIS = {
         warningEn:'Scaling with uptime <95% = every new user is additional burden, not revenue.',
         solusi:'System readiness checklist sebelum ekspansi + automation audit + dedicated debt sprint.',
         soluziEn:'System readiness checklist before expansion + automation audit + dedicated debt sprint.',
+      },
+      { num:'CORE 05', name:'Moat & AI Resilience', nameEn:'Moat & AI Resilience', severity:'KRITIS', severityEn:'CRITICAL',
+        gejala:'Produk lo bisa digantikan Claude/GPT-5 + RAG dalam 12-18 bulan. Tidak ada data yang hanya bisa lo kumpulkan. User tidak rugi apapun kalau switch ke kompetitor.',
+        gejalaEn:'Your product could be replaced by Claude/GPT-5 + RAG within 12-18 months. No data that only you can collect. Users lose nothing by switching to competitors.',
+        rootCause:'Bisnis dibangun di atas feature, bukan data moat. Tidak ada feedback loop yang mengakumulasi keunggulan kompetitif dari waktu ke waktu.',
+        rootCauseEn:'Business built on features, not data moat. No feedback loop accumulating competitive advantage over time.',
+        context:'Di 2026-2028, setiap SaaS yang tidak punya proprietary data loop akan menghadapi dua ancaman: (1) AI native competitors yang bisa build feature yang sama dalam minggu, (2) Big Tech yang masuk dengan bundle pricing. Satu-satunya pertahanan adalah data yang hanya bisa lo akumulasi dari operasi lo sendiri.',
+        contextEn:'In 2026-2028, every SaaS without a proprietary data loop will face two threats: (1) AI-native competitors who can build the same features in weeks, (2) Big Tech entering with bundle pricing. The only defense is data that only you can accumulate from your own operations.',
+        metrics:[{label:'Proprietary data depth',fieldId:'c5_data_depth',benchmarkText:'>7/10',benchmarkTextEn:'>7/10',compare:'low'},
+                 {label:'Switching cost',fieldId:'c5_switching',benchmarkText:'>7/10',benchmarkTextEn:'>7/10',compare:'low'},
+                 {label:'Feedback loop ke model',fieldId:'c5_feedback_loop',benchmarkText:'>6/10',benchmarkTextEn:'>6/10',compare:'low'},
+                 {label:'Network effect',fieldId:'c5_network_effect',benchmarkText:'>5/10',benchmarkTextEn:'>5/10',compare:'low'}],
+        warning:'SaaS dengan AI substitution risk HIGH dan data depth <4/10 tidak akan bertahan sampai 2027 tanpa reposisi.',
+        warningEn:'SaaS with HIGH AI substitution risk and data depth <4/10 will not survive until 2027 without repositioning.',
+        anticipasi:'12 bulan ke depan: jika data moat tidak dibangun sekarang, margin akan tertekan oleh AI-native competitors yang charge 10x lebih murah. 18 bulan: investor akan mempertanyakan defensibility. 24 bulan: disintermediation risk menjadi nyata.',
+        anticipasiEn:'12 months ahead: without data moat built now, margins will be pressured by AI-native competitors charging 10x less. 18 months: investors will question defensibility. 24 months: disintermediation risk becomes real.',
+        solusi:'Bangun 1 proprietary data stream dari operasi lo: outcome tracking per user action + closed-loop feedback ke model + network effect design (setiap user baru meningkatkan nilai untuk user lama).',
+        soluziEn:'Build 1 proprietary data stream from your operations: outcome tracking per user action + closed-loop feedback to model + network effect design (every new user increases value for existing users).',
       }
     ],
     roadmap: {
@@ -937,7 +1171,7 @@ const DIAGNOSIS = {
       { num:'CORE 01', name:'Systems Operasional', nameEn:'Operational Systems', severity:'SERIUS', severityEn:'SERIOUS',
         gejala:'Fulfillment delay tinggi, CS overload, return rate naik di atas 10%.',
         gejalaEn:'High fulfillment delays, CS overload, return rate above 10%.',
-        rootCause:'Proses order-to-ship tanpa single source of truth — setiap channel sistem sendiri.',
+        rootCause:'Proses order-to-ship tanpa single source of truth — tiap channel sistem sendiri.',
         rootCauseEn:'Order-to-ship process without single source of truth — each channel runs its own system.',
         metrics:[{label:'Order-to-ship time',fieldId:'order_to_ship',benchmarkText:'<24 jam',benchmarkTextEn:'<24 hrs',compare:'high'},
                  {label:'Return rate',fieldId:'return_rate',benchmarkText:'5–10%',benchmarkTextEn:'5–10%',compare:'high'},
@@ -950,12 +1184,12 @@ const DIAGNOSIS = {
       { num:'CORE 02', name:'Customer & Marketing', nameEn:'Customer & Marketing', severity:'SERIUS', severityEn:'SERIOUS',
         gejala:'Repeat purchase <15%, ROAS makin mahal, LTV tidak pernah dihitung.',
         gejalaEn:'Repeat purchase <15%, ROAS increasing, LTV never calculated.',
-        rootCause:'Fokus akuisisi terus — tanpa retention system yang berjalan otomatis.',
+        rootCause:'Fokus akuisisi terus — zero retention system yang berjalan otomatis.',
         rootCauseEn:'Perpetual acquisition focus — zero automated retention system.',
         metrics:[{label:'Repeat purchase rate',fieldId:'repeat_purchase',benchmarkText:'30–40%',benchmarkTextEn:'30–40%',compare:'low'},
                  {label:'ROAS',fieldId:'roas',benchmarkText:'>3.5x',benchmarkTextEn:'>3.5x',compare:'low'},
                  {label:'CAC:LTV ratio',fieldId:'cac_ltv',benchmarkText:'>1:3',benchmarkTextEn:'>1:3',compare:'low'}],
-        warning:'CAC:LTV <1:2 = setiap customer yang Anda akuisisi merugi. Scaling akan memperbesar kerugian.',
+        warning:'CAC:LTV <1:2 = setiap customer yang lo akuisisi merugi. Scaling memperbesar kerugian.',
         warningEn:'CAC:LTV <1:2 = every acquired customer is unprofitable. Scaling amplifies losses.',
         solusi:'Post-purchase journey + loyalty trigger + win-back automation per segment.',
         soluziEn:'Post-purchase journey + loyalty triggers + win-back automation per segment.',
@@ -973,7 +1207,7 @@ const DIAGNOSIS = {
         soluziEn:'Cross-team SOP + metric-based daily standup + real-time shared KPI dashboard.',
       },
       { num:'CORE 04', name:'Scaling Process', nameEn:'Scaling Process', severity:'SERIUS', severityEn:'SERIOUS',
-        gejala:'Menambah channel tapi margin tipis (<15%), tim exhausted.',
+        gejala:'Nambah channel tapi margin tipis (<15%), tim exhausted.',
         gejalaEn:'Adding channels but thin margins (<15%), team exhausted.',
         rootCause:'Automation belum jalan — scale = tambah headcount, bukan efisiensi.',
         rootCauseEn:'Automation not running — scaling = adding headcount, not efficiency.',
@@ -983,6 +1217,24 @@ const DIAGNOSIS = {
         warningEn:'New channels with margin <15% without automation audit = guaranteed margin compression.',
         solusi:'Automation audit + margin threshold gate + channel profitability matrix per SKU.',
         soluziEn:'Automation audit + margin threshold gate + channel profitability matrix per SKU.',
+      },
+      { num:'CORE 05', name:'Moat & AI Resilience', nameEn:'Moat & AI Resilience', severity:'SERIUS', severityEn:'SERIOUS',
+        gejala:'Product yang sama bisa ditemukan di marketplace lain. Tidak ada data pelanggan yang dimanfaatkan untuk personalisasi. Brand tidak punya komunitas yang tidak bisa diiklan-in.',
+        gejalaEn:'Same product found elsewhere. No customer data leveraged for personalization. Brand has no community that cannot be bought with ads.',
+        rootCause:'Bisnis dibangun di atas channel, bukan relasi. Data transaksi dikumpulkan tapi tidak dipakai untuk build competitive advantage.',
+        rootCauseEn:'Business built on channels, not relationships. Transaction data collected but not used to build competitive advantage.',
+        context:'E-commerce di 2026-2028 akan terbagi dua: mereka yang punya customer data loop yang kuat (personalisasi, prediction, retention otomatis) dan mereka yang hanya price-compete. ROAS akan terus naik untuk yang kedua. Yang pertama akan menikmati CAC yang makin turun seiring waktu.',
+        contextEn:'E-commerce in 2026-2028 will split into two: those with strong customer data loops (personalization, prediction, automated retention) and those who only price-compete. ROAS will keep rising for the latter. The former will enjoy declining CAC over time.',
+        metrics:[{label:'Data pelanggan proprietary',fieldId:'c5_data_depth',benchmarkText:'>7/10',benchmarkTextEn:'>7/10',compare:'low'},
+                 {label:'Switching cost ke kompetitor',fieldId:'c5_switching',benchmarkText:'>6/10',benchmarkTextEn:'>6/10',compare:'low'},
+                 {label:'Personalisasi berbasis data',fieldId:'c5_feedback_loop',benchmarkText:'>6/10',benchmarkTextEn:'>6/10',compare:'low'},
+                 {label:'Brand equity / community',fieldId:'c5_brand_moat',benchmarkText:'>6/10',benchmarkTextEn:'>6/10',compare:'low'}],
+        warning:'E-commerce tanpa brand moat atau data loop yang kuat akan kalah dari marketplace aggregator AI dalam 18 bulan.',
+        warningEn:'E-commerce without brand moat or strong data loop will lose to AI marketplace aggregators within 18 months.',
+        anticipasi:'6 bulan: AI-powered price comparison akan makin agresif — tanpa brand moat, lo hanya bisa compete di harga. 12 bulan: personalized recommendation dari kompetitor yang punya data lebih baik akan outperform lo. 18 bulan: channel CAC naik 30-50% tanpa data-driven retention.',
+        anticipasiEn:'6 months: AI-powered price comparison gets more aggressive — without brand moat, you only compete on price. 12 months: competitor personalized recommendations with better data will outperform. 18 months: channel CAC rises 30-50% without data-driven retention.',
+        solusi:'Bangun 1st-party data strategy: post-purchase survey sistematis + preference tracking + community layer (private group, loyalty tier). Setiap interaksi harus generate data yang meningkatkan prediksi next purchase.',
+        soluziEn:'Build 1st-party data strategy: systematic post-purchase surveys + preference tracking + community layer (private group, loyalty tiers). Every interaction must generate data that improves next purchase prediction.',
       }
     ],
     roadmap: {
@@ -1034,7 +1286,7 @@ const DIAGNOSIS = {
       { num:'CORE 03', name:'Team & Execution', nameEn:'Team & Execution', severity:'PERLU', severityEn:'ATTENTION',
         gejala:'Tim remote susah dimonitor, output tidak konsisten, meeting overload.',
         gejalaEn:'Remote team hard to monitor, inconsistent output, meeting overload.',
-        rootCause:'KPI sudah ada namun tidak cascade ke daily behavior — OKR tidak terhubung ke task harian.',
+        rootCause:'KPI ada tapi tidak cascade ke daily behavior — OKR tidak nyambung ke task harian.',
         rootCauseEn:'KPIs exist but don\'t cascade to daily behavior — OKRs disconnected from daily tasks.',
         metrics:[{label:'Ops overtime/minggu',fieldId:'ops_overtime',benchmarkText:'<10 jam',benchmarkTextEn:'<10 hrs',compare:'high'},
                  {label:'OKR achievement rate',fieldId:'okr_achievement',benchmarkText:'>70%',benchmarkTextEn:'>70%',compare:'low'}],
@@ -1044,7 +1296,7 @@ const DIAGNOSIS = {
         soluziEn:'OKR-to-daily-task cascade + output-based discipline OS + async-first protocol.',
       },
       { num:'CORE 04', name:'Scaling Process', nameEn:'Scaling Process', severity:'KRITIS', severityEn:'CRITICAL',
-        gejala:'Investor menuntut growth namun unit economics belum sehat, tim mengalami burnout.',
+        gejala:'Investor minta growth tapi unit economics belum sehat, tim burnout.',
         gejalaEn:'Investors demand growth but unit economics unhealthy, team burned out.',
         rootCause:'Pressure eksternal lebih kuat dari kesiapan internal — scaling roadmap tidak berbasis data.',
         rootCauseEn:'External pressure stronger than internal readiness — scaling roadmap not data-driven.',
@@ -1054,6 +1306,24 @@ const DIAGNOSIS = {
         warningEn:'CAC:LTV <1:2 + burn rate up 30% = runway shortened with no guarantee of improving unit economics.',
         solusi:'Scaling roadmap berbasis CAC:LTV + burn rate gate + team capacity planning per sprint.',
         soluziEn:'CAC:LTV-based scaling roadmap + burn rate gate + team capacity planning per sprint.',
+      },
+      { num:'CORE 05', name:'Moat & AI Resilience', nameEn:'Moat & AI Resilience', severity:'KRITIS', severityEn:'CRITICAL',
+        gejala:'Model credit scoring atau underwriting bisa direplikasi kompetitor dengan data publik. Tidak ada data behavioral unik yang terakumulasi. Compliance adalah cost center, bukan moat.',
+        gejalaEn:'Credit scoring or underwriting model replicable by competitors with public data. No unique behavioral data accumulated. Compliance is a cost center, not a moat.',
+        rootCause:'Fintech dibangun di atas regulasi dan akses modal, bukan data moat yang unik. Regulatory compliance dilihat sebagai beban, bukan sebagai barrier entry yang harus diperkuat.',
+        rootCauseEn:'Fintech built on regulation and capital access, not unique data moat. Regulatory compliance seen as burden, not as entry barrier to strengthen.',
+        context:'Fintech di 2026-2028 menghadapi dua tekanan: (1) Big Bank yang mulai deploy AI lebih agresif dengan data transaksi 10-20 tahun, (2) AI-native fintech baru yang build di atas foundation model tanpa legacy infrastructure. Satu-satunya pertahanan yang sustainable adalah data behavioral unik yang terakumulasi dari user journey.',
+        contextEn:'Fintech in 2026-2028 faces two pressures: (1) Big Banks deploying AI more aggressively with 10-20 years of transaction data, (2) AI-native fintechs built on foundation models without legacy infrastructure. The only sustainable defense is unique behavioral data accumulated from user journeys.',
+        metrics:[{label:'Data transaksi proprietary',fieldId:'c5_data_depth',benchmarkText:'>8/10',benchmarkTextEn:'>8/10',compare:'low'},
+                 {label:'Regulatory switching barrier',fieldId:'c5_switching',benchmarkText:'>7/10',benchmarkTextEn:'>7/10',compare:'low'},
+                 {label:'Model improvement loop',fieldId:'c5_feedback_loop',benchmarkText:'>6/10',benchmarkTextEn:'>6/10',compare:'low'},
+                 {label:'Compliance moat',fieldId:'c5_compliance_moat',benchmarkText:'>7/10',benchmarkTextEn:'>7/10',compare:'low'}],
+        warning:'Fintech dengan data moat <5/10 dan AI substitution risk HIGH akan di-squeeze oleh Big Bank AI dan neo-fintech dalam 24 bulan.',
+        warningEn:'Fintech with data moat <5/10 and HIGH AI substitution risk will be squeezed by Big Bank AI and neo-fintechs within 24 months.',
+        anticipasi:'12 bulan: OJK/BI akan perketat regulasi AI di fintech — yang compliance-ready akan dapat advantage. 18 bulan: Big Bank akan launch AI advisory product yang langsung compete dengan lo. 24 bulan: neo-fintech dengan better data loop akan menawarkan rate 20-30% lebih kompetitif.',
+        anticipasiEn:'12 months: OJK/BI will tighten AI regulation in fintech — compliance-ready will gain advantage. 18 months: Big Banks will launch AI advisory products competing directly with you. 24 months: neo-fintechs with better data loops will offer 20-30% more competitive rates.',
+        solusi:'Jadikan compliance sebagai moat: dokumentasikan setiap data point yang hanya bisa lo kumpulkan dari posisi lo (behavioral, transactional, contextual). Build model yang makin baik seiring data bertambah — bukan model yang statis.',
+        soluziEn:'Turn compliance into moat: document every data point only you can collect from your position (behavioral, transactional, contextual). Build models that improve as data grows — not static models.',
       }
     ],
     roadmap: {
@@ -1079,7 +1349,7 @@ const DIAGNOSIS = {
       { num:'CORE 01', name:'Systems Operasional', nameEn:'Operational Systems', severity:'SERIUS', severityEn:'SERIOUS',
         gejala:'Service lambat, food waste tinggi, stok sering tidak sinkron.',
         gejalaEn:'Slow service, high food waste, stock frequently out of sync.',
-        rootCause:'Tidak ada SOP standar per item/shift — setiap staf menangani dengan cara yang berbeda-beda.',
+        rootCause:'Tidak ada SOP standar per item/shift — tiap staff handle berbeda-beda.',
         rootCauseEn:'No standard SOP per item/shift — each staff handles differently.',
         metrics:[{label:'Service time',fieldId:'service_time',benchmarkText:'<10 mnt',benchmarkTextEn:'<10 min',compare:'high'},
                  {label:'Food waste rate',fieldId:'waste_rate',benchmarkText:'<5%',benchmarkTextEn:'<5%',compare:'high'},
@@ -1115,7 +1385,7 @@ const DIAGNOSIS = {
         soluziEn:'Visual training manual + 5-minute daily briefing + weekly quality check per station.',
       },
       { num:'CORE 04', name:'Scaling Process', nameEn:'Scaling Process', severity:'SERIUS', severityEn:'SERIOUS',
-        gejala:'Ingin membuka cabang tapi margin tipis, table turnover rendah.',
+        gejala:'Mau buka cabang tapi margin tipis, table turnover rendah.',
         gejalaEn:'Want to open branches but thin margins, low table turnover.',
         rootCause:'Unit economics belum proven di outlet pertama — scale akan multiplikasi masalah.',
         rootCauseEn:'Unit economics not proven at first outlet — scaling will multiply problems.',
@@ -1123,8 +1393,26 @@ const DIAGNOSIS = {
                  {label:'Table turnover/hari',fieldId:'table_turnover',benchmarkText:'>2.5x',benchmarkTextEn:'>2.5x',compare:'low'}],
         warning:'COGS >45% + table turnover <1.5x = outlet belum profitable secara struktural.',
         warningEn:'COGS >45% + table turnover <1.5x = outlet not structurally profitable.',
-        solusi:'Menu engineering — kurangi SKU, tingkatkan margin SKU unggulan. Fix unit economics terlebih dahulu.',
+        solusi:'Menu engineering — kurangi SKU, tingkatkan margin SKU unggulan. Fix unit economics dulu.',
         soluziEn:'Menu engineering — reduce SKUs, increase margin on hero items. Fix unit economics first.',
+      },
+      { num:'CORE 05', name:'Moat & AI Resilience', nameEn:'Moat & AI Resilience', severity:'PERLU', severityEn:'ATTENTION',
+        gejala:'Menu mudah ditiru. Tidak ada data preferensi pelanggan yang dimanfaatkan. Brand hanya dikenal karena lokasi, bukan karena experience yang tidak bisa direplikasi.',
+        gejalaEn:'Menu easily replicated. No customer preference data leveraged. Brand only known for location, not unreplicable experience.',
+        rootCause:'F&B dijalankan secara operasional tapi tidak ada sistem yang mengakumulasi pengetahuan tentang pelanggan dari waktu ke waktu.',
+        rootCauseEn:'F&B run operationally but no system accumulates customer knowledge over time.',
+        context:'F&B di 2026-2028 menghadapi dua ancaman: (1) Ghost kitchen dan delivery-only brand yang compete di harga dengan overhead lebih rendah, (2) AI-powered recommendation di delivery platform yang akan prioritaskan vendor dengan data lebih baik. F&B yang survive adalah yang punya community moat atau experience yang tidak bisa di-deliver platform.',
+        contextEn:'F&B in 2026-2028 faces two threats: (1) Ghost kitchens and delivery-only brands competing on price with lower overhead, (2) AI-powered recommendations on delivery platforms prioritizing vendors with better data. F&B that survives has community moat or experience undeliverable by platforms.',
+        metrics:[{label:'Data pelanggan & preferensi',fieldId:'c5_data_depth',benchmarkText:'>5/10',benchmarkTextEn:'>5/10',compare:'low'},
+                 {label:'Keunikan produk / experience',fieldId:'c5_switching',benchmarkText:'>7/10',benchmarkTextEn:'>7/10',compare:'low'},
+                 {label:'Feedback dari pelanggan',fieldId:'c5_feedback_loop',benchmarkText:'>5/10',benchmarkTextEn:'>5/10',compare:'low'},
+                 {label:'Komunitas / loyalitas lokal',fieldId:'c5_community',benchmarkText:'>6/10',benchmarkTextEn:'>6/10',compare:'low'}],
+        warning:'Kedai tanpa community moat atau signature experience unik akan tergerus delivery platform algorithm dalam 12-18 bulan.',
+        warningEn:'Outlets without community moat or unique signature experience will be eroded by delivery platform algorithms within 12-18 months.',
+        anticipasi:'6 bulan: delivery platform akan push commission lebih tinggi — tanpa community off-platform, lo tidak punya leverage. 12 bulan: ghost kitchen kompetitor akan offer harga 20-30% lebih murah dengan menu serupa. 18 bulan: AI recommendation di platform akan deprioritisasi outlet dengan review data lemah.',
+        anticipasiEn:'6 months: delivery platforms will push higher commissions — without off-platform community, you have no leverage. 12 months: competitor ghost kitchens will offer 20-30% cheaper prices with similar menus. 18 months: platform AI recommendations will deprioritize outlets with weak review data.',
+        solusi:'Bangun community yang tidak bisa diambil platform: WhatsApp loyal customer group + signature item yang hanya ada di sini + offline experience yang tidak bisa di-delivery. Mulai kumpulkan data preferensi pelanggan via loyalty card atau digital order history.',
+        soluziEn:'Build community platforms cannot take: WhatsApp loyal customer group + signature item only here + offline experience undeliverable. Start collecting customer preference data via loyalty card or digital order history.',
       }
     ],
     roadmap: {
@@ -1188,7 +1476,7 @@ const DIAGNOSIS = {
       { num:'CORE 04', name:'Scaling Process', nameEn:'Scaling Process', severity:'SERIUS', severityEn:'SERIOUS',
         gejala:'Revenue per pasien rendah, occupancy tidak optimal.',
         gejalaEn:'Low revenue per patient, occupancy not optimized.',
-        rootCause:'Tidak ada strategi service bundling — setiap kunjungan diperlakukan sama.',
+        rootCause:'Tidak ada strategi service bundling — tiap kunjungan diperlakukan sama.',
         rootCauseEn:'No service bundling strategy — every visit treated the same.',
         metrics:[{label:'Revenue per patient',fieldId:'revenue_per_patient',benchmarkText:'>Rp 300k',benchmarkTextEn:'>300k IDR',compare:'low'},
                  {label:'Occupancy rate',fieldId:'occupancy_rate',benchmarkText:'>75%',benchmarkTextEn:'>75%',compare:'low'}],
@@ -1196,6 +1484,24 @@ const DIAGNOSIS = {
         warningEn:'Occupancy <55% with fixed overhead = break-even point increasingly difficult.',
         solusi:'Service bundling + preventive care packages + occupancy optimization per time slot.',
         soluziEn:'Service bundling + preventive care packages + occupancy optimization per time slot.',
+      },
+      { num:'CORE 05', name:'Moat & AI Resilience', nameEn:'Moat & AI Resilience', severity:'PERLU', severityEn:'ATTENTION',
+        gejala:'Layanan standar yang bisa ditemukan di klinik lain. Tidak ada sistem yang merekam dan memanfaatkan data kesehatan longitudinal pasien. Dokter adalah moat-nya, bukan sistem.',
+        gejalaEn:'Standard services findable at other clinics. No system recording and leveraging longitudinal patient health data. Doctors are the moat, not the system.',
+        rootCause:'Healthcare dijalankan berbasis protokol medis tapi tidak ada data infrastructure yang mengakumulasi insight dari ribuan pasien menjadi keunggulan klinis.',
+        rootCauseEn:'Healthcare run on medical protocols but no data infrastructure accumulating insights from thousands of patients into clinical advantages.',
+        context:'Healthcare di 2026-2028 akan berubah fundamental: AI diagnostic tools akan tersedia untuk semua klinik. Moat bukan lagi akses ke teknologi, tapi data longitudinal pasien + trust relationship yang tidak bisa di-disrupt oleh app baru. Klinik yang invest di patient data infrastructure sekarang akan punya keunggulan yang semakin besar.',
+        contextEn:'Healthcare in 2026-2028 will fundamentally change: AI diagnostic tools available to all clinics. Moat is no longer technology access, but longitudinal patient data + trust relationships that no new app can disrupt. Clinics investing in patient data infrastructure now will have growing advantages.',
+        metrics:[{label:'Data medis pasien proprietary',fieldId:'c5_data_depth',benchmarkText:'>7/10',benchmarkTextEn:'>7/10',compare:'low'},
+                 {label:'Trust & relationship barrier',fieldId:'c5_switching',benchmarkText:'>8/10',benchmarkTextEn:'>8/10',compare:'low'},
+                 {label:'Clinical outcome tracking',fieldId:'c5_feedback_loop',benchmarkText:'>6/10',benchmarkTextEn:'>6/10',compare:'low'},
+                 {label:'Lisensi & compliance barrier',fieldId:'c5_compliance_moat',benchmarkText:'>8/10',benchmarkTextEn:'>8/10',compare:'low'}],
+        warning:'Klinik yang bergantung pada 1-2 dokter kunci tanpa sistem data adalah klinik yang satu resignation letter dari collapse.',
+        warningEn:'Clinics relying on 1-2 key doctors without data systems are one resignation letter from collapse.',
+        anticipasi:'6 bulan: telemedicine platform akan mulai compete langsung untuk konsultasi primer. 12 bulan: AI diagnostic tool akan tersedia gratis untuk semua klinik — diferensiasi bukan lagi teknologi. 18 bulan: klinik dengan patient data longitudinal terbaik akan bisa offer predictive health program yang premium.',
+        anticipasiEn:'6 months: telemedicine platforms will start competing directly for primary consultations. 12 months: AI diagnostic tools available free to all clinics — differentiation no longer technology. 18 months: clinics with best longitudinal patient data will offer premium predictive health programs.',
+        solusi:'Bangun patient data infrastructure: rekam medis digital terpusat + outcome tracking per treatment + longitudinal health monitoring untuk pasien kronis. Trust adalah moat terkuat — sistem lo harus memperkuat trust, bukan menggantikan relasi dokter-pasien.',
+        soluziEn:'Build patient data infrastructure: centralized digital medical records + outcome tracking per treatment + longitudinal health monitoring for chronic patients. Trust is the strongest moat — your system must strengthen doctor-patient relationships, not replace them.',
       }
     ],
     roadmap: {
@@ -1270,25 +1576,25 @@ function toggleAgentic(idx, el) {
 
 // ─── BENCHMARK HINTS ─────────────────────────────────────────
 const BENCH_HINTS = {
-  onboarding_days: { id:'Onboarding Anda {v} hari → benchmark SaaS 2026: 3–5 hari. {d}', en:'Your onboarding: {v} days → 2026 SaaS benchmark: 3–5 days. {d}',
+  onboarding_days: { id:'Onboarding lo {v} hari → benchmark SaaS 2026: 3–5 hari. {d}', en:'Your onboarding: {v} days → 2026 SaaS benchmark: 3–5 days. {d}',
     ok:'✓ On target. Good friction control.', warn:'⚠ 1.4–2x slower. Churn risk +12%.', bad:'⚡ {m}x slower than benchmark. Churn risk +22%. Immediate fix needed.' },
-  csat: { id:'CSAT Anda {v}% → benchmark: >80%. {d}', en:'Your CSAT: {v}% → benchmark: >80%. {d}',
+  csat: { id:'CSAT lo {v}% → benchmark: >80%. {d}', en:'Your CSAT: {v}% → benchmark: >80%. {d}',
     ok:'✓ Above benchmark. Strong support ops.', warn:'⚠ Below threshold. 1 in 5 users dissatisfied.', bad:'⚡ Critical. High churn correlation.' },
   support_tickets: { id:'Backlog {v} tiket/minggu → benchmark: <20. {d}', en:'{v} tickets/week → benchmark: <20. {d}',
     ok:'✓ Under control.', warn:'⚠ Scaling warning — CS team approaching capacity.', bad:'⚡ Overflow risk. Team burnout likely.' },
-  trial_paid: { id:'Trial-to-paid Anda {v}% → benchmark: >20%. {d}', en:'Your trial-to-paid: {v}% → benchmark: >20%. {d}',
+  trial_paid: { id:'Trial-to-paid lo {v}% → benchmark: >20%. {d}', en:'Your trial-to-paid: {v}% → benchmark: >20%. {d}',
     ok:'✓ Strong conversion.', warn:'⚠ Needs improvement. Check activation flow.', bad:'⚡ Below floor. Unit economics broken at scale.' },
-  churn: { id:'Churn Anda {v}%/bln → benchmark: 3–5%. {d}', en:'Your monthly churn: {v}% → benchmark: 3–5%. {d}',
+  churn: { id:'Churn lo {v}%/bln → benchmark: 3–5%. {d}', en:'Your monthly churn: {v}% → benchmark: 3–5%. {d}',
     ok:'✓ Healthy retention.', warn:'⚠ Watch trend. Improve activation.', bad:'⚡ Leaky bucket. CAC will never recover.' },
   founder_ops: { id:'Lo habis {v} jam/minggu di ops → benchmark: <20 jam. {d}', en:'You spend {v} hrs/week on ops → benchmark: <20 hrs. {d}',
     ok:'✓ Good delegation.', warn:'⚠ Bottleneck forming. Start delegating now.', bad:'⚡ Founder = single point of failure.' },
-  sprint_completion: { id:'Sprint completion Anda {v}% → benchmark: >80%. {d}', en:'Your sprint completion: {v}% → benchmark: >80%. {d}',
+  sprint_completion: { id:'Sprint completion lo {v}% → benchmark: >80%. {d}', en:'Your sprint completion: {v}% → benchmark: >80%. {d}',
     ok:'✓ Strong execution rhythm.', warn:'⚠ Priorities unclear or scope creep.', bad:'⚡ Execution broken. Roadmap at risk.' },
   uptime: { id:'System uptime {v}% → benchmark: >99%. {d}', en:'System uptime: {v}% → benchmark: >99%. {d}',
     ok:'✓ Reliable infrastructure.', warn:'⚠ SLA risk. Track incident patterns.', bad:'⚡ Every downtime minute = lost revenue + churn.' },
   repeat_purchase: { id:'Repeat purchase {v}% → benchmark: 30–40%. {d}', en:'Repeat purchase: {v}% → benchmark: 30–40%. {d}',
     ok:'✓ Loyal customer base.', warn:'⚠ Retention needs work.', bad:'⚡ Acquisition-only mode = unsustainable CAC.' },
-  roas: { id:'ROAS Anda {v}x → benchmark: >3.5x. {d}', en:'Your ROAS: {v}x → benchmark: >3.5x. {d}',
+  roas: { id:'ROAS lo {v}x → benchmark: >3.5x. {d}', en:'Your ROAS: {v}x → benchmark: >3.5x. {d}',
     ok:'✓ Efficient spend.', warn:'⚠ Margin squeeze. Optimize creative/targeting.', bad:'⚡ Losing money on ads. Pause & audit.' },
 };
 
@@ -1384,7 +1690,7 @@ function runDiagnosis() {
   const totalTriggered = coreScores.reduce((a,b) => a+b.triggered, 0);
   const totalMetrics   = coreScores.reduce((a,b) => a+b.total, 0);
   const healthScore    = totalMetrics > 0 ? Math.round((1 - totalTriggered/totalMetrics)*100) : 50;
-  const warningCount   = coreScores.filter(s => s.triggered > 0).length;
+  const warningCount   = coreScores.filter(s => s.triggered > 0).length; // now 5 cores
 
   let overallStatus = t('sehat'), overallColor = 'healthy';
   if (healthScore < 50)      { overallStatus = t('kritis');        overallColor = 'critical'; }
@@ -1398,7 +1704,7 @@ function runDiagnosis() {
   let html = `
     <div class="result-header">
       <h2>${ind.icon} ${lang==='id'?'Diagnosis Result':'Diagnosis Result'} — ${indLabel}</h2>
-      <p>${new Date().toLocaleDateString(lang==='id'?'id-ID':'en-US',{day:'numeric',month:'long',year:'numeric'})} · CocoBlast OS Framework 2025 · Ferry Hidayanto</p>
+      <p>${new Date().toLocaleDateString(lang==='id'?'id-ID':'en-US',{day:'numeric',month:'long',year:'numeric'})} · CocoBlast OS Framework 2026 · Ferry Hidayanto</p>
     </div>
 
     <div class="score-block">
@@ -1416,7 +1722,7 @@ function runDiagnosis() {
         <div class="score-label">${lang==='id'?'Triggered':'Triggered'}</div>
       </div>
       <div class="score-card">
-        <div class="score-val">${4-warningCount}</div>
+        <div class="score-val">${5-warningCount}</div>
         <div class="score-label">${t('coreSehat')}</div>
       </div>
       <div class="score-card" style="border-color:${gateReady?'var(--ok)':'var(--danger)'}">
@@ -1429,8 +1735,25 @@ function runDiagnosis() {
       <strong>${t('engineVerdict')}:</strong> ${gateReady?t('verdictReady'):t('verdictNotReady')}
     </div>
 
+
     <div class="divider"></div>
-    <div class="section-label"><span>02</span> — ${t('breakdown')}</div>
+    <div class="section-label"><span>01</span> — <span id="aiSectionLabel">AI INTELLIGENCE — CLAUDE ANALYSIS</span> <span class="tag" style="margin-left:8px;background:var(--accent);color:#000">LIVE</span></div>
+    <div class="ai-panel" id="aiIntelPanel">
+      <div class="ai-panel-header">
+        <span class="ai-panel-tag">// CocoBlast OS × Claude Sonnet</span>
+        <span class="ai-panel-badge" id="aiModelBadge">claude-sonnet-4-20250514</span>
+      </div>
+      <div id="aiIntelBody">
+        <div class="ai-loading">
+          <div class="ai-loading-dots"><span></span><span></span><span></span></div>
+          <span id="aiLoadingText">Menganalisis metrik bisnis lo...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label"><span>02</span> — ${lang==='id'?'5-CORE DIAGNOSIS BREAKDOWN':'5-CORE DIAGNOSIS BREAKDOWN'}</div>
+
   `;
 
   diag.cores.forEach((core, i) => {
@@ -1470,7 +1793,15 @@ function runDiagnosis() {
       });
       html += `</div>`;
     }
+    if (core.context) {
+      const ctx = lang === 'id' ? core.context : core.contextEn;
+      html += `<div class="context-box"><div class="context-box-title">📍 ${lang==='id'?'KONTEKS 2026-2028':'CONTEXT 2026-2028'}</div><p>${ctx}</p></div>`;
+    }
     if (hasIssues) html += `<div class="warning-box">⚡ ${warning}</div>`;
+    if (core.anticipasi) {
+      const ant = lang === 'id' ? core.anticipasi : core.anticipasiEn;
+      html += `<div class="anticipasi-box"><div class="anticipasi-box-title">🔮 ${lang==='id'?'ANTISIPASI — Jika Tidak Difix':'ANTICIPATION — If Not Fixed'}</div><p>${ant}</p></div>`;
+    }
     html += `<div class="solution-box"><div class="solution-box-title">✓ ${t('solusi')}</div><p>${solusi}</p></div>
         </div>
       </div>`;
@@ -1488,19 +1819,19 @@ function runDiagnosis() {
   const moatScore = Math.round((proprietary.score * 0.4) + (agScore/5*100 * 0.35) + (riskLevel==='low'?90:riskLevel==='med'?50:15) * 0.25);
   const moatColor = moatScore>=70?'var(--ok)':moatScore>=45?'var(--warn)':'var(--danger)';
   const killerThreat = riskLevel==='high'
-    ? (lang==='id'?'⚡ Dapat ditiru oleh Claude/GPT-5 + RAG dalam &lt;6 bulan. Zero switching cost untuk user.':'⚡ Copyable by Claude/GPT-5 + RAG in &lt;6 months. Zero switching cost for users.')
+    ? (lang==='id'?'⚡ Bisa di-copy oleh Claude/GPT-5 + RAG dalam &lt;6 bulan. Zero switching cost untuk user.':'⚡ Copyable by Claude/GPT-5 + RAG in &lt;6 months. Zero switching cost for users.')
     : riskLevel==='med'
-    ? (lang==='id'?'⚠ Potensi disintermediation dalam 12–18 bulan jika tidak membangun proprietary data Andaop.':'⚠ Potential disintermediation in 12–18 months without proprietary data Andaop.')
+    ? (lang==='id'?'⚠ Potensi disintermediation dalam 12–18 bulan jika tidak membangun proprietary data loop.':'⚠ Potential disintermediation in 12–18 months without proprietary data loop.')
     : (lang==='id'?'✓ Posisi defensibel. Fokus perluas data moat + agentic infrastructure.':'✓ Defensible position. Focus on expanding data moat + agentic infrastructure.');
   const boostAction = riskLevel==='high'
-    ? (lang==='id'?'→ Prioritas 30 hari: Identifikasi 1 data stream yang hanya ada di sistem Anda. Buat feedback loop dari output ke model.':'→ 30-day priority: Identify 1 data stream unique to your system. Build output-to-model feedback loop.')
+    ? (lang==='id'?'→ Prioritas 30 hari: Identifikasi 1 data stream yang hanya ada di sistem lo. Buat feedback loop dari output ke model.':'→ 30-day priority: Identify 1 data stream unique to your system. Build output-to-model feedback loop.')
     : riskLevel==='med'
-    ? (lang==='id'?'→ Bangun outcome tracking — catat hasil dari setiap interaksi user. Data ini yang bikin Anda tidak dapat ditiru.':'→ Build outcome tracking — log results from every user interaction. This data makes you uncopyable.')
-    : (lang==='id'?'→ Dokumentasikan data moat Anda. Buat investor narrative: "Setelah 12 bulan, kami punya X data points yang tidak bisa dibeli."':'→ Document your data moat. Build investor narrative: "After 12 months, we have X data points that cannot be purchased."');
+    ? (lang==='id'?'→ Bangun outcome tracking — catat hasil dari setiap interaksi user. Data ini yang bikin lo tidak bisa di-copy.':'→ Build outcome tracking — log results from every user interaction. This data makes you uncopyable.')
+    : (lang==='id'?'→ Dokumentasikan data moat lo. Buat investor narrative: "Setelah 12 bulan, kami punya X data points yang tidak bisa dibeli."':'→ Document your data moat. Build investor narrative: "After 12 months, we have X data points that cannot be purchased."');
 
   html += `
     <div class="divider"></div>
-    <div class="section-label"><span>03</span> — 🛡️ ${lang==='id'?'MOAT SCORE & AI RISK ANALYSIS':'MOAT SCORE & AI RISK ANALYSIS'} <span class="tag" style="margin-left:8px">Core 05</span></div>
+    <div class="section-label"><span>04</span> — 🛡️ ${lang==='id'?'MOAT SCORE & AI RISK ANALYSIS':'MOAT SCORE & AI RISK ANALYSIS'} <span class="tag" style="margin-left:8px">Core 05</span></div>
     <div class="moat-panel">
       <div class="moat-panel-header">
         <div class="moat-panel-title">🛡️ Moat Score <span>CORE 05 — DEFENSIBILITY</span></div>
@@ -1530,7 +1861,7 @@ function runDiagnosis() {
 
   html += `
     <div class="divider"></div>
-    <div class="section-label"><span>04</span> — ${t('roadmap')} <span class="tag" style="margin-left:8px">Engine Generated</span></div>
+    <div class="section-label"><span>05</span> — ${t('roadmap')} <span class="tag" style="margin-left:8px">Engine Generated</span></div>
     <div class="roadmap-phases">
       <div class="phase-col">
         <div class="phase-label">${t('phase1')}</div>
@@ -1562,13 +1893,188 @@ function runDiagnosis() {
     </div>
 
     <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.8">
-      CocoBlast OS Startup Diagnosis Framework 2025 · Ferry Hidayanto · Systems Thinking for Bootstrapped Founders<br>
+      CocoBlast OS Startup Diagnosis Framework 2026 · Ferry Hidayanto · Systems Thinking for Bootstrapped Founders<br>
       "Data doesn't lie. Systems don't break. People execute."
     </div>
   `;
 
   document.getElementById('resultsContainer').innerHTML = html;
   showStep(3);
+
+  // Trigger Claude AI analysis after template is rendered
+  const agScore = agenticChecked.filter(Boolean).length;
+  callClaudeAI({
+    cores: diag.cores,
+    coreScores,
+    healthScore,
+    overallStatus,
+    totalTriggered,
+    indLabel,
+    gateReady,
+    riskLevel: selectedRisk || 'med',
+    agScore,
+  });
+}
+
+
+// ─── CLAUDE AI INTELLIGENCE ───────────────────────────────────
+async function callClaudeAI(diagData) {
+  const aiBody = document.getElementById('aiIntelBody');
+  const loadingText = document.getElementById('aiLoadingText');
+
+  // Build context string from all triggered metrics
+  const triggeredSummary = diagData.coreScores.map((cs, i) => {
+    const core = diagData.cores[i];
+    const name = lang === 'id' ? core.name : core.nameEn;
+    if (cs.triggeredMetrics.length === 0) return `${core.num} ${name}: SEHAT (0 metric triggered)`;
+    const metrics = cs.triggeredMetrics.map(m =>
+      `${m.label}: ${m.your}${m.unit} (target: ${m.bench})`
+    ).join(', ');
+    return `${core.num} ${name}: ${cs.triggered}/${cs.total} metric triggered — ${metrics}`;
+  }).join('\n');
+
+  const moatCtx = diagData.riskLevel === 'low' ? 'AI Substitution Risk: LOW — Moat kuat'
+    : diagData.riskLevel === 'med' ? 'AI Substitution Risk: MEDIUM — Perlu diperkuat'
+    : 'AI Substitution Risk: HIGH — Sangat rentan digantikan AI';
+
+  const agScore = diagData.agScore;
+
+  const isId = lang === 'id';
+
+  const systemPrompt = isId
+    ? `Kamu adalah CocoBlast OS — sistem diagnosa bisnis yang dibangun oleh Ferry Hidayanto dari Jember, Indonesia. 
+Filosofi: "Systems Over Specs. Profit Over Funding. Data Over Intuition."
+Tone: direct, blunt, practitioner — bukan konsultan akademik. Bahasa hybrid Indonesia-Inggris yang natural.
+JANGAN gunakan: bullet points berlebihan, jargon kosong, kata "leverage", "synergy", "holistic".
+Output HARUS dalam JSON dengan format yang ditentukan.`
+    : `You are CocoBlast OS — a business diagnosis system built by Ferry Hidayanto from Jember, Indonesia.
+Philosophy: "Systems Over Specs. Profit Over Funding. Data Over Intuition."
+Tone: direct, blunt, practitioner — not an academic consultant. Natural language.
+NEVER use: excessive bullet points, empty jargon, words like "leverage", "synergy", "holistic".
+Output MUST be in JSON with the specified format.`;
+
+  const userPrompt = isId
+    ? `Bisnis ini sedang diaudit dengan CocoBlast OS 5-Core Framework.
+
+INDUSTRI: ${diagData.indLabel}
+HEALTH SCORE: ${diagData.healthScore}%
+STATUS: ${diagData.overallStatus}
+TOTAL METRIC TRIGGERED: ${diagData.totalTriggered}
+SCALING GATE: ${diagData.gateReady ? 'READY' : 'BELUM SIAP — FIX DULU'}
+
+DETAIL 5-CORE BREAKDOWN:
+${triggeredSummary}
+
+CORE 05 — MOAT & AI RESILIENCE:
+${moatCtx}
+Agentic Readiness: ${agScore}/5 signals
+
+Berdasarkan data di atas, berikan diagnosis dalam format JSON berikut:
+{
+  "executive_summary": "2-3 kalimat ringkasan diagnosis yang jujur dan spesifik berdasarkan angka aktual. Sebutkan angka konkret. Jangan generik.",
+  "killer_risk": {
+    "title": "Nama risiko terbesar dalam 5-7 kata",
+    "description": "2-3 kalimat penjelasan mengapa ini adalah #1 ancaman yang akan membunuh bisnis ini dalam 12 bulan jika tidak difix. Spesifik ke metrik yang ada.",
+    "timeline": "Kapan tepatnya ini akan jadi krisis jika dibiarkan (contoh: '6-8 bulan lagi jika...')"
+  },
+  "custom_insight": "1-2 kalimat insight yang HANYA bisa ditemukan dari melihat kombinasi semua metrik ini secara bersamaan — sesuatu yang tidak obvious dari melihat satu metric saja. Ini adalah nilai tambah AI analysis."
+}`
+    : `This business is being audited with the CocoBlast OS 5-Core Framework.
+
+INDUSTRY: ${diagData.indLabel}
+HEALTH SCORE: ${diagData.healthScore}%
+STATUS: ${diagData.overallStatus}
+TOTAL METRICS TRIGGERED: ${diagData.totalTriggered}
+SCALING GATE: ${diagData.gateReady ? 'READY' : 'NOT READY — FIX FIRST'}
+
+5-CORE BREAKDOWN DETAILS:
+${triggeredSummary}
+
+CORE 05 — MOAT & AI RESILIENCE:
+${moatCtx}
+Agentic Readiness: ${agScore}/5 signals
+
+Based on the data above, provide diagnosis in the following JSON format:
+{
+  "executive_summary": "2-3 sentence honest and specific diagnosis summary based on actual numbers. Cite concrete numbers. Don't be generic.",
+  "killer_risk": {
+    "title": "Name of the biggest risk in 5-7 words",
+    "description": "2-3 sentences explaining why this is the #1 threat that will kill this business within 12 months if not fixed. Specific to the metrics present.",
+    "timeline": "When exactly this will become a crisis if ignored (e.g., '6-8 months if...')"
+  },
+  "custom_insight": "1-2 sentence insight that can ONLY be found by looking at the combination of ALL these metrics simultaneously — something not obvious from any single metric. This is the added value of AI analysis."
+}`;
+
+  try {
+    const ANTHROPIC_KEY = 'GANTI_DENGAN_API_KEY_LO'; // sk-ant-...
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    if (!resp.ok) {
+      throw new Error(`API error: ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const raw = data.content?.[0]?.text || '';
+
+    // Parse JSON — strip markdown fences if present
+    let parsed;
+    try {
+      const clean = raw.replace(/```json|```/g, '').trim();
+      parsed = JSON.parse(clean);
+    } catch(e) {
+      throw new Error('JSON parse failed');
+    }
+
+    // Render the AI panel
+    const summaryLabel = isId ? 'EXECUTIVE SUMMARY' : 'EXECUTIVE SUMMARY';
+    const killerLabel  = isId ? '⚡ KILLER RISK #1 — ANCAMAN TERBESAR 12 BULAN' : '⚡ KILLER RISK #1 — BIGGEST THREAT 12 MONTHS';
+    const insightLabel = isId ? '🔍 CUSTOM INSIGHT — HANYA DARI KOMBINASI METRIK INI' : '🔍 CUSTOM INSIGHT — ONLY FROM THIS METRIC COMBINATION';
+    const timelineLabel = isId ? 'Timeline jika dibiarkan:' : 'Timeline if ignored:';
+    const aiSectionLabel = isId ? 'AI INTELLIGENCE — ANALISIS CLAUDE' : 'AI INTELLIGENCE — CLAUDE ANALYSIS';
+    document.getElementById('aiSectionLabel').textContent = aiSectionLabel;
+
+    aiBody.innerHTML = `
+      <div class="ai-panel-body">
+        <div style="margin-bottom:18px">
+          <div class="custom-insight-label" style="color:var(--accent)">${summaryLabel}</div>
+          <div class="exec-summary">${parsed.executive_summary}</div>
+        </div>
+
+        <div class="killer-risk-box">
+          <div class="killer-risk-label">⚡ ${killerLabel}</div>
+          <div class="killer-risk-content"><strong>${parsed.killer_risk.title}</strong><br><br>${parsed.killer_risk.description}</div>
+          <div class="killer-risk-timeline">${timelineLabel} ${parsed.killer_risk.timeline}</div>
+        </div>
+
+        <div class="custom-insight-box">
+          <div class="custom-insight-label">${insightLabel}</div>
+          <div class="custom-insight-content">${parsed.custom_insight}</div>
+        </div>
+      </div>
+    `;
+
+  } catch(err) {
+    // Graceful fallback — don't break the whole page
+    const errMsg = isId
+      ? 'AI analysis tidak tersedia saat ini. Template diagnosis di bawah tetap akurat.'
+      : 'AI analysis unavailable right now. Template diagnosis below remains accurate.';
+    aiBody.innerHTML = `<div class="ai-error-box">// ${errMsg}</div>`;
+    console.error('Claude API error:', err);
+  }
 }
 
 // ─── UTILS ────────────────────────────────────────────────────
@@ -1616,7 +2122,7 @@ function applyLangAiRisk() {
     document.getElementById('riskMedLabel').textContent = 'MEDIUM';
     document.getElementById('riskMedDesc').textContent = 'API wrapper + some unique data. Copyable, but needs 6–12 months of effort.';
     document.getElementById('riskHighLabel').textContent = 'HIGH';
-    document.getElementById('riskHighDesc').textContent = 'Feature-only, tanpa data unik. Replicable by LLM in <1 hour of prompt engineering.';
+    document.getElementById('riskHighDesc').textContent = 'Feature-only, no unique data. Replicable by LLM in <1 hour of prompt engineering.';
     document.getElementById('agenticLabel').textContent = 'Agentic Readiness';
     document.getElementById('agenticHeader').textContent = 'AGENTIC READINESS — AI-NATIVE INFRASTRUCTURE';
     document.getElementById('agenticDesc').textContent = 'Check all that currently exist in your system:';
@@ -1630,19 +2136,19 @@ function applyLangAiRisk() {
     document.getElementById('aiRiskHeader').textContent = 'AI SUBSTITUTION RISK — CORE 05 MOAT INPUT';
     document.getElementById('aiRiskDesc').textContent = 'Seberapa mudah bisnis ini bisa digantikan oleh Claude/GPT-5 + RAG dalam 6–18 bulan ke depan?';
     document.getElementById('riskLowLabel').textContent = 'LOW';
-    document.getElementById('riskLowDesc').textContent = 'Data proprietary + closed-loop feedback. Moat kuat. LLM tidak dapat mereplikasi tanpa data Anda.';
+    document.getElementById('riskLowDesc').textContent = 'Data proprietary + closed-loop feedback. Moat kuat. LLM tidak bisa replicate tanpa data lo.';
     document.getElementById('riskMedLabel').textContent = 'MEDIUM';
-    document.getElementById('riskMedDesc').textContent = 'API wrapper + beberapa data unik. Dapat ditiru, namun membutuhkan 6–12 bulan upaya.';
+    document.getElementById('riskMedDesc').textContent = 'API wrapper + beberapa data unik. Bisa di-copy, tapi butuh 6–12 bulan effort.';
     document.getElementById('riskHighLabel').textContent = 'HIGH';
-    document.getElementById('riskHighDesc').textContent = 'Feature-only, tanpa data unik. Dapat ditiru LLM dalam <1 jam prompt engineering.';
+    document.getElementById('riskHighDesc').textContent = 'Feature-only, no unique data. Bisa di-copy LLM dalam <1 jam prompt engineering.';
     document.getElementById('agenticLabel').textContent = 'Agentic Readiness';
     document.getElementById('agenticHeader').textContent = 'AGENTIC READINESS — INFRASTRUKTUR AI-NATIVE';
-    document.getElementById('agenticDesc').textContent = 'Centang semua yang sudah ada di sistem Anda sekarang:';
+    document.getElementById('agenticDesc').textContent = 'Centang semua yang sudah ada di sistem lo sekarang:';
     document.getElementById('ag0').textContent = 'Event-driven architecture (trigger otomatis berdasarkan event)';
     document.getElementById('ag1').textContent = 'Real-time dashboard operasional (bukan laporan manual)';
-    document.getElementById('ag2').textContent = 'Task audit log otomatis (semua aksi tercatat + dapat diaudit)';
-    document.getElementById('ag3').textContent = 'External action trigger (notifikasi, API call, atau workflow dipicu oleh data)';
-    document.getElementById('ag4').textContent = 'Feedback loop ke model/sistem (data pengguna digunakan untuk meningkatkan output)';
+    document.getElementById('ag2').textContent = 'Task audit log otomatis (semua aksi tercatat + bisa di-audit)';
+    document.getElementById('ag3').textContent = 'External action trigger (notif, API call, atau workflow dipicu oleh data)';
+    document.getElementById('ag4').textContent = 'Feedback loop ke model/sistem (data pengguna dipakai improve output)';
   }
 }
 </script>

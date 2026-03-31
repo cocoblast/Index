@@ -2,4 +2,1651 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CocoBlast ENGINE v6 — AI-Native Startup Health OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<style>
+:root {
+  --bg: #070709;
+  --surface: #0d0d12;
+  --surface2: #13131a;
+  --surface3: #1a1a24;
+  --border: #1e1e2a;
+  --border2: #282836;
+  --accent: #ff5500;
+  --accent2: #ff8c42;
+  --accent-dim: rgba(255,85,0,0.1);
+  --accent-glow: rgba(255,85,0,0.25);
+  --danger: #ff3040;
+  --danger-dim: rgba(255,48,64,0.12);
+  --warn: #ffbe00;
+  --warn-dim: rgba(255,190,0,0.1);
+  --ok: #00d97e;
+  --ok-dim: rgba(0,217,126,0.1);
+  --text: #e8e8f0;
+  --text2: #9898b0;
+  --muted: #44445a;
+  --mono: 'IBM Plex Mono', monospace;
+  --display: 'Barlow Condensed', sans-serif;
+  --body: 'Barlow', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,85,0,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,85,0,0.015) 1px, transparent 1px);
+  background-size: 48px 48px;
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 1; opacity: 0.4;
+}
+
+/* HEADER */
+.header {
+  position: sticky; top: 0; z-index: 900;
+  background: rgba(7,7,9,0.96);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px; height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo {
+  font-family: var(--mono); font-size: 11px; color: var(--accent);
+  letter-spacing: 2px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 8px;
+}
+.logo-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)} }
+.logo-version {
+  font-size: 9px; color: var(--muted); letter-spacing: 1px;
+  border: 1px solid var(--border2); padding: 2px 6px;
+}
+.header-nav {
+  display: flex; align-items: center; gap: 4px;
+}
+.nav-btn {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer; padding: 6px 14px;
+  border: 1px solid transparent; color: var(--muted);
+  background: none; transition: all 0.2s; position: relative;
+}
+.nav-btn:hover { color: var(--text2); }
+.nav-btn.active { color: var(--accent); border-color: var(--border2); background: var(--surface); }
+.nav-btn.active::after {
+  content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
+  height: 2px; background: var(--accent);
+}
+.header-right { display: flex; align-items: center; gap: 8px; }
+.lang-toggle {
+  font-family: var(--mono); font-size: 9px; cursor: pointer;
+  border: 1px solid var(--border2); padding: 4px 10px;
+  color: var(--muted); transition: all 0.2s; letter-spacing: 1px;
+  background: none;
+}
+.lang-toggle:hover { color: var(--accent); border-color: var(--accent); }
+.settings-btn {
+  font-family: var(--mono); font-size: 10px; cursor: pointer;
+  border: 1px solid var(--border2); padding: 4px 10px;
+  color: var(--muted); transition: all 0.2s;
+  background: none; letter-spacing: 1px;
+}
+.settings-btn:hover { color: var(--text2); border-color: var(--border2); }
+
+/* VIEWS */
+.view { display: none; max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; position: relative; z-index: 2; }
+.view.active { display: block; animation: fadeUp 0.35s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center; padding: 80px 24px;
+}
+.empty-state-icon { font-size: 48px; margin-bottom: 24px; opacity: 0.3; }
+.empty-state h2 { font-family: var(--display); font-size: 32px; font-weight: 800; text-transform: uppercase; margin-bottom: 12px; }
+.empty-state p { font-family: var(--mono); font-size: 11px; color: var(--text2); margin-bottom: 28px; line-height: 1.8; }
+
+/* PRIORITY CARD (hero) */
+.priority-card {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-top: 3px solid var(--accent);
+  padding: 28px 32px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.priority-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at top left, var(--accent-glow), transparent 60%);
+  pointer-events: none;
+}
+.priority-card-eyebrow {
+  font-family: var(--mono); font-size: 9px; color: var(--accent);
+  letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.priority-card-eyebrow::before { content:''; display:block; width:20px; height:1px; background:var(--accent); }
+.priority-card-title {
+  font-family: var(--display); font-size: clamp(32px, 5vw, 52px);
+  font-weight: 900; text-transform: uppercase; line-height: 1;
+  margin-bottom: 8px;
+}
+.priority-card-title em { font-style: normal; color: var(--accent); }
+.priority-card-context {
+  font-family: var(--mono); font-size: 11px; color: var(--text2);
+  margin-bottom: 20px; line-height: 1.7; max-width: 540px;
+}
+.priority-action {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-left: 3px solid var(--accent);
+  padding: 12px 16px; margin-bottom: 20px;
+}
+.priority-action-label {
+  font-family: var(--mono); font-size: 9px; color: var(--accent);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px;
+}
+.priority-action-text {
+  font-family: var(--body); font-size: 14px; color: var(--text);
+  font-weight: 500; line-height: 1.5;
+}
+.priority-card-footer {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.badge {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
+  text-transform: uppercase; padding: 4px 10px; border-radius: 2px;
+}
+.badge-critical { background: var(--danger-dim); color: var(--danger); border: 1px solid rgba(255,48,64,0.3); }
+.badge-warn { background: var(--warn-dim); color: var(--warn); border: 1px solid rgba(255,190,0,0.3); }
+.badge-ok { background: var(--ok-dim); color: var(--ok); border: 1px solid rgba(0,217,126,0.3); }
+.badge-accent { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(255,85,0,0.3); }
+.btn-spar {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer; padding: 8px 18px;
+  border: 1px solid var(--accent); color: var(--accent); background: none;
+  transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+}
+.btn-spar:hover { background: var(--accent); color: var(--bg); }
+
+/* 5 CORES GRID */
+.cores-label {
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  letter-spacing: 3px; text-transform: uppercase;
+  margin-bottom: 12px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.cores-label::before { content: ''; width: 16px; height: 1px; background: var(--muted); }
+.cores-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px; margin-bottom: 24px;
+}
+@media (max-width: 700px) { .cores-grid { grid-template-columns: repeat(2, 1fr); } }
+.core-mini {
+  background: var(--surface); border: 1px solid var(--border2);
+  padding: 16px; transition: border-color 0.2s; cursor: default;
+}
+.core-mini:hover { border-color: var(--border2); }
+.core-mini-num {
+  font-family: var(--mono); font-size: 8px; color: var(--muted);
+  letter-spacing: 1px; margin-bottom: 8px;
+}
+.core-mini-name {
+  font-family: var(--display); font-size: 13px; font-weight: 700;
+  text-transform: uppercase; margin-bottom: 12px; color: var(--text2);
+  letter-spacing: 0.5px;
+}
+.core-mini-score {
+  font-family: var(--mono); font-size: 28px; font-weight: 700;
+  line-height: 1; margin-bottom: 4px;
+}
+.core-mini-score span { font-size: 10px; color: var(--muted); }
+.core-mini-indicator {
+  font-family: var(--mono); font-size: 8px; letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.core-mini-metric {
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  line-height: 1.5; border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px;
+}
+
+/* CRITICAL RISKS */
+.risks-section { margin-bottom: 24px; }
+.risk-item {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--danger);
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  display: flex; align-items: center; gap: 16px;
+}
+.risk-item.warn { border-left-color: var(--warn); }
+.risk-icon { font-size: 16px; flex-shrink: 0; }
+.risk-body { flex: 1; }
+.risk-name {
+  font-family: var(--mono); font-size: 10px; color: var(--text);
+  letter-spacing: 0.5px; margin-bottom: 3px;
+}
+.risk-detail {
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+}
+.risk-value {
+  font-family: var(--mono); font-size: 13px; font-weight: 700;
+  color: var(--danger); flex-shrink: 0;
+  text-align: right;
+}
+.risk-value.warn { color: var(--warn); }
+
+/* ROADMAP SECTION */
+.roadmap-section {
+  background: var(--surface); border: 1px solid var(--border2);
+  padding: 24px 28px; margin-bottom: 24px;
+}
+.roadmap-title {
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  letter-spacing: 3px; text-transform: uppercase;
+  margin-bottom: 20px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.roadmap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media (max-width: 600px) { .roadmap-grid { grid-template-columns: 1fr; } }
+.roadmap-phase {}
+.roadmap-phase-label {
+  font-family: var(--mono); font-size: 9px; color: var(--accent);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
+}
+.roadmap-phase-text {
+  font-family: var(--body); font-size: 13px; color: var(--text2);
+  line-height: 1.6;
+}
+
+/* WINS SECTION */
+.wins-section {
+  background: var(--ok-dim); border: 1px solid rgba(0,217,126,0.2);
+  padding: 16px 20px; margin-bottom: 24px;
+  display: none;
+}
+.wins-section.visible { display: block; }
+.wins-title {
+  font-family: var(--mono); font-size: 9px; color: var(--ok);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px;
+}
+.wins-items { display: flex; flex-wrap: wrap; gap: 8px; }
+.win-chip {
+  font-family: var(--mono); font-size: 9px; color: var(--ok);
+  background: rgba(0,217,126,0.08); border: 1px solid rgba(0,217,126,0.2);
+  padding: 4px 10px;
+}
+
+/* SNAPSHOT META */
+.snapshot-meta {
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  margin-bottom: 24px; display: flex; align-items: center; gap: 16px;
+  padding: 10px 16px; background: var(--surface); border: 1px solid var(--border);
+}
+.snapshot-meta span { display: flex; align-items: center; gap: 6px; }
+
+/* ── INPUT VIEW ─────────────────────────────────── */
+.input-hero { margin-bottom: 36px; }
+.input-hero h1 {
+  font-family: var(--display); font-size: clamp(40px, 8vw, 72px);
+  font-weight: 900; text-transform: uppercase; line-height: 0.95;
+  letter-spacing: -0.5px; margin-bottom: 16px;
+}
+.input-hero h1 em { font-style: normal; color: var(--accent); }
+.input-hero p {
+  font-family: var(--mono); font-size: 11px; color: var(--text2);
+  line-height: 1.8; max-width: 480px;
+}
+.input-tabs { display: flex; gap: 2px; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+.input-tab {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  padding: 10px 20px; cursor: pointer; color: var(--muted); border: none;
+  background: none; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: all 0.2s;
+}
+.input-tab:hover { color: var(--text2); }
+.input-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.input-tab-content { display: none; }
+.input-tab-content.active { display: block; animation: fadeUp 0.3s ease; }
+
+/* CSV DROP ZONE */
+.csv-template-btn {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer; padding: 8px 18px;
+  border: 1px solid var(--border2); color: var(--text2); background: none;
+  transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 20px;
+}
+.csv-template-btn:hover { border-color: var(--accent); color: var(--accent); }
+.drop-zone {
+  border: 2px dashed var(--border2); padding: 48px 32px;
+  text-align: center; cursor: pointer; transition: all 0.25s;
+  background: var(--surface); position: relative;
+}
+.drop-zone:hover, .drop-zone.drag-over {
+  border-color: var(--accent); background: var(--accent-dim);
+}
+.drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.drop-icon { font-size: 32px; margin-bottom: 16px; opacity: 0.4; }
+.drop-title { font-family: var(--display); font-size: 24px; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+.drop-sub { font-family: var(--mono); font-size: 10px; color: var(--text2); line-height: 1.7; }
+.drop-sub strong { color: var(--accent); }
+
+/* CSV PREVIEW */
+.csv-preview {
+  background: var(--surface); border: 1px solid var(--ok);
+  padding: 20px; margin-top: 20px; display: none;
+}
+.csv-preview.visible { display: block; }
+.preview-title {
+  font-family: var(--mono); font-size: 9px; color: var(--ok);
+  letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;
+}
+.preview-rows { overflow-x: auto; }
+.preview-table {
+  font-family: var(--mono); font-size: 10px; border-collapse: collapse; width: 100%;
+}
+.preview-table th {
+  text-align: left; padding: 6px 10px; color: var(--muted);
+  border-bottom: 1px solid var(--border2); white-space: nowrap;
+}
+.preview-table td {
+  padding: 6px 10px; color: var(--text2);
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.preview-actions { margin-top: 16px; display: flex; gap: 10px; }
+.btn-primary {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer; padding: 10px 24px;
+  border: none; background: var(--accent); color: var(--bg);
+  transition: all 0.2s;
+}
+.btn-primary:hover { background: var(--accent2); }
+.btn-secondary {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+  text-transform: uppercase; cursor: pointer; padding: 10px 20px;
+  border: 1px solid var(--border2); color: var(--muted); background: none;
+  transition: all 0.2s;
+}
+.btn-secondary:hover { border-color: var(--text2); color: var(--text2); }
+
+/* SHEETS TAB */
+.sheets-instruction {
+  background: var(--surface); border: 1px solid var(--border2);
+  padding: 20px 24px; margin-bottom: 20px;
+}
+.sheets-step {
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-bottom: 14px; font-family: var(--mono); font-size: 11px; color: var(--text2);
+  line-height: 1.6;
+}
+.sheets-step-num {
+  font-family: var(--mono); font-size: 9px; color: var(--accent);
+  background: var(--accent-dim); border: 1px solid rgba(255,85,0,0.3);
+  width: 20px; height: 20px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.sheets-input-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.sheets-url-input {
+  flex: 1; background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--mono); font-size: 11px;
+  padding: 10px 14px; outline: none; transition: border-color 0.2s;
+}
+.sheets-url-input:focus { border-color: var(--accent); }
+.sheets-url-input::placeholder { color: var(--muted); }
+.sheets-service-account {
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 12px 16px; font-family: var(--mono); font-size: 10px;
+  color: var(--muted); line-height: 1.7; margin-top: 16px;
+}
+.sheets-service-account strong { color: var(--accent); }
+
+/* MANUAL TAB */
+.manual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+@media (max-width: 600px) { .manual-grid { grid-template-columns: 1fr; } }
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+.field-label {
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.field-label .required { color: var(--accent); margin-left: 3px; }
+.field-input {
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--mono); font-size: 12px;
+  padding: 10px 14px; outline: none; transition: border-color 0.2s; width: 100%;
+}
+.field-input:focus { border-color: var(--accent); }
+.field-input::placeholder { color: var(--muted); }
+.field-select {
+  background: var(--surface); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--mono); font-size: 12px;
+  padding: 10px 14px; outline: none; width: 100%; cursor: pointer;
+  transition: border-color 0.2s; appearance: none;
+}
+.field-select:focus { border-color: var(--accent); }
+.field-hint { font-family: var(--mono); font-size: 9px; color: var(--muted); line-height: 1.6; }
+.manual-section-title {
+  font-family: var(--mono); font-size: 9px; color: var(--muted);
+  letter-spacing: 3px; text-transform: uppercase;
+  grid-column: 1 / -1; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.manual-section-title::before { content: ''; width: 12px; height: 1px; background: var(--muted); }
+
+/* ERROR TOAST */
+.error-toast {
+  font-family: var(--mono); font-size: 10px;
+  background: var(--danger-dim); border: 1px solid rgba(255,48,64,0.3);
+  color: var(--danger); padding: 12px 16px; margin-top: 12px; display: none;
+}
+.error-toast.visible { display: block; }
+
+/* MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(7,7,9,0.9);
+  backdrop-filter: blur(8px); z-index: 950; display: none;
+  align-items: center; justify-content: center; padding: 24px;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-top: 3px solid var(--accent); width: 100%; max-width: 620px;
+  max-height: 80vh; overflow-y: auto;
+  animation: fadeUp 0.25s ease;
+}
+.modal-header {
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-family: var(--display); font-size: 20px; font-weight: 800; text-transform: uppercase; }
+.modal-close {
+  font-family: var(--mono); font-size: 16px; cursor: pointer;
+  color: var(--muted); background: none; border: none; padding: 4px 8px;
+}
+.modal-close:hover { color: var(--text); }
+.modal-body { padding: 24px; }
+.modal-context-block {
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 14px 16px; margin-bottom: 20px;
+}
+.modal-context-label { font-family: var(--mono); font-size: 8px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+.modal-context-content { font-family: var(--mono); font-size: 10px; color: var(--text2); line-height: 1.7; }
+.modal-prompt-area {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--mono); font-size: 11px;
+  padding: 12px; resize: vertical; min-height: 80px; outline: none;
+  margin-bottom: 12px; line-height: 1.6;
+}
+.modal-prompt-area:focus { border-color: var(--accent); }
+.modal-response {
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 16px; min-height: 80px; font-family: var(--body); font-size: 13px;
+  color: var(--text2); line-height: 1.7; white-space: pre-wrap;
+  display: none; margin-top: 16px;
+}
+.modal-response.visible { display: block; }
+.modal-api-key-row {
+  display: flex; gap: 8px; margin-bottom: 16px; align-items: center;
+}
+.modal-api-key-row input {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text2); font-family: var(--mono); font-size: 10px;
+  padding: 8px 12px; outline: none;
+}
+.modal-api-key-row input:focus { border-color: var(--accent); }
+.modal-api-key-label { font-family: var(--mono); font-size: 9px; color: var(--muted); white-space: nowrap; }
+.loading-dots { display: none; }
+.loading-dots.visible { display: inline-flex; gap: 4px; }
+.loading-dot { width: 5px; height: 5px; background: var(--accent); border-radius: 50%; animation: dotBounce 1.2s ease infinite; }
+.loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.loading-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotBounce { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+
+/* SETTINGS PANEL */
+.settings-panel {
+  position: fixed; top: 52px; right: 0; width: 300px;
+  background: var(--surface); border-left: 1px solid var(--border2);
+  border-bottom: 1px solid var(--border2);
+  padding: 20px; z-index: 850; display: none;
+  animation: slideLeft 0.2s ease;
+  box-shadow: -16px 16px 48px rgba(0,0,0,0.5);
+}
+.settings-panel.open { display: block; }
+@keyframes slideLeft { from{opacity:0;transform:translateX(10px)} to{opacity:1;transform:translateX(0)} }
+.settings-title { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+.settings-field { margin-bottom: 14px; }
+.settings-field label { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 1px; display: block; margin-bottom: 6px; }
+.settings-field input {
+  width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--text); font-family: var(--mono); font-size: 10px;
+  padding: 8px 10px; outline: none;
+}
+.settings-field input:focus { border-color: var(--accent); }
+.settings-save { font-family: var(--mono); font-size: 9px; color: var(--ok); letter-spacing: 1px; }
+
+/* HISTORY PILLS */
+.history-row {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.history-pill {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.5px;
+  padding: 4px 10px; border: 1px solid var(--border2); color: var(--muted);
+  cursor: pointer; transition: all 0.15s;
+}
+.history-pill:hover { border-color: var(--accent); color: var(--accent); }
+.history-pill.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+.history-label { font-family: var(--mono); font-size: 9px; color: var(--muted); margin-right: 4px; }
+
+/* UTILS */
+.text-ok { color: var(--ok); }
+.text-warn { color: var(--warn); }
+.text-danger { color: var(--danger); }
+.text-accent { color: var(--accent); }
+.separator { height: 1px; background: var(--border); margin: 24px 0; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    COCOBLAST
+    <span style="color:var(--muted)"> // </span>
+    ENGINE
+    <div class="logo-version">V6.0</div>
+  </div>
+  <nav class="header-nav">
+    <button class="nav-btn" id="navDashboard" onclick="switchView('dashboard')">Dashboard</button>
+    <button class="nav-btn active" id="navInput" onclick="switchView('input')">Metrics Input</button>
+  </nav>
+  <div class="header-right">
+    <button class="lang-toggle" onclick="toggleLang()">ID / EN</button>
+    <button class="settings-btn" onclick="toggleSettings()">⚙ Settings</button>
+  </div>
+</header>
+
+<!-- SETTINGS PANEL -->
+<div class="settings-panel" id="settingsPanel">
+  <div class="settings-title">Settings</div>
+  <div class="settings-field">
+    <label>Anthropic API Key (untuk AI-sparring)</label>
+    <input type="password" id="apiKeyInput" placeholder="sk-ant-..." oninput="saveApiKey(this.value)">
+  </div>
+  <div class="settings-field">
+    <label>Google Sheets Service Account Email</label>
+    <input type="text" id="serviceEmailInput" placeholder="cocoblast@...iam.gserviceaccount.com" readonly style="color:var(--muted)">
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px;line-height:1.6">
+      Share your sheet ke email ini (read-only)
+    </div>
+  </div>
+  <div class="settings-save" id="settingsSaveMsg" style="display:none">✓ Tersimpan</div>
+</div>
+
+<!-- ════════════════ DASHBOARD VIEW ════════════════ -->
+<div class="view active" id="viewDashboard" style="display:none">
+
+  <!-- Empty state when no snapshot -->
+  <div id="dashEmpty" class="empty-state">
+    <div class="empty-state-icon">◎</div>
+    <h2>Belum ada <em style="color:var(--accent)">snapshot</em></h2>
+    <p>Upload CSV atau connect Google Sheets<br>untuk lihat diagnosis & priority card kamu.</p>
+    <button class="btn-primary" onclick="switchView('input')">→ Upload Metrics Sekarang</button>
+  </div>
+
+  <!-- Loaded state -->
+  <div id="dashContent" style="display:none">
+
+    <!-- Snapshot meta + history -->
+    <div class="snapshot-meta" id="snapshotMeta">
+      <span>📅 <span id="metaDate">—</span></span>
+      <span>📦 <span id="metaVersion">CocoBlast ENGINE v6</span></span>
+      <span>🏷 <span id="metaIndustry">AI-SaaS</span></span>
+    </div>
+    <div class="history-row" id="historyRow" style="display:none">
+      <span class="history-label">HISTORY →</span>
+    </div>
+
+    <!-- SECTION A: Priority Card -->
+    <div class="priority-card" id="priorityCard">
+      <div class="priority-card-eyebrow">Priority card // week</div>
+      <div class="priority-card-title" id="pcTitle">—</div>
+      <div class="priority-card-context" id="pcContext">—</div>
+      <div class="priority-action">
+        <div class="priority-action-label">⚡ Small action this week</div>
+        <div class="priority-action-text" id="pcAction">—</div>
+      </div>
+      <div class="priority-card-footer">
+        <span class="badge" id="pcBadge">—</span>
+        <button class="btn-spar" onclick="openSparring()">
+          ✦ Ask AI how to fix this →
+        </button>
+      </div>
+    </div>
+
+    <!-- SECTION B: Wins (green cores) -->
+    <div class="wins-section" id="winsSection">
+      <div class="wins-title">✓ You're doing well here</div>
+      <div class="wins-items" id="winsItems"></div>
+    </div>
+
+    <!-- SECTION B: 5 Cores -->
+    <div class="cores-label">5 Core Health Scores (no capping)</div>
+    <div class="cores-grid" id="coresGrid"></div>
+
+    <!-- SECTION C: Critical Risks -->
+    <div class="risks-section" id="risksSection" style="display:none">
+      <div class="cores-label">Critical Risks</div>
+      <div id="risksList"></div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:8px">
+        Critical risks tidak men-cap score keseluruhan — score tetap jalan independen.
+      </div>
+    </div>
+
+    <!-- SECTION D: 30/60/90 Roadmap -->
+    <div class="roadmap-section">
+      <div class="roadmap-title">AUTO-GENERATED // 30 · 60 · 90 DAY ROADMAP</div>
+      <div class="roadmap-grid" id="roadmapGrid"></div>
+    </div>
+
+    <div style="text-align:center;margin-top:32px">
+      <button class="btn-secondary" onclick="switchView('input')">↑ Update Snapshot Baru</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ INPUT VIEW ════════════════ -->
+<div class="view active" id="viewInput">
+  <div class="input-hero">
+    <h1>BEDAH BISNIS LO<br>DENGAN <em>DATA.</em></h1>
+    <p id="heroSub">Upload metrics aktual → scoring engine hitung 5 core scores tanpa cap → priority card 1 aksi minggu ini dari framework CocoBlast ENGINE v6. AI-native founders only.</p>
+  </div>
+
+  <div class="input-tabs">
+    <button class="input-tab active" onclick="switchInputTab('csv')">📄 CSV Upload</button>
+    <button class="input-tab" onclick="switchInputTab('sheets')">📊 Google Sheets</button>
+    <button class="input-tab" onclick="switchInputTab('manual')">✏ Manual Input</button>
+  </div>
+
+  <!-- CSV TAB -->
+  <div class="input-tab-content active" id="tabCsv">
+    <button class="csv-template-btn" onclick="downloadTemplate()">↓ Download CSV Template</button>
+    <div class="drop-zone" id="dropZone"
+      ondragover="event.preventDefault();this.classList.add('drag-over')"
+      ondragleave="this.classList.remove('drag-over')"
+      ondrop="handleDrop(event)">
+      <input type="file" accept=".csv" onchange="handleFileInput(this)">
+      <div class="drop-icon">⬆</div>
+      <div class="drop-title">Drop CSV di sini</div>
+      <div class="drop-sub">atau klik untuk pilih file<br><strong>Format: CocoBlast_Template.csv</strong><br>Kolom wajib: snapshot_date, mrr_usd, churn_rate_pct, activation_rate_pct, uptime_pct</div>
+    </div>
+    <div class="csv-preview" id="csvPreview">
+      <div class="preview-title">✓ Preview — looks right?</div>
+      <div class="preview-rows" id="previewRows"></div>
+      <div class="preview-actions">
+        <button class="btn-primary" onclick="submitSnapshot()">Submit Snapshot →</button>
+        <button class="btn-secondary" onclick="clearPreview()">Clear</button>
+      </div>
+    </div>
+    <div class="error-toast" id="csvError"></div>
+  </div>
+
+  <!-- SHEETS TAB -->
+  <div class="input-tab-content" id="tabSheets">
+    <div class="sheets-instruction">
+      <div class="sheets-step">
+        <div class="sheets-step-num">1</div>
+        <div>Buka <strong style="color:var(--accent)">Google Sheets Template</strong> → File → Make a copy ke Google Drive kamu.
+          <br><button class="csv-template-btn" style="margin-top:8px;font-size:9px" onclick="window.open('https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms/edit','_blank')">↗ Buka Template Sheets</button>
+        </div>
+      </div>
+      <div class="sheets-step">
+        <div class="sheets-step-num">2</div>
+        <div>Isi data kamu di sheet bernama <strong style="color:var(--accent)">CocoBlast_Snapshot</strong>. Satu baris = satu snapshot minggu ini.</div>
+      </div>
+      <div class="sheets-step">
+        <div class="sheets-step-num">3</div>
+        <div>Set sharing ke <strong style="color:var(--accent)">"Anyone with link can view"</strong>, lalu paste URL-nya di bawah.</div>
+      </div>
+    </div>
+    <div class="sheets-input-row">
+      <input class="sheets-url-input" id="sheetsUrl" type="text" placeholder="https://docs.google.com/spreadsheets/d/...">
+      <button class="btn-primary" onclick="importFromSheets()">Import Snapshot</button>
+    </div>
+    <div id="sheetsStatus" style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:8px"></div>
+    <div class="sheets-service-account">
+      <strong>Note:</strong> Pastikan sheet di-set ke "Anyone with link can view". CocoBlast pakai Google Sheets JSON API (read-only, no auth needed untuk public sheets). Sheet harus punya kolom sesuai template.
+    </div>
+  </div>
+
+  <!-- MANUAL TAB -->
+  <div class="input-tab-content" id="tabManual">
+    <form onsubmit="submitManual(event)">
+      <div class="manual-grid">
+        <div class="manual-section-title">Core 01 — Growth</div>
+
+        <div class="field-group">
+          <label class="field-label">MRR (USD)<span class="required">*</span></label>
+          <input class="field-input" type="number" id="m_mrr" placeholder="12500" min="0">
+          <div class="field-hint">Monthly Recurring Revenue dalam USD</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Churn Rate (%)<span class="required">*</span></label>
+          <input class="field-input" type="number" id="m_churn" placeholder="3.5" step="0.1" min="0" max="100">
+          <div class="field-hint">% user/customer yang churn per bulan. &lt;3% = sehat.</div>
+        </div>
+
+        <div class="manual-section-title">Core 02 — Activation</div>
+
+        <div class="field-group">
+          <label class="field-label">Activation Rate (%)<span class="required">*</span></label>
+          <input class="field-input" type="number" id="m_activation" placeholder="65" step="0.1" min="0" max="100">
+          <div class="field-hint">% user yang capai "aha moment" dalam 7 hari pertama</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Onboarding Time (hari)</label>
+          <input class="field-input" type="number" id="m_onboarding" placeholder="4" step="0.5" min="0">
+          <div class="field-hint">Rata-rata hari sampai user aktif. &lt;7 hari = sehat.</div>
+        </div>
+
+        <div class="manual-section-title">Core 03 — Reliability</div>
+
+        <div class="field-group">
+          <label class="field-label">Uptime (%)<span class="required">*</span></label>
+          <input class="field-input" type="number" id="m_uptime" placeholder="99.8" step="0.01" min="0" max="100">
+          <div class="field-hint">Uptime sistem 30 hari terakhir. &gt;99% = sehat.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Bug Rate (per minggu)</label>
+          <input class="field-input" type="number" id="m_bugs" placeholder="3" min="0">
+          <div class="field-hint">Jumlah bug yang masuk per minggu. &lt;5 = sehat.</div>
+        </div>
+
+        <div class="manual-section-title">Core 04 — Economics</div>
+
+        <div class="field-group">
+          <label class="field-label">CAC (USD)<span class="required">*</span></label>
+          <input class="field-input" type="number" id="m_cac" placeholder="320" min="0">
+          <div class="field-hint">Customer Acquisition Cost rata-rata</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">LTV (USD)<span class="required">*</span></label>
+          <input class="field-input" type="number" id="m_ltv" placeholder="1800" min="0">
+          <div class="field-hint">Lifetime Value rata-rata. LTV:CAC &gt;3x = sehat.</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Burn Rate (% runway/bulan)</label>
+          <input class="field-input" type="number" id="m_burn" placeholder="25" step="0.1" min="0" max="100">
+          <div class="field-hint">% runway yang dibakar per bulan. &lt;30% = sehat.</div>
+        </div>
+
+        <div class="manual-section-title">Core 05 — AI Moat</div>
+
+        <div class="field-group">
+          <label class="field-label">AI Substitution Risk<span class="required">*</span></label>
+          <select class="field-select" id="m_ai_risk">
+            <option value="">— pilih —</option>
+            <option value="low">Low — differensiasi kuat</option>
+            <option value="medium">Medium — ada risiko penggantian</option>
+            <option value="high">High — bisa langsung diganti LLM</option>
+          </select>
+          <div class="field-hint">Seberapa mudah produk lo diganti AI model generik?</div>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Agentic Readiness (1–5)<span class="required">*</span></label>
+          <select class="field-select" id="m_agentic">
+            <option value="">— pilih —</option>
+            <option value="1">1 — pure manual, zero automation</option>
+            <option value="2">2 — beberapa otomasi tapi bukan agentic</option>
+            <option value="3">3 — ada workflow agentic terbatas</option>
+            <option value="4">4 — agentic di core product</option>
+            <option value="5">5 — fully agentic, AI-native by design</option>
+          </select>
+          <div class="field-hint">Seberapa "agentic" arsitektur produk lo?</div>
+        </div>
+
+        <div class="manual-section-title">Meta</div>
+
+        <div class="field-group">
+          <label class="field-label">Snapshot Date</label>
+          <input class="field-input" type="date" id="m_date">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Stage</label>
+          <select class="field-select" id="m_stage">
+            <option value="pre-pmf">Pre-PMF</option>
+            <option value="post-pmf">Post-PMF</option>
+            <option value="growth">Growth</option>
+            <option value="series-b">Series B+</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary" style="margin-top:8px">Submit Snapshot →</button>
+    </form>
+  </div>
+</div>
+
+<!-- ════════════════ SPARRING MODAL ════════════════ -->
+<div class="modal-overlay" id="sparringModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">✦ AI Sparring</div>
+      <button class="modal-close" onclick="closeSparring()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-context-block">
+        <div class="modal-context-label">Context — Priority Card</div>
+        <div class="modal-context-content" id="sparringContext">—</div>
+      </div>
+      <div class="modal-api-key-row">
+        <span class="modal-api-key-label">API KEY:</span>
+        <input type="password" id="modalApiKey" placeholder="sk-ant-... (simpan di Settings biar tidak ketik ulang)">
+      </div>
+      <textarea class="modal-prompt-area" id="sparringPrompt" placeholder="Tambah context tambahan (optional): e.g. 'Kami B2B SaaS, ICP adalah CFO fintech startup'..."></textarea>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn-primary" onclick="runSparring()">✦ Run Sparring</button>
+        <div class="loading-dots" id="sparringLoader">
+          <div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div>
+        </div>
+      </div>
+      <div class="modal-response" id="sparringResponse"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let lang = 'id';
+let apiKey = localStorage.getItem('cb_v6_apikey') || '';
+let pendingSnapshot = null;
+let sessions = [];
+
+try { sessions = JSON.parse(localStorage.getItem('cb_v6_sessions') || '[]'); } catch(e){}
+
+// Load API key into settings input
+document.getElementById('apiKeyInput').value = apiKey;
+document.getElementById('modalApiKey').value = apiKey;
+document.getElementById('serviceEmailInput').value = 'cocoblast-engine@cocoblast-app.iam.gserviceaccount.com';
+
+// Set today's date for manual input
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('m_date').value = today;
+
+// ══════════════════════════════════════════════════
+// SCORING ENGINE V6 — NO FATAL CAP
+// ══════════════════════════════════════════════════
+
+function scoreCore01_Growth(s) {
+  let pts = 0, total = 0, keyMetric = '';
+  // Churn (low = good) — weight 70%
+  const churn = parseFloat(s.churn_rate_pct);
+  if (!isNaN(churn)) {
+    total += 70;
+    if (churn <= 3) pts += 70;
+    else if (churn <= 5) pts += 35;
+    else pts += 0;
+    keyMetric = `Churn ${churn}%`;
+  }
+  // MRR (proxy for growth signal) — weight 30%
+  const mrr = parseFloat(s.mrr_usd);
+  if (!isNaN(mrr) && mrr > 0) {
+    total += 30;
+    if (mrr >= 10000) pts += 30;
+    else if (mrr >= 2000) pts += 18;
+    else pts += 8;
+  }
+  const score = total > 0 ? Math.round((pts / total) * 100) : null;
+  const band = score === null ? null : score >= 70 ? 'healthy' : score >= 40 ? 'warning' : 'bad';
+  return { score, band, keyMetric: keyMetric || `MRR $${s.mrr_usd}` };
+}
+
+function scoreCore02_Activation(s) {
+  let pts = 0, total = 0;
+  const act = parseFloat(s.activation_rate_pct);
+  if (!isNaN(act)) {
+    total += 60;
+    if (act >= 60) pts += 60;
+    else if (act >= 35) pts += 30;
+    else pts += 0;
+  }
+  const onb = parseFloat(s.onboarding_days);
+  if (!isNaN(onb)) {
+    total += 40;
+    if (onb <= 4) pts += 40;
+    else if (onb <= 7) pts += 22;
+    else pts += 0;
+  }
+  const score = total > 0 ? Math.round((pts / total) * 100) : null;
+  const band = score === null ? null : score >= 70 ? 'healthy' : score >= 40 ? 'warning' : 'bad';
+  const keyMetric = !isNaN(act) ? `Activation ${act}%` : `Onboarding ${onb}d`;
+  return { score, band, keyMetric };
+}
+
+function scoreCore03_Reliability(s) {
+  let pts = 0, total = 0;
+  const up = parseFloat(s.uptime_pct);
+  if (!isNaN(up)) {
+    total += 70;
+    if (up >= 99.5) pts += 70;
+    else if (up >= 99.0) pts += 42;
+    else pts += 0;
+  }
+  const bugs = parseFloat(s.bug_rate_weekly);
+  if (!isNaN(bugs)) {
+    total += 30;
+    if (bugs <= 3) pts += 30;
+    else if (bugs <= 8) pts += 15;
+    else pts += 0;
+  }
+  const score = total > 0 ? Math.round((pts / total) * 100) : null;
+  const band = score === null ? null : score >= 70 ? 'healthy' : score >= 40 ? 'warning' : 'bad';
+  return { score, band, keyMetric: !isNaN(up) ? `Uptime ${up}%` : `Bugs ${bugs}/wk` };
+}
+
+function scoreCore04_Economics(s) {
+  let pts = 0, total = 0;
+  const cac = parseFloat(s.cac_usd);
+  const ltv = parseFloat(s.ltv_usd);
+  if (!isNaN(cac) && !isNaN(ltv) && cac > 0) {
+    const ratio = ltv / cac;
+    total += 60;
+    if (ratio >= 3) pts += 60;
+    else if (ratio >= 1.5) pts += 30;
+    else pts += 0;
+  }
+  const burn = parseFloat(s.burn_rate_pct);
+  if (!isNaN(burn)) {
+    total += 40;
+    if (burn <= 30) pts += 40;
+    else if (burn <= 50) pts += 20;
+    else pts += 0;
+  }
+  const score = total > 0 ? Math.round((pts / total) * 100) : null;
+  const band = score === null ? null : score >= 70 ? 'healthy' : score >= 40 ? 'warning' : 'bad';
+  const ltvCacRatio = (!isNaN(cac) && !isNaN(ltv) && cac > 0) ? (ltv/cac).toFixed(1) : '—';
+  return { score, band, keyMetric: `LTV:CAC ${ltvCacRatio}x` };
+}
+
+function scoreCore05_AIMoat(s) {
+  let pts = 0, total = 100;
+  const risk = s.ai_substitution_risk;
+  const agentic = parseInt(s.agentic_readiness);
+  if (risk) {
+    if (risk === 'low') pts += 50;
+    else if (risk === 'medium') pts += 28;
+    else pts += 0;
+  }
+  if (!isNaN(agentic)) {
+    pts += Math.round((agentic / 5) * 50);
+  }
+  const score = Math.round(pts);
+  const band = score >= 70 ? 'healthy' : score >= 40 ? 'warning' : 'bad';
+  return { score, band, keyMetric: `Risk: ${risk||'—'} · Agentic: ${isNaN(agentic)?'—':agentic}/5` };
+}
+
+function detectCriticalRisks(s) {
+  const risks = [];
+  const churn = parseFloat(s.churn_rate_pct);
+  const burn = parseFloat(s.burn_rate_pct);
+  const uptime = parseFloat(s.uptime_pct);
+  const act = parseFloat(s.activation_rate_pct);
+  const cac = parseFloat(s.cac_usd);
+  const ltv = parseFloat(s.ltv_usd);
+
+  if (!isNaN(churn) && churn > 5)
+    risks.push({ slug:'churn', label:'Churn Rate', value:`${churn}%`, threshold:'> 5%', severity:'critical' });
+  if (!isNaN(burn) && burn > 60)
+    risks.push({ slug:'burn', label:'Burn Rate', value:`${burn}%`, threshold:'> 60%', severity:'critical' });
+  if (!isNaN(uptime) && uptime < 99.0)
+    risks.push({ slug:'uptime', label:'Uptime', value:`${uptime}%`, threshold:'< 99%', severity:'critical' });
+  if (!isNaN(act) && act < 30)
+    risks.push({ slug:'activation', label:'Activation Rate', value:`${act}%`, threshold:'< 30%', severity:'critical' });
+  if (s.ai_substitution_risk === 'high' && !isNaN(parseInt(s.agentic_readiness)) && parseInt(s.agentic_readiness) < 2)
+    risks.push({ slug:'ai_moat', label:'AI Substitution Risk', value:'HIGH + Agentic < 2', threshold:'Defensibility critical', severity:'critical' });
+  if (!isNaN(cac) && !isNaN(ltv) && cac > 0 && (ltv / cac) < 1.5)
+    risks.push({ slug:'unit_econ', label:'LTV:CAC Ratio', value:`${(ltv/cac).toFixed(1)}x`, threshold:'< 1.5x', severity:'warn' });
+
+  return risks;
+}
+
+// Priority triage order
+const PRIORITY_TRIAGE = [
+  { slug:'churn',     title: { id:'Fix Retention', en:'Fix Retention' },
+    context: { id:'Churn lo di atas 5% — revenue base lo mengikis lebih cepat dari akuisisi. Ini yang harus di-fix sebelum scale apapun.', en:'Churn above 5% — revenue base eroding faster than acquisition. Fix this before scaling anything.' },
+    action: { id:'Audit drop-off: cek step mana di product journey yang paling banyak kehilangan user. Fokus 1 step ini minggu ini.', en:'Audit drop-off: find which product journey step loses the most users. Focus on this 1 step this week.' }
+  },
+  { slug:'burn',      title: { id:'Extend Runway', en:'Extend Runway' },
+    context: { id:'Burn rate lo di atas 60% runway per bulan. Runway pendek = tidak punya waktu untuk iterate ke PMF.', en:'Burn rate above 60% of runway/month. Short runway = no time to iterate to PMF.' },
+    action: { id:'Freeze 1 budget line yang tidak langsung generate revenue. Hitung runway exact hari ini.', en:'Freeze 1 budget line not directly generating revenue. Calculate exact runway today.' }
+  },
+  { slug:'uptime',    title: { id:'Fix Reliability', en:'Fix Reliability' },
+    context: { id:'Uptime lo di bawah 99% — setiap downtime adalah trust yang hilang dari user dan calon enterprise buyer.', en:'Uptime below 99% — every downtime is lost trust from users and enterprise prospects.' },
+    action: { id:'Setup uptime monitoring (Betteruptime / UptimeRobot) hari ini dan cek root cause downtime terakhir.', en:'Set up uptime monitoring today and investigate root cause of last downtime.' }
+  },
+  { slug:'activation', title: { id:'Fix Onboarding', en:'Fix Onboarding' },
+    context: { id:'Kurang dari 30% user reach aha moment. Product lo deliver value terlambat — user churn sebelum sempat engaged.', en:'Less than 30% of users reach aha moment. Product delivers value too late — users churn before getting engaged.' },
+    action: { id:'Map 3 langkah pertama user setelah sign up. Identify 1 friction point. Remove atau simplify minggu ini.', en:'Map the first 3 steps after sign up. Identify 1 friction point. Remove or simplify it this week.' }
+  },
+  { slug:'ai_moat',   title: { id:'Build AI Defensibility', en:'Build AI Defensibility' },
+    context: { id:'Product lo berisiko tinggi diganti oleh AI model generik, dan agentic readiness-nya masih rendah. Ini moat yang harus dibangun sekarang.', en:'Your product is at high risk of being replaced by generic AI models, with low agentic readiness. Build this moat now.' },
+    action: { id:'Definisikan 1 data asset atau workflow yang hanya bisa di-deliver oleh produk lo — bukan oleh ChatGPT. Tuliskan sebagai internal doc.', en:'Define 1 data asset or workflow that only your product can deliver — not ChatGPT. Write it as an internal doc.' }
+  },
+  { slug:'unit_econ', title: { id:'Fix Unit Economics', en:'Fix Unit Economics' },
+    context: { id:'LTV:CAC ratio di bawah 1.5x — setiap customer yang lo acquire masih merugi setelah diperhitungkan semua cost.', en:'LTV:CAC below 1.5x — every customer you acquire is still losing money after all costs.' },
+    action: { id:'Hitung LTV dari cohort terbaru (bukan estimasi). Bandingkan dengan CAC channel utama. Cari 1 channel yang CAC-nya paling efisien.', en:'Calculate LTV from your latest cohort (not estimates). Compare with main channel CAC. Find 1 most efficient CAC channel.' }
+  },
+];
+
+function generatePriorityCard(risks, s) {
+  // Find first matching risk from triage order
+  for (const t of PRIORITY_TRIAGE) {
+    if (risks.find(r => r.slug === t.slug)) {
+      return {
+        title: t.title[lang],
+        context: t.context[lang],
+        action: t.action[lang],
+        slug: t.slug,
+        severity: risks.find(r=>r.slug===t.slug)?.severity || 'critical',
+      };
+    }
+  }
+  // All green
+  return {
+    title: lang === 'id' ? 'Level Up: Pick 1 Growth Experiment' : 'Level Up: Pick 1 Growth Experiment',
+    context: lang === 'id' ? 'Semua core scores hijau — ini waktu yang tepat untuk experiment growth yang terukur, bukan fix masalah.' : 'All core scores green — this is the time to run a measured growth experiment, not fix problems.',
+    action: lang === 'id' ? 'Pilih 1 metric yang paling bisa di-improve 10% dalam 2 minggu ke depan. Buat hipotesis dan ukur.' : 'Pick 1 metric that can be improved 10% in the next 2 weeks. Form a hypothesis and measure.',
+    slug: 'growth_exp',
+    severity: 'ok',
+  };
+}
+
+function generateRoadmap(priority, cores, s) {
+  const templates = {
+    churn: {
+      d30: { id:'Audit churn path — identify top 3 drop-off points dan test 1 onboarding improvement.', en:'Audit churn path — identify top 3 drop-off points and test 1 onboarding improvement.' },
+      d60: { id:'Deploy fix onboarding + setup retention email sequence. Target churn < 4%.', en:'Deploy onboarding fix + set up retention email sequence. Target churn < 4%.' },
+      d90: { id:'Churn < 3% dan setup cohort tracking otomatis. Mulai optimize untuk expansion revenue.', en:'Churn < 3% and set up automated cohort tracking. Start optimizing for expansion revenue.' },
+    },
+    burn: {
+      d30: { id:'Freeze non-revenue spend, audit semua subscription, hitung exact runway.', en:'Freeze non-revenue spend, audit all subscriptions, calculate exact runway.' },
+      d60: { id:'Pastikan runway ≥ 12 bulan atau renegotiate 2 vendor contract besar.', en:'Ensure runway ≥ 12 months or renegotiate 2 major vendor contracts.' },
+      d90: { id:'Revenue cover ≥ 40% burn, atau close bridge round jika growth metrics solid.', en:'Revenue covers ≥ 40% of burn, or close bridge round if growth metrics are solid.' },
+    },
+    uptime: {
+      d30: { id:'Setup monitoring (Betteruptime/Sentry), deploy incident response runbook, fix top bug.', en:'Set up monitoring (Betteruptime/Sentry), deploy incident response runbook, fix top bug.' },
+      d60: { id:'Uptime ≥ 99.5%, automate recovery untuk failure mode yang paling sering.', en:'Uptime ≥ 99.5%, automate recovery for the most common failure modes.' },
+      d90: { id:'SLA tertulis untuk enterprise tier, chaos engineering test pertama.', en:'Written SLA for enterprise tier, first chaos engineering test.' },
+    },
+    activation: {
+      d30: { id:'Map full activation flow, identify 1 friction killer, deploy fix + A/B test.', en:'Map full activation flow, identify 1 friction killer, deploy fix + A/B test.' },
+      d60: { id:'Activation ≥ 40%, setup in-app nudge untuk user yang stuck sebelum aha moment.', en:'Activation ≥ 40%, set up in-app nudge for users stuck before aha moment.' },
+      d90: { id:'Activation ≥ 60% dan build self-serve onboarding yang tidak perlu sales touch.', en:'Activation ≥ 60% and build self-serve onboarding that needs no sales touch.' },
+    },
+    ai_moat: {
+      d30: { id:'Definisikan proprietary data layer — apa yang LLM generik tidak punya.', en:'Define proprietary data layer — what generic LLMs don\'t have.' },
+      d60: { id:'Ship 1 agentic workflow yang tidak bisa direplikasi di ChatGPT. Document sebagai differentiator.', en:'Ship 1 agentic workflow that can\'t be replicated in ChatGPT. Document as differentiator.' },
+      d90: { id:'Agentic readiness ≥ 4, mulai collect proprietary training data dari user interactions.', en:'Agentic readiness ≥ 4, start collecting proprietary training data from user interactions.' },
+    },
+    unit_econ: {
+      d30: { id:'Hitung LTV cohort per channel. Cut atau pause channel dengan LTV:CAC < 1.5x.', en:'Calculate LTV by cohort per channel. Cut or pause channels with LTV:CAC < 1.5x.' },
+      d60: { id:'LTV:CAC ≥ 2x di channel utama. Mulai optimize untuk payback period < 12 bulan.', en:'LTV:CAC ≥ 2x on main channel. Start optimizing for payback period < 12 months.' },
+      d90: { id:'LTV:CAC ≥ 3x, payback period < 9 bulan. Ready untuk scale paid acquisition.', en:'LTV:CAC ≥ 3x, payback period < 9 months. Ready to scale paid acquisition.' },
+    },
+    growth_exp: {
+      d30: { id:'Jalankan 1 growth experiment terukur — hypothesis, metric, timeline yang jelas.', en:'Run 1 measured growth experiment — clear hypothesis, metric, timeline.' },
+      d60: { id:'Analyze hasil experiment, iterate atau discard. Mulai build referral loop.', en:'Analyze experiment results, iterate or discard. Start building referral loop.' },
+      d90: { id:'Referral rate > 15%, pipeline dari organic ≥ 20% dari total acquisition.', en:'Referral rate > 15%, organic pipeline ≥ 20% of total acquisition.' },
+    },
+  };
+  const t = templates[priority.slug] || templates.growth_exp;
+  return {
+    d30: t.d30[lang], d60: t.d60[lang], d90: t.d90[lang],
+  };
+}
+
+// ══════════════════════════════════════════════════
+// COMPUTE ALL
+// ══════════════════════════════════════════════════
+function computeAll(snapshot) {
+  const cores = {
+    core01: { ...scoreCore01_Growth(snapshot), num:'01', name: lang==='id' ? 'Growth' : 'Growth' },
+    core02: { ...scoreCore02_Activation(snapshot), num:'02', name: lang==='id' ? 'Activation' : 'Activation' },
+    core03: { ...scoreCore03_Reliability(snapshot), num:'03', name: lang==='id' ? 'Reliability' : 'Reliability' },
+    core04: { ...scoreCore04_Economics(snapshot), num:'04', name: lang==='id' ? 'Economics' : 'Economics' },
+    core05: { ...scoreCore05_AIMoat(snapshot), num:'05', name: 'AI Moat' },
+  };
+  const risks = detectCriticalRisks(snapshot);
+  const priority = generatePriorityCard(risks, snapshot);
+  const roadmap = generateRoadmap(priority, cores, snapshot);
+
+  // Sort cores: highest score first (positive reinforcement)
+  const coresSorted = Object.entries(cores)
+    .filter(([,c]) => c.score !== null)
+    .sort(([,a],[,b]) => (b.score||0) - (a.score||0));
+
+  const wins = coresSorted.filter(([,c]) => c.band === 'healthy').map(([,c]) => c.name);
+
+  return { cores, coresSorted, risks, priority, roadmap, wins };
+}
+
+// ══════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════
+function renderDashboard(snapshot, computed) {
+  const { coresSorted, risks, priority, roadmap, wins } = computed;
+
+  // Meta
+  document.getElementById('metaDate').textContent = snapshot.snapshot_date || today;
+  document.getElementById('metaIndustry').textContent = snapshot.stage || 'AI-SaaS';
+
+  // Priority Card
+  document.getElementById('pcTitle').innerHTML = priority.title.replace(/\b(Fix|Build|Extend|Level Up)\b/, '<em>$1</em>');
+  document.getElementById('pcContext').textContent = priority.context;
+  document.getElementById('pcAction').textContent = priority.action;
+  const badge = document.getElementById('pcBadge');
+  badge.textContent = priority.severity === 'ok' ? '✓ All Green' : priority.severity === 'warn' ? '⚠ Warning' : '⚡ Critical';
+  badge.className = 'badge ' + (priority.severity === 'ok' ? 'badge-ok' : priority.severity === 'warn' ? 'badge-warn' : 'badge-critical');
+
+  // Wins
+  const winsEl = document.getElementById('winsSection');
+  const winsItems = document.getElementById('winsItems');
+  if (wins.length > 0) {
+    winsItems.innerHTML = wins.map(w => `<div class="win-chip">✓ ${w}</div>`).join('');
+    winsEl.classList.add('visible');
+  } else {
+    winsEl.classList.remove('visible');
+  }
+
+  // 5 Cores (sorted)
+  const coresGrid = document.getElementById('coresGrid');
+  coresGrid.innerHTML = '';
+  const allCoreKeys = ['core01','core02','core03','core04','core05'];
+  const computed_cores = computed.cores;
+  // display sorted but show all 5
+  const displayOrder = coresSorted.map(([k]) => k);
+  allCoreKeys.filter(k => !displayOrder.includes(k)).forEach(k => displayOrder.push(k));
+
+  displayOrder.forEach(key => {
+    const c = computed_cores[key];
+    if (!c) return;
+    const col = c.band === 'healthy' ? 'var(--ok)' : c.band === 'warning' ? 'var(--warn)' : c.band === 'bad' ? 'var(--danger)' : 'var(--muted)';
+    const bdr = c.band === 'healthy' ? 'rgba(0,217,126,0.2)' : c.band === 'warning' ? 'rgba(255,190,0,0.2)' : c.band === 'bad' ? 'rgba(255,48,64,0.2)' : 'var(--border2)';
+    coresGrid.innerHTML += `
+      <div class="core-mini" style="border-color:${bdr}">
+        <div class="core-mini-num">CORE ${c.num}</div>
+        <div class="core-mini-name">${c.name}</div>
+        <div class="core-mini-score" style="color:${col}">${c.score !== null ? c.score : '—'}<span>/100</span></div>
+        <div class="core-mini-indicator" style="color:${col}">${c.band ? c.band.toUpperCase() : '—'}</div>
+        <div class="core-mini-metric">${c.keyMetric || '—'}</div>
+      </div>`;
+  });
+
+  // Critical Risks
+  const risksSection = document.getElementById('risksSection');
+  const risksList = document.getElementById('risksList');
+  if (risks.length > 0) {
+    risksSection.style.display = 'block';
+    risksList.innerHTML = risks.slice(0,4).map(r => `
+      <div class="risk-item ${r.severity === 'warn' ? 'warn' : ''}">
+        <div class="risk-icon">${r.severity === 'warn' ? '⚠' : '⚡'}</div>
+        <div class="risk-body">
+          <div class="risk-name">${r.label}</div>
+          <div class="risk-detail">Threshold: ${r.threshold}</div>
+        </div>
+        <div class="risk-value ${r.severity === 'warn' ? 'warn' : ''}">${r.value}</div>
+      </div>`).join('');
+  } else {
+    risksSection.style.display = 'none';
+  }
+
+  // Roadmap
+  const roadmapGrid = document.getElementById('roadmapGrid');
+  roadmapGrid.innerHTML = `
+    <div class="roadmap-phase">
+      <div class="roadmap-phase-label">0–30 hari</div>
+      <div class="roadmap-phase-text">${roadmap.d30}</div>
+    </div>
+    <div class="roadmap-phase">
+      <div class="roadmap-phase-label">30–60 hari</div>
+      <div class="roadmap-phase-text">${roadmap.d60}</div>
+    </div>
+    <div class="roadmap-phase">
+      <div class="roadmap-phase-label">60–90 hari</div>
+      <div class="roadmap-phase-text">${roadmap.d90}</div>
+    </div>`;
+
+  // History pills
+  renderHistory();
+
+  // Show
+  document.getElementById('dashEmpty').style.display = 'none';
+  document.getElementById('dashContent').style.display = 'block';
+}
+
+function renderHistory() {
+  const row = document.getElementById('historyRow');
+  if (sessions.length <= 1) { row.style.display = 'none'; return; }
+  row.style.display = 'flex';
+  row.innerHTML = '<span class="history-label">HISTORY →</span>';
+  sessions.slice(0, 6).forEach((s, i) => {
+    const pill = document.createElement('div');
+    pill.className = 'history-pill' + (i === 0 ? ' active' : '');
+    pill.textContent = s.snapshot_date || `Session ${sessions.length - i}`;
+    pill.onclick = () => {
+      document.querySelectorAll('.history-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      const computed = computeAll(s);
+      renderDashboard(s, computed);
+    };
+    row.appendChild(pill);
+  });
+}
+
+// ══════════════════════════════════════════════════
+// INPUT — CSV
+// ══════════════════════════════════════════════════
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) parseCSV(file);
+}
+
+function handleFileInput(input) {
+  const file = input.files[0];
+  if (file) parseCSV(file);
+}
+
+function parseCSV(file) {
+  if (!file.name.endsWith('.csv')) {
+    showError('csvError', 'File harus berformat .csv');
+    return;
+  }
+  Papa.parse(file, {
+    header: true, skipEmptyLines: true,
+    complete: function(results) {
+      if (!results.data || results.data.length === 0) {
+        showError('csvError', 'CSV kosong atau format salah.');
+        return;
+      }
+      const row = results.data[results.data.length - 1]; // use latest row
+      const required = ['churn_rate_pct', 'activation_rate_pct', 'uptime_pct', 'cac_usd', 'ltv_usd'];
+      const missing = required.filter(k => !(k in row) || row[k] === '');
+      if (missing.length > 3) {
+        showError('csvError', `Kolom wajib tidak ditemukan: ${missing.join(', ')}. Download template untuk format yang benar.`);
+        return;
+      }
+      hideError('csvError');
+      pendingSnapshot = normalizeSnapshot(row);
+      showPreview(results.data.slice(-3));
+    },
+    error: function() { showError('csvError', 'Gagal parse CSV. Pastikan file tidak corrupt.'); }
+  });
+}
+
+function showPreview(rows) {
+  const preview = document.getElementById('csvPreview');
+  const previewRows = document.getElementById('previewRows');
+  const keys = Object.keys(rows[0]).slice(0, 8);
+  let html = '<table class="preview-table"><thead><tr>';
+  keys.forEach(k => { html += `<th>${k}</th>`; });
+  html += '</tr></thead><tbody>';
+  rows.forEach(r => {
+    html += '<tr>';
+    keys.forEach(k => { html += `<td>${r[k] || '—'}</td>`; });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  previewRows.innerHTML = html;
+  preview.classList.add('visible');
+}
+
+function clearPreview() {
+  document.getElementById('csvPreview').classList.remove('visible');
+  pendingSnapshot = null;
+}
+
+function submitSnapshot() {
+  if (!pendingSnapshot) return;
+  processAndNavigate(pendingSnapshot);
+}
+
+// ══════════════════════════════════════════════════
+// INPUT — GOOGLE SHEETS
+// ══════════════════════════════════════════════════
+async function importFromSheets() {
+  const url = document.getElementById('sheetsUrl').value.trim();
+  const status = document.getElementById('sheetsStatus');
+  if (!url) { status.textContent = '⚠ Paste URL Google Sheets dulu.'; return; }
+
+  // Extract sheet ID
+  const match = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  if (!match) { status.textContent = '⚠ URL tidak valid — harus berformat docs.google.com/spreadsheets/d/...'; return; }
+
+  const sheetId = match[1];
+  const apiUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:csv&sheet=CocoBlast_Snapshot`;
+  status.textContent = '⏳ Mengambil data dari Sheets...';
+
+  try {
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error('Fetch failed');
+    const text = await res.text();
+
+    Papa.parse(text, {
+      header: true, skipEmptyLines: true,
+      complete: function(results) {
+        if (!results.data || results.data.length === 0) {
+          status.textContent = '⚠ Sheet kosong atau nama sheet bukan "CocoBlast_Snapshot".';
+          return;
+        }
+        const row = results.data[results.data.length - 1];
+        pendingSnapshot = normalizeSnapshot(row);
+        status.textContent = '✓ Data berhasil diambil. Memproses...';
+        setTimeout(() => processAndNavigate(pendingSnapshot), 600);
+      }
+    });
+  } catch(e) {
+    status.textContent = '⚠ Gagal ambil data. Pastikan sheet di-set ke "Anyone with link can view".';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// INPUT — MANUAL
+// ══════════════════════════════════════════════════
+function submitManual(e) {
+  e.preventDefault();
+  const s = {
+    snapshot_date: document.getElementById('m_date').value || today,
+    mrr_usd: document.getElementById('m_mrr').value,
+    churn_rate_pct: document.getElementById('m_churn').value,
+    activation_rate_pct: document.getElementById('m_activation').value,
+    onboarding_days: document.getElementById('m_onboarding').value,
+    uptime_pct: document.getElementById('m_uptime').value,
+    bug_rate_weekly: document.getElementById('m_bugs').value,
+    cac_usd: document.getElementById('m_cac').value,
+    ltv_usd: document.getElementById('m_ltv').value,
+    burn_rate_pct: document.getElementById('m_burn').value,
+    ai_substitution_risk: document.getElementById('m_ai_risk').value,
+    agentic_readiness: document.getElementById('m_agentic').value,
+    stage: document.getElementById('m_stage').value,
+  };
+
+  const required = ['churn_rate_pct','activation_rate_pct','uptime_pct','cac_usd','ltv_usd'];
+  if (required.some(k => !s[k])) {
+    alert('Isi minimal: Churn, Activation, Uptime, CAC, LTV');
+    return;
+  }
+  processAndNavigate(normalizeSnapshot(s));
+}
+
+function normalizeSnapshot(row) {
+  // Normalize keys — handle various column name formats
+  const s = {};
+  const keyMap = {
+    snapshot_date: ['snapshot_date','date','Date'],
+    mrr_usd: ['mrr_usd','mrr','MRR'],
+    churn_rate_pct: ['churn_rate_pct','churn_rate','churn'],
+    activation_rate_pct: ['activation_rate_pct','activation_rate','activation'],
+    onboarding_days: ['onboarding_days','onboarding','onboarding_time'],
+    uptime_pct: ['uptime_pct','uptime'],
+    bug_rate_weekly: ['bug_rate_weekly','bug_rate','bugs'],
+    cac_usd: ['cac_usd','cac','CAC'],
+    ltv_usd: ['ltv_usd','ltv','LTV'],
+    burn_rate_pct: ['burn_rate_pct','burn_rate','burn'],
+    ai_substitution_risk: ['ai_substitution_risk','ai_risk'],
+    agentic_readiness: ['agentic_readiness','agentic'],
+    stage: ['stage'],
+    priority_this_week: ['priority_this_week'],
+    critical_risk_flag: ['critical_risk_flag'],
+  };
+  for (const [canonical, aliases] of Object.entries(keyMap)) {
+    for (const alias of aliases) {
+      if (row[alias] !== undefined && row[alias] !== '') {
+        s[canonical] = row[alias];
+        break;
+      }
+    }
+  }
+  if (!s.snapshot_date) s.snapshot_date = today;
+  return s;
+}
+
+function processAndNavigate(snapshot) {
+  // Save to session history
+  sessions.unshift(snapshot);
+  sessions = sessions.slice(0, 10);
+  try { localStorage.setItem('cb_v6_sessions', JSON.stringify(sessions)); } catch(e){}
+
+  const computed = computeAll(snapshot);
+  renderDashboard(snapshot, computed);
+  switchView('dashboard');
+}
+
+// ══════════════════════════════════════════════════
+// AI SPARRING
+// ══════════════════════════════════════════════════
+function openSparring() {
+  const latest = sessions[0];
+  if (!latest) return;
+  const computed = computeAll(latest);
+  const p = computed.priority;
+  const ctx = {
+    tool: 'CocoBlast ENGINE v6',
+    stage: latest.stage || 'pre-pmf',
+    snapshot_date: latest.snapshot_date,
+    priority: { slug: p.slug, label: p.title },
+    metric_values: {
+      churn_rate_pct: latest.churn_rate_pct,
+      activation_rate_pct: latest.activation_rate_pct,
+      uptime_pct: latest.uptime_pct,
+      cac_usd: latest.cac_usd,
+      ltv_usd: latest.ltv_usd,
+      burn_rate_pct: latest.burn_rate_pct,
+      ai_substitution_risk: latest.ai_substitution_risk,
+      agentic_readiness: latest.agentic_readiness,
+    },
+    critical_risks: computed.risks.map(r => r.label),
+  };
+  document.getElementById('sparringContext').textContent = JSON.stringify(ctx, null, 2);
+  document.getElementById('sparringResponse').style.display = 'none';
+  document.getElementById('sparringResponse').textContent = '';
+  document.getElementById('sparringPrompt').value = '';
+  // Pre-fill api key from settings
+  document.getElementById('modalApiKey').value = apiKey;
+  document.getElementById('sparringModal').classList.add('open');
+}
+
+function closeSparring() {
+  document.getElementById('sparringModal').classList.remove('open');
+}
+
+async function runSparring() {
+  const key = document.getElementById('modalApiKey').value.trim() || apiKey;
+  if (!key) {
+    alert('Masukkan Anthropic API Key di Settings atau field di atas.');
+    return;
+  }
+  const contextText = document.getElementById('sparringContext').textContent;
+  const extraPrompt = document.getElementById('sparringPrompt').value.trim();
+
+  const loader = document.getElementById('sparringLoader');
+  const responseEl = document.getElementById('sparringResponse');
+  loader.classList.add('visible');
+  responseEl.style.display = 'none';
+
+  const systemPrompt = `You are an expert startup advisor and product strategist specializing in AI-native SaaS products. You have deep expertise in unit economics, activation design, churn prevention, AI product defensibility, and AI-native startup operations. You are direct, concise, and action-oriented.`;
+
+  const userMessage = `Saya menggunakan CocoBlast ENGINE v6 untuk diagnose startup saya. Ini adalah context diagnosis saya:
+
+${contextText}
+
+${extraPrompt ? `Context tambahan: ${extraPrompt}\n` : ''}
+Berikan saya:
+1. Root cause dari priority ini (2-3 kalimat max)
+2. 3 langkah konkret yang bisa saya lakukan dalam 30 hari
+3. 1 quick win yang bisa dilakukan HARI INI (< 2 jam)
+
+Jawab dalam bahasa Indonesia, singkat dan actionable. Gunakan bullet points.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userMessage }],
+      }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    const text = data.content?.[0]?.text || 'Tidak ada response.';
+    responseEl.textContent = text;
+    responseEl.style.display = 'block';
+  } catch(err) {
+    responseEl.textContent = `Error: ${err.message}. Pastikan API key valid dan ada akses internet.`;
+    responseEl.style.display = 'block';
+  } finally {
+    loader.classList.remove('visible');
+  }
+}
+
+// ══════════════════════════════════════════════════
+// TEMPLATE DOWNLOAD
+// ══════════════════════════════════════════════════
+function downloadTemplate() {
+  const headers = [
+    'snapshot_date','mrr_usd','churn_rate_pct','activation_rate_pct','onboarding_days',
+    'uptime_pct','bug_rate_weekly','cac_usd','ltv_usd','burn_rate_pct',
+    'ai_substitution_risk','agentic_readiness','stage','critical_risk_flag','priority_this_week'
+  ];
+  const example = [
+    today,'12500','3.5','65','4','99.8','3','320','1800','25',
+    'low','4','pre-pmf','','Fix onboarding step 3'
+  ];
+  const comment = [
+    'ISO date','USD','% per bulan','% user reach aha moment','hari',
+    '% uptime 30d','bug per minggu','USD','USD','% runway/bulan',
+    'low/medium/high','1-5','pre-pmf/post-pmf/growth/series-b','slug opsional','teks opsional'
+  ];
+  const csv = [headers, comment, example].map(r => r.join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'CocoBlast_ENGINE_v6_Template.csv';
+  a.click();
+}
+
+// ══════════════════════════════════════════════════
+// NAV + UTILS
+// ══════════════════════════════════════════════════
+function switchView(view) {
+  document.getElementById('viewDashboard').style.display = view === 'dashboard' ? 'block' : 'none';
+  document.getElementById('viewInput').style.display = view === 'input' ? 'block' : 'none';
+  document.getElementById('navDashboard').classList.toggle('active', view === 'dashboard');
+  document.getElementById('navInput').classList.toggle('active', view === 'input');
+  // If switching to dashboard with no session, show empty
+  if (view === 'dashboard' && sessions.length === 0) {
+    document.getElementById('dashEmpty').style.display = 'block';
+    document.getElementById('dashContent').style.display = 'none';
+  }
+  // Close settings
+  document.getElementById('settingsPanel').classList.remove('open');
+}
+
+function switchInputTab(tab) {
+  document.querySelectorAll('.input-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['csv','sheets','manual'][i] === tab);
+  });
+  document.getElementById('tabCsv').classList.toggle('active', tab === 'csv');
+  document.getElementById('tabSheets').classList.toggle('active', tab === 'sheets');
+  document.getElementById('tabManual').classList.toggle('active', tab === 'manual');
+}
+
+function toggleLang() {
+  lang = lang === 'id' ? 'en' : 'id';
+  if (sessions.length > 0) {
+    const computed = computeAll(sessions[0]);
+    renderDashboard(sessions[0], computed);
+  }
+}
+
+function toggleSettings() {
+  document.getElementById('settingsPanel').classList.toggle('open');
+}
+
+function saveApiKey(val) {
+  apiKey = val;
+  localStorage.setItem('cb_v6_apikey', val);
+  document.getElementById('modalApiKey').value = val;
+  const msg = document.getElementById('settingsSaveMsg');
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display = 'none'; }, 1500);
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = '⚠ ' + msg;
+  el.classList.add('visible');
+}
+
+function hideError(id) {
+  document.getElementById(id).classList.remove('visible');
+}
+
+// Close settings on outside click
+document.addEventListener('click', e => {
+  const panel = document.getElementById('settingsPanel');
+  const btn = document.querySelector('.settings-btn');
+  if (panel.classList.contains('open') && !panel.contains(e.target) && !btn.contains(e.target)) {
+    panel.classList.remove('open');
+  }
+});
+
+// Close modal on overlay click
+document.getElementById('sparringModal').addEventListener('click', function(e) {
+  if (e.target === this) closeSparring();
+});
+
+// ══════════════════════════════════════════════════
+// INIT — restore last session if any
+// ══════════════════════════════════════════════════
+(function init() {
+  if (sessions.length > 0) {
+    switchView('dashboard');
+    const computed = computeAll(sessions[0]);
+    renderDashboard(sessions[0], computed);
+  } else {
+    switchView('input');
+  }
+})();
+</script>
+</body>
+</html>

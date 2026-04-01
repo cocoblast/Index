@@ -1,1760 +1,1662 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CocoBlast ENGINE v6</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Barlow+Condensed:wght@500;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CocoBlast ENGINE v7</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Barlow+Condensed:wght@500;700;800;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
-/* ───────────────────────────────────────────────────────────────────
-   DESIGN TOKENS
-─────────────────────────────────────────────────────────────────── */
-:root {
-  --bg:          #08080c;
-  --s1:          #0e0e14;
-  --s2:          #14141c;
-  --s3:          #1c1c28;
-  --b1:          #1e1e2c;
-  --b2:          #2a2a3e;
-  --accent:      #ff5500;
-  --a2:          #ff8040;
-  --a-dim:       rgba(255,85,0,.09);
-  --a-glow:      rgba(255,85,0,.22);
-  --red:         #ff3050;
-  --red-dim:     rgba(255,48,80,.10);
-  --yellow:      #ffbf00;
-  --yellow-dim:  rgba(255,191,0,.10);
-  --green:       #00d97e;
-  --green-dim:   rgba(0,217,126,.10);
-  --blue:        #4db8ff;
-  --blue-dim:    rgba(77,184,255,.10);
-  --txt:         #eaeaf4;
-  --txt2:        #9090b0;
-  --muted:       #42425a;
-  --mono:        'IBM Plex Mono', monospace;
-  --display:     'Barlow Condensed', sans-serif;
-  --body:        'Barlow', sans-serif;
-  --r:           6px;
+:root{
+  --bg:#08080c;--s1:#0e0e14;--s2:#14141c;--s3:#1c1c28;
+  --b1:#1e1e2c;--b2:#2a2a3e;--b3:#363650;
+  --accent:#ff5500;--a2:#ff8040;--a-dim:rgba(255,85,0,.08);--a-glow:rgba(255,85,0,.20);
+  --red:#ff3050;--red-dim:rgba(255,48,80,.10);
+  --yellow:#ffbf00;--yel-dim:rgba(255,191,0,.10);
+  --green:#00d97e;--grn-dim:rgba(0,217,126,.10);
+  --blue:#4db8ff;--blu-dim:rgba(77,184,255,.10);
+  --purple:#a78bfa;--pur-dim:rgba(167,139,250,.10);
+  --txt:#eaeaf4;--txt2:#9090b0;--muted:#42425a;
+  --mono:'IBM Plex Mono',monospace;--display:'Barlow Condensed',sans-serif;--body:'Barlow',sans-serif;
+  --r:4px;--r2:8px;
 }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--txt);font-family:var(--body);min-height:100vh;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--b3);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 14px; scroll-behavior: smooth; }
-body {
-  background: var(--bg);
-  color: var(--txt);
-  font-family: var(--body);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;height:48px;padding:0 20px;background:var(--s1);border-bottom:1px solid var(--b1);position:sticky;top:0;z-index:200}
+.logo{font-family:var(--display);font-size:18px;font-weight:900;letter-spacing:.06em}
+.logo em{color:var(--accent);font-style:normal}
+.logo sup{font-family:var(--mono);font-size:9px;color:var(--txt2);vertical-align:super;margin-left:3px}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.lang-btn{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;background:var(--s2);border:1px solid var(--b2);color:var(--txt2);padding:5px 10px;border-radius:20px;cursor:pointer;transition:all .15s}
+.lang-btn:hover{border-color:var(--accent);color:var(--accent)}
+.privacy-dot{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:9px;color:var(--muted)}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0}
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--s1); }
-::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 3px; }
+/* NAV */
+.nav-tabs{display:flex;align-items:center;background:var(--s1);border-bottom:1px solid var(--b1);padding:0 20px;gap:2px;overflow-x:auto}
+.nav-btn{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:12px 14px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.nav-btn:hover{color:var(--txt)}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
 
-/* ── LAYOUT ── */
-.shell { display: flex; flex-direction: column; min-height: 100vh; }
+/* MAIN */
+.main{max-width:1300px;margin:0 auto;padding:20px;width:100%}
+.tab-panel{display:none}
+.tab-panel.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
 
-/* ── TOPBAR ── */
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  height: 50px; padding: 0 20px;
-  background: var(--s1); border-bottom: 1px solid var(--b1);
-  position: sticky; top: 0; z-index: 200;
-}
-.logo {
-  font-family: var(--display); font-size: 17px; font-weight: 900;
-  letter-spacing: .06em;
-}
-.logo em { color: var(--accent); font-style: normal; }
-.logo sup {
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  color: var(--txt2); vertical-align: super; margin-left: 2px;
-}
-.topbar-right { display: flex; align-items: center; gap: 8px; }
+/* CARDS */
+.card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r2);padding:16px;margin-bottom:12px}
+.card-hd{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--txt2);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.card-hd .accent{color:var(--accent)}
 
-.pill-btn {
-  font-family: var(--mono); font-size: 10px; font-weight: 700;
-  letter-spacing: .08em; text-transform: uppercase;
-  background: var(--s2); border: 1px solid var(--b2);
-  color: var(--txt2); padding: 5px 12px;
-  border-radius: 20px; cursor: pointer;
-  transition: border-color .15s, color .15s, background .15s;
-}
-.pill-btn:hover { border-color: var(--accent); color: var(--txt); background: var(--a-dim); }
-.pill-btn.active { border-color: var(--accent); color: var(--accent); background: var(--a-dim); }
+/* GRID */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+@media(max-width:760px){.g2,.g3,.g5{grid-template-columns:1fr}}
 
-/* ── NAV ── */
-.nav-tabs {
-  display: flex; align-items: center;
-  background: var(--s1); border-bottom: 1px solid var(--b1);
-  padding: 0 20px; gap: 4px; overflow-x: auto;
-}
-.nav-btn {
-  font-family: var(--mono); font-size: 10px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase;
-  background: none; border: none; border-bottom: 2px solid transparent;
-  color: var(--muted); padding: 11px 14px; cursor: pointer;
-  transition: color .15s, border-color .15s; white-space: nowrap;
-}
-.nav-btn:hover { color: var(--txt2); }
-.nav-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+/* BUTTONS */
+.btn{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:var(--r);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff;border:1px solid var(--accent);padding:10px 22px;font-size:11px}
+.btn-primary:hover{background:var(--a2);border-color:var(--a2);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-ghost{background:var(--s2);color:var(--txt2);border:1px solid var(--b2);padding:7px 14px}
+.btn-ghost:hover{border-color:var(--accent);color:var(--txt);background:var(--a-dim)}
+.btn-sm{padding:5px 10px;font-size:9px}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid var(--red);padding:5px 10px;font-size:9px}
+.btn-danger:hover{background:var(--red);color:#fff}
 
-/* ── VIEWS ── */
-.view { display: none; }
-.view.active { display: block; animation: fadeIn .2s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+/* FORM */
+.form-group{margin-bottom:12px}
+.form-label{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--txt2);display:block;margin-bottom:5px}
+.form-label span{color:var(--muted);font-weight:400;text-transform:none;font-size:9px;margin-left:4px}
+.form-input{width:100%;background:var(--s3);border:1px solid var(--b2);color:var(--txt);font-family:var(--mono);font-size:13px;padding:8px 10px;border-radius:var(--r);outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--accent);background:var(--b1)}
+.form-select{width:100%;background:var(--s3);border:1px solid var(--b2);color:var(--txt);font-family:var(--mono);font-size:12px;padding:8px 10px;border-radius:var(--r);outline:none;cursor:pointer;transition:border-color .15s;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%2342425a'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.form-select:focus{border-color:var(--accent)}
+.form-hint{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:3px}
+.form-hint.sehat{color:var(--green)}
+.form-hint.warning{color:var(--yellow)}
+.form-hint.kritis{color:var(--red)}
+.form-textarea{width:100%;background:var(--s3);border:1px solid var(--b2);color:var(--txt);font-family:var(--body);font-size:13px;padding:8px 10px;border-radius:var(--r);resize:vertical;min-height:60px;outline:none;line-height:1.5;transition:border-color .15s}
+.form-textarea:focus{border-color:var(--accent)}
 
-.view-inner { max-width: 820px; margin: 0 auto; padding: 28px 20px 60px; }
+/* CORE SECTIONS */
+.core-wrap{border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden;margin-bottom:10px}
+.core-hd{background:var(--s3);padding:11px 14px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;transition:background .15s}
+.core-hd:hover{background:var(--b1)}
+.core-num{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--accent);letter-spacing:.1em;white-space:nowrap}
+.core-title{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--txt);flex:1;letter-spacing:.04em}
+.core-score-badge{font-family:var(--display);font-size:18px;font-weight:900;min-width:32px;text-align:right}
+.chevron{color:var(--muted);font-size:10px;transition:transform .2s}
+.chevron.open{transform:rotate(180deg)}
+.core-body{padding:14px;background:var(--s2);display:none}
+.core-body.open{display:block;animation:fadeIn .2s ease}
 
-/* ── SECTION HEADER ── */
-.sec-label {
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: .16em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 12px;
-  display: flex; align-items: center; gap: 8px;
-}
-.sec-label::after { content: ''; flex: 1; height: 1px; background: var(--b1); }
+/* PILLS & BADGES */
+.pill{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:20px;display:inline-block;white-space:nowrap}
+.pill-sehat{background:var(--grn-dim);color:var(--green);border:1px solid var(--green)}
+.pill-warning{background:var(--yel-dim);color:var(--yellow);border:1px solid var(--yellow)}
+.pill-kritis{background:var(--red-dim);color:var(--red);border:1px solid var(--red)}
+.pill-info{background:var(--blu-dim);color:var(--blue);border:1px solid var(--blue)}
+.pill-muted{background:var(--s3);color:var(--txt2);border:1px solid var(--b2)}
+.pill-purple{background:var(--pur-dim);color:var(--purple);border:1px solid var(--purple)}
 
-/* ── CARDS ── */
-.card {
-  background: var(--s2); border: 1px solid var(--b1);
-  border-radius: var(--r); padding: 18px;
-}
+/* VERDICT */
+.verdict-card{padding:22px;border-radius:var(--r2);border:2px solid;margin-bottom:12px}
+.v-ready{background:linear-gradient(135deg,#003520,#001a10);border-color:var(--green);color:var(--green)}
+.v-fix{background:linear-gradient(135deg,#2a2000,#1a1400);border-color:var(--yellow);color:var(--yellow)}
+.v-pivot{background:linear-gradient(135deg,#2a1500,#1a0e00);border-color:var(--accent);color:var(--accent)}
+.v-collapse{background:linear-gradient(135deg,#2a0010,#1a000a);border-color:var(--red);color:var(--red)}
+.v-num{font-family:var(--display);font-size:72px;font-weight:900;line-height:1;flex-shrink:0}
+.v-label{font-family:var(--display);font-size:30px;font-weight:900;letter-spacing:.04em}
+.v-desc{font-family:var(--body);font-size:13px;opacity:.8;margin-top:4px}
 
-/* ── BADGE ── */
-.badge {
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: .1em; padding: 2px 8px; border-radius: 3px;
-  text-transform: uppercase;
-}
-.b-red    { background: var(--red-dim);    color: var(--red);    border: 1px solid var(--red); }
-.b-yellow { background: var(--yellow-dim); color: var(--yellow); border: 1px solid var(--yellow); }
-.b-green  { background: var(--green-dim);  color: var(--green);  border: 1px solid var(--green); }
-.b-blue   { background: var(--blue-dim);   color: var(--blue);   border: 1px solid var(--blue); }
-.b-accent { background: var(--a-dim);      color: var(--accent); border: 1px solid var(--accent); }
+/* KILLER RISK */
+.killer-card{padding:16px;border-radius:var(--r2);border:1px solid var(--red);background:var(--red-dim);margin-bottom:12px}
+.killer-title{font-family:var(--display);font-size:20px;font-weight:800;color:var(--red);margin-bottom:4px}
+.killer-sub{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--red);margin-bottom:8px}
+.killer-desc{font-family:var(--body);font-size:13px;color:var(--txt2);line-height:1.5}
 
-/* ── SCORE COLORS ── */
-.sc-green  { color: var(--green); }
-.sc-yellow { color: var(--yellow); }
-.sc-red    { color: var(--red); }
+/* SCORE BAR */
+.prog-track{height:4px;background:var(--b2);border-radius:2px;overflow:hidden;flex:1;max-width:120px}
+.prog-fill{height:100%;border-radius:2px;transition:width .6s ease}
 
-/* ══════════════════════════════════════════════════════════════
-   DASHBOARD
-══════════════════════════════════════════════════════════════ */
+/* METRIC ROW */
+.m-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--b1)}
+.m-row:last-child{border-bottom:none}
+.m-name{font-family:var(--mono);font-size:10px;color:var(--txt2);flex:1}
+.m-val{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--txt);min-width:40px;text-align:right}
 
-/* Meta strip */
-.meta-strip {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px;
-  padding: 10px 14px;
-  background: var(--s2); border: 1px solid var(--b1);
-  border-radius: var(--r); margin-bottom: 20px;
-  font-family: var(--mono); font-size: 10px;
-}
-.meta-key { color: var(--muted); }
-.meta-val { color: var(--txt); font-weight: 700; margin-left: 4px; }
-.meta-div { color: var(--b2); }
-.meta-overall { font-size: 13px; font-weight: 700; margin-left: 4px; }
+/* SECTION TITLE */
+.sec-title{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--b1)}
 
-/* THE ONE THING card */
-.ot-card {
-  border: 1px solid var(--accent);
-  border-left: 4px solid var(--accent);
-  background: linear-gradient(135deg, var(--a-dim), var(--s2) 60%);
-  border-radius: var(--r); padding: 22px 24px; margin-bottom: 20px;
-  position: relative; overflow: hidden;
-}
-.ot-card::before {
-  content: ''; position: absolute; top: -40px; right: -40px;
-  width: 160px; height: 160px;
-  background: radial-gradient(circle, var(--a-glow) 0%, transparent 70%);
-  pointer-events: none;
-}
-.ot-header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
-}
-.ot-eyebrow {
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: .16em; text-transform: uppercase; color: var(--accent);
-}
-.ot-title {
-  font-family: var(--display); font-size: 26px; font-weight: 900;
-  line-height: 1.1; margin-bottom: 8px;
-}
-.ot-context {
-  font-size: 13px; color: var(--txt2); line-height: 1.65;
-  margin-bottom: 14px;
-}
-.ot-action {
-  background: var(--a-dim); border: 1px solid var(--a-glow);
-  border-radius: 4px; padding: 12px 16px; margin-bottom: 16px;
-}
-.ot-action-label {
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: .12em; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 5px;
-}
-.ot-action-text { font-size: 13px; color: var(--txt); line-height: 1.5; }
-.ot-footer { display: flex; justify-content: flex-end; gap: 8px; }
+/* ROADMAP */
+.phase-card{border-radius:var(--r2);padding:16px;border:1px solid;margin-bottom:12px}
+.phase-hd{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.phase-action{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-family:var(--body);font-size:12px;color:var(--txt2);line-height:1.4;cursor:pointer}
+.phase-action input[type=checkbox]{margin-top:2px;flex-shrink:0;accent-color:currentColor}
+.phase-action.done{color:var(--muted);text-decoration:line-through}
+.kpi-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.kpi-tag{font-family:var(--mono);font-size:9px;font-weight:700;padding:3px 8px;border-radius:3px;border:1px solid}
 
-/* Wins */
-.wins-row { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; }
-.win-chip {
-  font-family: var(--mono); font-size: 10px; color: var(--green);
-  background: var(--green-dim); border: 1px solid var(--green);
-  border-radius: 3px; padding: 3px 9px;
-}
+/* RESILIENCE */
+.res-ring{width:140px;height:140px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:5px solid;flex-shrink:0}
+.res-num{font-family:var(--display);font-size:48px;font-weight:900;line-height:1}
+.res-label{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.7;margin-top:2px}
 
-/* 5 Cores grid */
-.cores-grid {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;
-  margin-bottom: 20px;
-}
-@media (max-width: 680px) { .cores-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 360px) { .cores-grid { grid-template-columns: 1fr; } }
+/* CHAT */
+.chat-wrap{display:flex;flex-direction:column;gap:10px;max-height:380px;overflow-y:auto;padding:4px 0 12px}
+.bubble{max-width:85%;padding:10px 14px;border-radius:var(--r2);font-size:13px;line-height:1.5;white-space:pre-wrap;animation:slideIn .2s ease}
+.bubble.user{background:var(--a-dim);border:1px solid var(--a-glow);color:var(--a2);align-self:flex-end;font-family:var(--mono);font-size:11px}
+.bubble.ai{background:var(--s3);border:1px solid var(--b2);color:var(--txt);align-self:flex-start}
+.bubble.thinking{background:var(--s3);color:var(--muted);font-family:var(--mono);font-size:11px;align-self:flex-start;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+.chat-input-row{display:flex;gap:8px;margin-top:8px}
 
-.core-card {
-  background: var(--s2); border: 1px solid var(--b1);
-  border-radius: var(--r); padding: 14px 12px;
-  transition: border-color .15s, transform .15s;
-}
-.core-card:hover { transform: translateY(-2px); }
-.core-card.s-green  { border-color: rgba(0,217,126,.35); }
-.core-card.s-yellow { border-color: rgba(255,191,0,.35); }
-.core-card.s-red    { border-color: rgba(255,48,80,.35); }
+/* HISTORY */
+.hist-item{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:12px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--b1);cursor:pointer;transition:background .15s}
+.hist-item:hover{background:var(--s3)}
+.hist-date{font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap}
+.hist-industry{font-family:var(--mono);font-size:9px;color:var(--txt2);text-transform:uppercase}
+.hist-score{font-family:var(--display);font-size:22px;font-weight:900}
 
-.core-num {
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  color: var(--muted); margin-bottom: 4px;
-}
-.core-name {
-  font-family: var(--display); font-size: 13px; font-weight: 700;
-  margin-bottom: 10px; line-height: 1.2;
-}
-.core-score-row { display: flex; align-items: baseline; gap: 3px; margin-bottom: 7px; }
-.core-score-num { font-family: var(--mono); font-size: 22px; font-weight: 700; }
-.core-score-denom { font-family: var(--mono); font-size: 10px; color: var(--muted); }
-.core-bar-track {
-  height: 3px; background: var(--b1); border-radius: 2px; overflow: hidden; margin-bottom: 6px;
-}
-.core-bar-fill { height: 100%; border-radius: 2px; transition: width .7s cubic-bezier(.4,0,.2,1); }
-.fill-green  { background: var(--green); }
-.fill-yellow { background: var(--yellow); }
-.fill-red    { background: var(--red); }
-.core-detail { font-family: var(--mono); font-size: 9px; color: var(--txt2); line-height: 1.45; }
+/* SPARKLINE */
+.spark{display:flex;align-items:flex-end;gap:2px;height:28px}
+.spark-bar{flex:1;min-width:5px;border-radius:1px 1px 0 0;transition:height .3s}
 
-/* Bottleneck + risks */
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 20px; }
-@media (max-width: 580px) { .two-col { grid-template-columns: 1fr; } }
+/* DROPZONE */
+.dropzone{border:1px dashed var(--b3);border-radius:var(--r2);padding:18px;text-align:center;cursor:pointer;transition:all .15s;background:var(--s2);margin-bottom:10px}
+.dropzone:hover,.dropzone.drag-over{border-color:var(--accent);background:var(--a-dim)}
+.dropzone-icon{font-size:22px;margin-bottom:5px}
+.dropzone-text{font-family:var(--mono);font-size:10px;color:var(--txt2)}
 
-.risk-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 0; border-bottom: 1px solid var(--b1);
-  font-size: 12px;
-}
-.risk-item:last-child { border: none; }
-.risk-idx { font-family: var(--mono); font-size: 9px; color: var(--muted); width: 18px; }
-.risk-val { font-family: var(--mono); font-size: 11px; font-weight: 700; margin-left: auto; }
+/* EXT LINKS */
+.ext-btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:6px 12px;border-radius:var(--r);cursor:pointer;text-decoration:none;transition:all .15s;border:1px solid var(--b2);color:var(--txt2);background:var(--s2)}
+.ext-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blu-dim)}
 
-/* VC Insight box */
-.insight-box {
-  background: var(--s2); border: 1px solid var(--b2);
-  border-left: 3px solid var(--blue);
-  border-radius: var(--r); padding: 16px 18px; margin-bottom: 20px;
-}
-.insight-label {
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: .12em; text-transform: uppercase;
-  color: var(--blue); margin-bottom: 8px;
-}
-.insight-text { font-size: 12px; color: var(--txt2); line-height: 1.7; }
+/* AGENTIC CHECKLIST */
+.ag-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--b1);font-family:var(--body);font-size:12px;color:var(--txt2);line-height:1.4;cursor:pointer}
+.ag-item:last-child{border-bottom:none}
+.ag-item input{margin-top:2px;flex-shrink:0;accent-color:var(--accent)}
+.ag-item.checked{color:var(--green)}
 
-/* Empty dash */
-.dash-empty {
-  text-align: center; padding: 80px 24px;
-}
-.dash-empty-icon {
-  font-size: 40px; margin-bottom: 16px; opacity: .4;
-}
-.dash-empty-title {
-  font-family: var(--display); font-size: 22px; font-weight: 700; margin-bottom: 8px;
-}
-.dash-empty-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+/* WHAT-IF */
+.whatif-delta{font-family:var(--display);font-size:36px;font-weight:900;text-align:center;padding:10px 0}
 
-/* ══════════════════════════════════════════════════════════════
-   INPUT VIEW
-══════════════════════════════════════════════════════════════ */
+/* SCORE TABLE */
+.score-tbl{width:100%;border-collapse:collapse}
+.score-tbl th{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--s3);padding:8px 10px;text-align:left;border-bottom:1px solid var(--b1)}
+.score-tbl td{font-family:var(--mono);font-size:11px;color:var(--txt);padding:9px 10px;border-bottom:1px solid var(--b1);transition:background .15s}
+.score-tbl tr:hover td{background:var(--s3)}
+.score-tbl tr:last-child td{border-bottom:none}
 
-.input-tabs { display: flex; gap: 4px; margin-bottom: 20px; }
-.itab {
-  font-family: var(--mono); font-size: 10px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase;
-  background: var(--s2); border: 1px solid var(--b2);
-  color: var(--txt2); padding: 7px 16px; border-radius: 4px;
-  cursor: pointer; transition: all .15s;
-}
-.itab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-.itab:not(.active):hover { border-color: var(--accent); color: var(--txt); }
-
-.itab-content { display: none; }
-.itab-content.active { display: block; }
-
-/* Drop zone */
-.dropzone {
-  border: 2px dashed var(--b2); border-radius: var(--r);
-  padding: 52px 32px; text-align: center; cursor: pointer;
-  background: var(--s2); transition: all .15s;
-}
-.dropzone:hover, .dropzone.over {
-  border-color: var(--accent); background: var(--a-dim);
-}
-.dz-icon { font-size: 28px; margin-bottom: 12px; opacity: .6; }
-.dz-title {
-  font-family: var(--display); font-size: 18px; font-weight: 700; margin-bottom: 6px;
-}
-.dz-sub { font-size: 12px; color: var(--txt2); line-height: 1.7; }
-.dz-sub strong { color: var(--accent); }
-
-.csv-preview {
-  display: none; margin-top: 16px;
-  background: var(--s2); border: 1px solid var(--b2);
-  border-radius: var(--r); overflow: hidden;
-}
-.csv-preview.show { display: block; }
-.csv-ph {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px; border-bottom: 1px solid var(--b1);
-}
-.csv-ph-title { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--accent); }
-.csv-ph-actions { display: flex; gap: 8px; }
-.preview-tbl-wrap { max-height: 220px; overflow-y: auto; padding: 12px 14px; }
-.ptbl { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 10px; }
-.ptbl th { text-align: left; padding: 4px 10px 4px 0; color: var(--txt2); border-bottom: 1px solid var(--b1); }
-.ptbl td { padding: 4px 10px 4px 0; color: var(--txt); border-bottom: 1px solid var(--b1); }
-
-/* Manual form */
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-@media (max-width: 520px) { .form-grid { grid-template-columns: 1fr; } }
-
-.field { display: flex; flex-direction: column; gap: 5px; }
-.field-lbl {
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase; color: var(--txt2);
-}
-.field-hint { font-size: 11px; color: var(--muted); margin-top: 2px; }
-
-.field input, .field select {
-  background: var(--s3); border: 1px solid var(--b2);
-  color: var(--txt); font-family: var(--mono); font-size: 12px;
-  padding: 8px 12px; border-radius: 4px;
-  transition: border-color .15s, box-shadow .15s;
-  width: 100%;
-}
-.field input:focus, .field select:focus {
-  outline: none; border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--a-dim);
-}
-.field input::placeholder { color: var(--muted); }
-.field select option { background: var(--s2); }
-
-.form-sep {
-  grid-column: 1/-1;
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: .14em; text-transform: uppercase;
-  color: var(--accent); padding: 10px 0 4px;
-  border-bottom: 1px solid var(--b1); margin-bottom: 2px;
-}
-
-.form-err {
-  display: none; font-family: var(--mono); font-size: 11px; color: var(--red);
-  background: var(--red-dim); border: 1px solid var(--red);
-  border-radius: 4px; padding: 10px 14px; margin-bottom: 12px;
-}
-
-/* ══════════════════════════════════════════════════════════════
-   HISTORY VIEW
-══════════════════════════════════════════════════════════════ */
-
-.hist-empty { text-align: center; padding: 60px; color: var(--muted); font-size: 13px; }
-
-.hist-item {
-  background: var(--s2); border: 1px solid var(--b1);
-  border-radius: var(--r); padding: 14px 16px; margin-bottom: 8px;
-  display: flex; align-items: center; gap: 14px; cursor: pointer;
-  transition: border-color .15s;
-}
-.hist-item:hover { border-color: var(--accent); }
-.hist-date { font-family: var(--mono); font-size: 11px; color: var(--txt2); width: 90px; }
-.hist-overall { font-family: var(--mono); font-size: 18px; font-weight: 700; width: 60px; }
-.hist-action { font-size: 12px; color: var(--txt2); flex: 1; line-height: 1.4; }
-.hist-badges { display: flex; gap: 4px; flex-wrap: wrap; }
-
-.clear-hist-btn {
-  font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .08em;
-  background: none; border: 1px solid var(--b2); color: var(--txt2);
-  padding: 6px 14px; border-radius: 4px; cursor: pointer; margin-bottom: 14px;
-  transition: all .15s;
-}
-.clear-hist-btn:hover { border-color: var(--red); color: var(--red); }
-
-/* ══════════════════════════════════════════════════════════════
-   BUTTONS
-══════════════════════════════════════════════════════════════ */
-
-.btn-primary {
-  font-family: var(--mono); font-size: 11px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase;
-  background: var(--accent); color: #fff; border: none;
-  padding: 9px 22px; border-radius: 4px; cursor: pointer;
-  transition: opacity .15s, transform .1s;
-}
-.btn-primary:hover { opacity: .85; transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
-
-.btn-ghost {
-  font-family: var(--mono); font-size: 11px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase;
-  background: var(--s3); color: var(--txt2);
-  border: 1px solid var(--b2); padding: 9px 18px;
-  border-radius: 4px; cursor: pointer; transition: all .15s;
-}
-.btn-ghost:hover { border-color: var(--accent); color: var(--txt); }
-
-/* ══════════════════════════════════════════════════════════════
-   SETTINGS PANEL
-══════════════════════════════════════════════════════════════ */
-
-.settings-drawer {
-  display: none; position: fixed; top: 50px; right: 0; width: 290px;
-  background: var(--s1); border: 1px solid var(--b1);
-  border-right: none; border-top: none; padding: 18px;
-  border-bottom-left-radius: 8px; z-index: 150;
-  animation: slideIn .15s ease;
-}
-.settings-drawer.open { display: block; }
-@keyframes slideIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: none; } }
-
-.settings-title {
-  font-family: var(--display); font-size: 15px; font-weight: 700;
-  margin-bottom: 14px; color: var(--txt);
-}
-.settings-field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
-.settings-field label {
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
-}
-.settings-field input {
-  background: var(--s2); border: 1px solid var(--b2);
-  color: var(--txt); font-family: var(--mono); font-size: 11px;
-  padding: 7px 10px; border-radius: 4px; width: 100%;
-  transition: border-color .15s;
-}
-.settings-field input:focus { outline: none; border-color: var(--accent); }
-.settings-saved {
-  display: none; font-family: var(--mono); font-size: 10px;
-  color: var(--green); margin-top: 4px;
-}
-
-/* ══════════════════════════════════════════════════════════════
-   AI SPARRING MODAL
-══════════════════════════════════════════════════════════════ */
-
-.modal-bg {
-  display: none; position: fixed; inset: 0;
-  background: rgba(8,8,12,.88); z-index: 300;
-  align-items: center; justify-content: center; padding: 16px;
-}
-.modal-bg.open { display: flex; }
-
-.modal-box {
-  background: var(--s1); border: 1px solid var(--b2);
-  border-top: 3px solid var(--accent);
-  border-radius: 8px; width: 100%; max-width: 540px;
-  max-height: 88vh; overflow-y: auto; padding: 24px;
-  animation: modalIn .2s ease;
-}
-@keyframes modalIn {
-  from { opacity: 0; transform: translateY(16px) scale(.97); }
-  to   { opacity: 1; transform: none; }
-}
-
-.modal-title {
-  font-family: var(--display); font-size: 21px; font-weight: 800;
-  color: var(--accent); margin-bottom: 14px;
-}
-.modal-ctx-label {
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px;
-}
-.modal-ctx {
-  font-family: var(--mono); font-size: 10px; color: var(--txt2);
-  background: var(--s2); border: 1px solid var(--b1);
-  border-radius: 4px; padding: 10px 12px; margin-bottom: 14px;
-  white-space: pre-wrap; line-height: 1.6; max-height: 100px; overflow-y: auto;
-}
-.modal textarea {
-  width: 100%; background: var(--s2); border: 1px solid var(--b2);
-  color: var(--txt); font-family: var(--body); font-size: 13px;
-  padding: 10px 12px; border-radius: 4px;
-  resize: vertical; min-height: 80px; margin-bottom: 12px;
-  transition: border-color .15s;
-}
-.modal textarea:focus { outline: none; border-color: var(--accent); }
-.modal textarea::placeholder { color: var(--muted); }
-
-.modal-token-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
-.modal-token-row label {
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
-}
-.modal-token-row input {
-  background: var(--s2); border: 1px solid var(--b2);
-  color: var(--txt); font-family: var(--mono); font-size: 11px;
-  padding: 7px 10px; border-radius: 4px; width: 100%;
-  transition: border-color .15s;
-}
-.modal-token-row input:focus { outline: none; border-color: var(--accent); }
-
-.spar-loader {
-  display: none; font-family: var(--mono); font-size: 10px; color: var(--accent);
-  margin: 12px 0; animation: blink 1.2s infinite;
-}
-.spar-loader.show { display: block; }
-@keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
-
-.spar-response {
-  display: none;
-  font-family: var(--mono); font-size: 11px; color: var(--txt);
-  background: var(--s2); border: 1px solid var(--b1);
-  border-radius: 4px; padding: 14px; margin-top: 12px;
-  white-space: pre-wrap; line-height: 1.75; max-height: 300px; overflow-y: auto;
-}
-.spar-response.show { display: block; }
-.spar-err { color: var(--red); }
-.spar-tip { color: var(--txt2); font-size: 9px; }
-
-.modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
-
-/* ══════════════════════════════════════════════════════════════
-   VC BRIEFING VIEW
-══════════════════════════════════════════════════════════════ */
-
-.vc-section { margin-bottom: 28px; }
-.vc-section-title {
-  font-family: var(--display); font-size: 17px; font-weight: 800;
-  margin-bottom: 8px; color: var(--txt);
-}
-.vc-section-body { font-size: 13px; color: var(--txt2); line-height: 1.75; }
-.vc-section-body strong { color: var(--txt); }
-.vc-quote {
-  border-left: 3px solid var(--accent); padding: 10px 16px;
-  background: var(--a-dim); margin: 12px 0; font-size: 13px;
-  color: var(--txt); line-height: 1.65; font-style: italic;
-  border-radius: 0 4px 4px 0;
-}
-.vc-data-point {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-family: var(--mono); font-size: 11px;
-  background: var(--s3); border: 1px solid var(--b2);
-  border-radius: 3px; padding: 4px 10px; margin: 3px;
-}
-.vc-dp-val { color: var(--accent); font-weight: 700; }
-
-/* ══════════════════════════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════════════════════════ */
-
-@media (max-width: 480px) {
-  .topbar { padding: 0 14px; }
-  .view-inner { padding: 20px 14px 60px; }
-  .ot-card { padding: 16px; }
-  .ot-title { font-size: 20px; }
-}
+/* MISC */
+.divider{border:none;border-top:1px solid var(--b1);margin:14px 0}
+.tag{font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:3px;display:inline-block}
+.notice{font-family:var(--mono);font-size:9px;color:var(--muted);background:var(--s2);border:1px solid var(--b1);padding:7px 12px;border-radius:var(--r);display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.quote-bar{margin-top:16px;padding:12px 16px;background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);border-left:3px solid var(--accent)}
+.quote-text{font-family:var(--mono);font-size:10px;color:var(--txt2);font-style:italic}
+.quote-src{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:4px}
 </style>
 </head>
-
 <body>
-<div class="shell">
 
-<!-- ── TOP BAR ─────────────────────────────────────────────────── -->
+<!-- TOPBAR -->
 <header class="topbar">
-  <div class="logo">COCO<em>BLAST</em> <sup>v6</sup></div>
+  <div class="logo"><em>Coco</em>Blast<sup>ENGINE v7</sup></div>
   <div class="topbar-right">
-    <button class="pill-btn" id="langBtn" onclick="toggleLang()">EN</button>
-    <button class="pill-btn" onclick="toggleSettings()">⚙ Settings</button>
+    <div class="privacy-dot">
+      <span class="dot"></span>
+      <span id="privacy-text">Data stays in browser</span>
+    </div>
+    <button class="lang-btn" onclick="toggleLang()" id="lang-btn">🇮🇩 ID</button>
   </div>
 </header>
 
-<!-- ── SETTINGS DRAWER ────────────────────────────────────────── -->
-<div class="settings-drawer" id="settingsDrawer">
-  <div class="settings-title" id="s-title">Pengaturan</div>
-  <div class="settings-field">
-    <label id="s-hf-lbl">HuggingFace Token (AI Sparring)</label>
-    <input type="password" id="hfTokenInput" placeholder="hf_..." oninput="saveToken(this.value)">
-  </div>
-  <div class="settings-saved" id="settingsSaved">✓ Tersimpan</div>
-</div>
-
-<!-- ── NAV TABS ───────────────────────────────────────────────── -->
+<!-- NAV -->
 <nav class="nav-tabs">
-  <button class="nav-btn active" id="nb-dash"    onclick="switchView('dash')"    data-id="nb-dash"    data-id2="n-dashboard"><span id="n-dashboard">Dashboard</span></button>
-  <button class="nav-btn"        id="nb-input"   onclick="switchView('input')"   data-id="nb-input"   data-id2="n-input"><span id="n-input">Input Data</span></button>
-  <button class="nav-btn"        id="nb-history" onclick="switchView('history')" data-id="nb-history" data-id2="n-history"><span id="n-history">Riwayat</span></button>
-  <button class="nav-btn"        id="nb-vc"      onclick="switchView('vc')"      data-id="nb-vc"      data-id2="n-vc"><span id="n-vc">VC Briefing</span></button>
+  <button class="nav-btn active" onclick="switchTab('diagnosa',this)" data-i="tab_diagnosa">⬡ DIAGNOSA</button>
+  <button class="nav-btn" onclick="switchTab('hasil',this)" data-i="tab_hasil">◉ HASIL</button>
+  <button class="nav-btn" onclick="switchTab('resiliensi',this)" data-i="tab_resiliensi">⬢ RESILIENSI</button>
+  <button class="nav-btn" onclick="switchTab('sparring',this)" data-i="tab_sparring">◈ SPARRING AI</button>
+  <button class="nav-btn" onclick="switchTab('histori',this)" data-i="tab_histori">◎ HISTORI</button>
 </nav>
 
-<!-- ════════════════════════════════════════════════════════════
-     VIEW: DASHBOARD
-════════════════════════════════════════════════════════════ -->
-<section class="view active" id="view-dash">
-<div class="view-inner">
+<div class="main">
 
-  <!-- Empty state -->
-  <div id="dash-empty">
-    <div class="dash-empty">
-      <div class="dash-empty-icon">📊</div>
-      <div class="dash-empty-title" id="de-title">Belum ada data</div>
-      <p class="dash-empty-sub" id="de-sub">Upload CSV atau isi manual dulu biar CocoBlast bisa kasih diagnosis kamu.</p>
-      <button class="btn-primary" onclick="switchView('input')" id="de-btn">Mulai Input →</button>
+<!-- ══════════════════════════════════════ TAB: DIAGNOSA -->
+<div id="tab-diagnosa" class="tab-panel active">
+
+  <!-- Setup -->
+  <div class="card">
+    <div class="card-hd"><span data-i="setup_title">SETUP DIAGNOSIS</span></div>
+    <div class="g2">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label" data-i="industry_label">Industri Bisnis</label>
+        <select class="form-select" id="industry-sel" onchange="onIndustryChange(this.value)">
+          <option value="saas">SaaS / Tech</option>
+          <option value="ecom">E-Commerce</option>
+          <option value="fintech">Fintech</option>
+          <option value="fb">F&amp;B / Kedai</option>
+          <option value="healthcare">Healthcare</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label" data-i="import_label">Import Data</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('csv-input').click()">📄 CSV</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('pdf-input').click()">📋 PDF</button>
+          <button class="btn btn-ghost btn-sm" onclick="downloadTemplate()" data-i="btn_template">⬇ Template</button>
+        </div>
+        <input id="csv-input" type="file" accept=".csv" style="display:none" onchange="handleCSV(this)"/>
+        <input id="pdf-input" type="file" accept=".pdf" style="display:none" onchange="handlePDF(this)"/>
+      </div>
+    </div>
+
+    <div class="dropzone" id="dropzone" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDrop(event)" onclick="document.getElementById('csv-input').click()" style="margin-top:10px">
+      <div class="dropzone-icon">⬆</div>
+      <div class="dropzone-text" id="drop-text" data-i="drop_text">Drop CSV / PDF di sini, atau klik untuk upload</div>
+    </div>
+    <div id="file-status" style="font-family:var(--mono);font-size:10px;color:var(--txt2);display:none;margin-bottom:6px"></div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+      <a class="ext-btn" href="https://sheets.google.com" target="_blank">📊 Google Sheets</a>
+      <a class="ext-btn" href="https://notion.so" target="_blank">📝 Notion</a>
     </div>
   </div>
 
-  <!-- Dashboard content -->
-  <div id="dash-content" style="display:none">
+  <!-- Core Inputs -->
+  <div id="core-inputs"></div>
 
-    <!-- Meta strip -->
-    <div class="meta-strip">
-      <span class="meta-key" id="m-date-lbl">Tanggal</span>
-      <span class="meta-val" id="m-date-val">—</span>
-      <span class="meta-div">·</span>
-      <span class="meta-key" id="m-stage-lbl">Stage</span>
-      <span class="meta-val" id="m-stage-val">—</span>
-      <span class="meta-div">·</span>
-      <span class="meta-key" id="m-overall-lbl">Overall</span>
-      <span class="meta-overall" id="m-overall-val">—</span>
-      <span class="meta-div">·</span>
-      <span class="meta-key" id="m-verdict-lbl">Status</span>
-      <span class="meta-val" id="m-verdict-val">—</span>
-    </div>
-
-    <!-- THE ONE THING -->
-    <div class="ot-card">
-      <div class="ot-header">
-        <span class="ot-eyebrow" id="ot-eyebrow">Fokus Minggu Ini</span>
-        <span class="badge b-red" id="ot-badge">PERLU AKSI</span>
-      </div>
-      <div class="ot-title" id="ot-title">—</div>
-      <div class="ot-context" id="ot-context">—</div>
-      <div class="ot-action">
-        <div class="ot-action-label" id="ot-action-lbl">→ Satu aksi minggu ini</div>
-        <div class="ot-action-text" id="ot-action-txt">—</div>
-      </div>
-      <div class="ot-footer">
-        <button class="btn-ghost" onclick="openSparring()" id="spar-open-btn">✦ Tanya AI Sparring</button>
-      </div>
-    </div>
-
-    <!-- Wins -->
-    <div class="sec-label" id="wins-lbl">Yang lagi bagus</div>
-    <div class="card" style="margin-bottom:20px">
-      <div class="wins-row" id="wins-row">—</div>
-    </div>
-
-    <!-- 5 Cores -->
-    <div class="sec-label" id="cores-lbl">5 Area Kesehatan Startup</div>
-    <div class="cores-grid" id="cores-grid"></div>
-
-    <!-- Bottleneck + Context -->
-    <div class="two-col">
-      <div class="card">
-        <div class="sec-label" style="margin-bottom:10px" id="risk-lbl">Yang perlu diperbaiki</div>
-        <div id="risk-list"></div>
-      </div>
-      <div class="card">
-        <div class="sec-label" style="margin-bottom:10px" id="bench-lbl">Benchmark target</div>
-        <div id="bench-list"></div>
-      </div>
-    </div>
-
-    <!-- VC Signal -->
-    <div class="insight-box">
-      <div class="insight-label" id="vc-signal-lbl">💡 VC Signal</div>
-      <div class="insight-text" id="vc-signal-txt">—</div>
-    </div>
-
-  </div><!-- /dash-content -->
-</div>
-</section>
-
-<!-- ════════════════════════════════════════════════════════════
-     VIEW: INPUT
-════════════════════════════════════════════════════════════ -->
-<section class="view" id="view-input">
-<div class="view-inner">
-
-  <div class="input-tabs">
-    <button class="itab active" id="itab-csv"    onclick="switchITab('csv')">📄 Upload CSV</button>
-    <button class="itab"        id="itab-manual" onclick="switchITab('manual')">✍️ <span id="it-manual">Input Manual</span></button>
+  <!-- Agentic Checklist -->
+  <div class="card" id="agentic-card">
+    <div class="card-hd" data-i="agentic_title">AGENTIC READINESS — 5 SIGNAL</div>
+    <div style="font-family:var(--body);font-size:12px;color:var(--muted);margin-bottom:10px" data-i="agentic_desc">Berapa signal yang sudah lo miliki? (dipakai untuk Core 05)</div>
+    <div id="agentic-list"></div>
   </div>
 
-  <!-- CSV tab -->
-  <div class="itab-content active" id="ic-csv">
-    <div class="dropzone" id="dropzone" onclick="document.getElementById('csvFile').click()"
-         ondragover="dzOver(event)" ondragleave="dzLeave()" ondrop="dzDrop(event)">
-      <div class="dz-icon">📂</div>
-      <div class="dz-title" id="dz-title">Upload file CSV kamu</div>
-      <p class="dz-sub" id="dz-sub">
-        Drag file ke sini atau klik untuk pilih<br>
-        <strong>Kolom minimal:</strong> snapshot_date · mrr_usd · churn_rate_pct · activation_rate_pct · uptime_pct
-      </p>
+  <!-- What-If Simulator -->
+  <div class="card">
+    <div class="card-hd" data-i="whatif_title">WHAT-IF SIMULATOR <span class="accent">— Preview Score</span></div>
+    <div style="font-family:var(--body);font-size:12px;color:var(--txt2);margin-bottom:12px" data-i="whatif_desc">Ubah 1 metric, lihat dampak ke score (tidak disimpan)</div>
+    <div class="g2">
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label" data-i="whatif_metric">Pilih Metric</label>
+        <select class="form-select" id="whatif-sel" onchange="runWhatIf()"></select>
+      </div>
+      <div class="form-group" style="margin-bottom:0">
+        <label class="form-label" data-i="whatif_newval">Nilai Baru</label>
+        <input type="number" class="form-input" id="whatif-val" oninput="runWhatIf()" placeholder="0"/>
+      </div>
     </div>
-    <input type="file" id="csvFile" accept=".csv" style="display:none" onchange="handleCSV(this)">
-
-    <div class="csv-preview" id="csv-preview">
-      <div class="csv-ph">
-        <span class="csv-ph-title" id="prev-lbl">Preview Data</span>
-        <div class="csv-ph-actions">
-          <button class="btn-primary" onclick="submitCSV()" id="csv-submit-btn">Analisis →</button>
-          <button class="btn-ghost"   onclick="cancelCSV()" id="csv-cancel-btn">Batal</button>
+    <div id="whatif-result" style="display:none;margin-top:12px">
+      <div class="g2">
+        <div style="text-align:center;padding:10px;background:var(--s3);border-radius:var(--r)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted)" data-i="current_score">Score Saat Ini</div>
+          <div style="font-family:var(--display);font-size:36px;font-weight:900;color:var(--txt)" id="wi-current">—</div>
+        </div>
+        <div style="text-align:center;padding:10px;background:var(--s3);border-radius:var(--r)">
+          <div style="font-family:var(--mono);font-size:9px;color:var(--muted)" data-i="new_score">Score Jika Diubah</div>
+          <div style="font-family:var(--display);font-size:36px;font-weight:900" id="wi-new">—</div>
         </div>
       </div>
-      <div class="preview-tbl-wrap"><div id="preview-rows"></div></div>
-    </div>
-
-    <!-- Template hint -->
-    <div class="card" style="margin-top:16px">
-      <div class="sec-label" style="margin-bottom:8px" id="tpl-lbl">Template CSV</div>
-      <p style="font-size:12px;color:var(--txt2);line-height:1.7" id="tpl-desc">
-        Buat file CSV dengan kolom di bawah ini. Satu baris = satu snapshot mingguan.
-      </p>
-      <div style="margin-top:10px;overflow-x:auto">
-        <table class="ptbl" style="margin:0">
-          <thead><tr>
-            <th>Kolom</th><th>Contoh</th><th>Wajib?</th>
-          </tr></thead>
-          <tbody>
-            <tr><td>snapshot_date</td><td>2025-01-15</td><td>✓</td></tr>
-            <tr><td>stage</td><td>seed</td><td>✓</td></tr>
-            <tr><td>mrr_usd</td><td>8500</td><td>✓</td></tr>
-            <tr><td>mrr_growth_pct</td><td>12</td><td>—</td></tr>
-            <tr><td>churn_rate_pct</td><td>2.5</td><td>✓</td></tr>
-            <tr><td>activation_rate_pct</td><td>45</td><td>✓</td></tr>
-            <tr><td>onboarding_days</td><td>7</td><td>—</td></tr>
-            <tr><td>d30_retention_pct</td><td>35</td><td>—</td></tr>
-            <tr><td>uptime_pct</td><td>99.5</td><td>✓</td></tr>
-            <tr><td>bug_rate_weekly</td><td>4</td><td>—</td></tr>
-            <tr><td>cac_usd</td><td>120</td><td>—</td></tr>
-            <tr><td>ltv_usd</td><td>480</td><td>—</td></tr>
-            <tr><td>burn_rate_pct</td><td>22</td><td>—</td></tr>
-            <tr><td>ai_substitution_risk</td><td>medium</td><td>—</td></tr>
-            <tr><td>agentic_readiness</td><td>3</td><td>—</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <div id="wi-delta" style="text-align:center;font-family:var(--mono);font-size:11px;color:var(--txt2);margin-top:8px"></div>
     </div>
   </div>
 
-  <!-- Manual tab -->
-  <div class="itab-content" id="ic-manual">
-    <div class="form-err" id="form-err"></div>
-    <form id="manualForm" onsubmit="submitManual(event)">
-      <div class="form-grid">
-
-        <div class="field">
-          <label class="field-lbl" id="lbl-date">Tanggal Snapshot</label>
-          <input type="date" id="f-date">
-        </div>
-        <div class="field">
-          <label class="field-lbl" id="lbl-stage">Stage Startup</label>
-          <select id="f-stage">
-            <option value="pre-seed">Pre-Seed</option>
-            <option value="seed" selected>Seed</option>
-            <option value="series-a">Series A</option>
-            <option value="series-b">Series B</option>
-          </select>
-        </div>
-
-        <div class="form-sep" id="sep-rev">📈 Revenue</div>
-
-        <div class="field">
-          <label class="field-lbl">MRR (USD) *</label>
-          <input type="number" id="f-mrr" placeholder="8500" min="0">
-          <span class="field-hint" id="hint-mrr">Monthly Recurring Revenue kamu saat ini</span>
-        </div>
-        <div class="field">
-          <label class="field-lbl" id="lbl-growth">MRR Growth MoM (%)</label>
-          <input type="number" id="f-growth" placeholder="12" step="0.1" min="-100">
-        </div>
-        <div class="field">
-          <label class="field-lbl">Churn Rate (%) *</label>
-          <input type="number" id="f-churn" placeholder="2.5" step="0.1" min="0" max="100">
-          <span class="field-hint" id="hint-churn">% user yang berhenti dalam sebulan</span>
-        </div>
-
-        <div class="form-sep" id="sep-prod">🎯 Product</div>
-
-        <div class="field">
-          <label class="field-lbl">Activation Rate (%) *</label>
-          <input type="number" id="f-act" placeholder="45" step="0.1" min="0" max="100">
-          <span class="field-hint" id="hint-act">% user baru yang capai "aha moment"</span>
-        </div>
-        <div class="field">
-          <label class="field-lbl" id="lbl-d30">Day-30 Retention (%)</label>
-          <input type="number" id="f-d30" placeholder="35" step="0.1" min="0" max="100">
-        </div>
-        <div class="field">
-          <label class="field-lbl" id="lbl-onb">Onboarding (hari)</label>
-          <input type="number" id="f-onb" placeholder="7" min="1">
-        </div>
-
-        <div class="form-sep" id="sep-ops">⚙️ Operasional</div>
-
-        <div class="field">
-          <label class="field-lbl">Uptime (%) *</label>
-          <input type="number" id="f-uptime" placeholder="99.5" step="0.01" min="0" max="100">
-        </div>
-        <div class="field">
-          <label class="field-lbl" id="lbl-bugs">Bug per Minggu</label>
-          <input type="number" id="f-bugs" placeholder="4" min="0">
-        </div>
-
-        <div class="form-sep" id="sep-eco">💰 Unit Economics</div>
-
-        <div class="field">
-          <label class="field-lbl">CAC (USD)</label>
-          <input type="number" id="f-cac" placeholder="120" min="0">
-        </div>
-        <div class="field">
-          <label class="field-lbl">LTV (USD)</label>
-          <input type="number" id="f-ltv" placeholder="480" min="0">
-        </div>
-        <div class="field">
-          <label class="field-lbl" id="lbl-burn">Burn Rate (% of MRR)</label>
-          <input type="number" id="f-burn" placeholder="22" step="0.1" min="0">
-        </div>
-
-        <div class="form-sep" id="sep-ai">🤖 AI Moat</div>
-
-        <div class="field">
-          <label class="field-lbl" id="lbl-airisk">Risiko Digantikan AI</label>
-          <select id="f-airisk">
-            <option value="high">Tinggi — produk bisa di-replace ChatGPT</option>
-            <option value="medium" selected>Sedang — ada differensiasi tapi tipis</option>
-            <option value="low">Rendah — moat kuat, susah digantikan</option>
-          </select>
-        </div>
-        <div class="field">
-          <label class="field-lbl" id="lbl-agentic">Agentic Readiness (1–6)</label>
-          <select id="f-agentic">
-            <option value="1">1 — Belum eksplorasi</option>
-            <option value="2">2 — Mulai eksplorasi</option>
-            <option value="3" selected>3 — Prototyping</option>
-            <option value="4">4 — Terintegrasi di produk</option>
-            <option value="5">5 — Deployed ke user</option>
-            <option value="6">6 — Core dari produk</option>
-          </select>
-        </div>
-
-      </div><!-- /form-grid -->
-      <div style="margin-top:16px">
-        <button type="submit" class="btn-primary" id="submit-manual-btn">⚡ Analisis Sekarang</button>
-      </div>
-    </form>
-  </div>
-
-</div>
-</section>
-
-<!-- ════════════════════════════════════════════════════════════
-     VIEW: HISTORY
-════════════════════════════════════════════════════════════ -->
-<section class="view" id="view-history">
-<div class="view-inner">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-    <div class="sec-label" style="margin-bottom:0" id="hist-title">Riwayat Snapshot</div>
-    <button class="clear-hist-btn" onclick="clearHistory()" id="clear-btn">Hapus semua</button>
-  </div>
-  <div id="hist-list">
-    <div class="hist-empty" id="hist-empty">Belum ada riwayat.</div>
+  <!-- Diagnose Button -->
+  <div style="text-align:center;padding:8px 0 32px">
+    <button class="btn btn-primary" id="diagnose-btn" onclick="runDiagnosis()" style="font-size:12px;padding:13px 44px;letter-spacing:.12em">
+      ⬡ <span data-i="btn_diagnose">BEDAH BISNIS</span>
+    </button>
   </div>
 </div>
-</section>
 
-<!-- ════════════════════════════════════════════════════════════
-     VIEW: VC BRIEFING
-════════════════════════════════════════════════════════════ -->
-<section class="view" id="view-vc">
-<div class="view-inner">
-
-  <div class="card" style="margin-bottom:20px;border-left:4px solid var(--accent)">
-    <div class="sec-label" style="margin-bottom:8px">📋 VC Briefing — CocoBlast ENGINE v5 → v6</div>
-    <p style="font-size:13px;color:var(--txt2);line-height:1.7">
-      Ini adalah analisis jujur dari perspektif VC skeptis yang udah lihat banyak "founder health dashboard" mati pelan-pelan. CocoBlast v6 dibangun untuk jawab masalah-masalah ini.
-    </p>
+<!-- ══════════════════════════════════════ TAB: HASIL -->
+<div id="tab-hasil" class="tab-panel">
+  <div id="hasil-empty" style="text-align:center;padding:60px 20px">
+    <div style="font-family:var(--display);font-size:48px;color:var(--b3)">◌</div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:10px" data-i="no_result">Belum ada diagnosis. Jalankan diagnosis dulu.</div>
+    <button class="btn btn-ghost" style="margin-top:16px" onclick="switchTab('diagnosa',document.querySelector('.nav-btn'))" data-i="go_diagnose">→ Ke Diagnosa</button>
   </div>
-
-  <div class="vc-section">
-    <div class="vc-section-title">1. Risiko Adopsi: Manual Input vs. Founder Inertia</div>
-    <div class="vc-section-body">
-      Tool diagnosis yang butuh input manual punya masalah stickiness yang serius. Data 2025 menunjukkan:
-    </div>
-    <div style="margin:10px 0;display:flex;flex-wrap:wrap;gap:6px">
-      <span class="vc-data-point"><span class="vc-dp-val">&lt;30%</span> retensi aktif di hari ke-30</span>
-      <span class="vc-data-point"><span class="vc-dp-val">&lt;10%</span> di hari ke-60 (manual-entry tools)</span>
-      <span class="vc-data-point"><span class="vc-dp-val">50%+</span> drop out dalam 4–6 minggu</span>
-    </div>
-    <div class="vc-quote">
-      "Founders harus diasumsikan akan drop dalam 60 hari kalau tool-nya butuh input manual tanpa integrasi ke workflow inti mereka."
-    </div>
-    <div class="vc-section-body">
-      <strong>Solusi di v6:</strong> Weekly ritual framing, input cepat (minimal 5 field), dan AI sparring yang bikin founders mau balik karena ada nilai konkret setiap sesi.
-    </div>
-  </div>
-
-  <div class="vc-section">
-    <div class="vc-section-title">2. Fatal Cap = Behavioral Risk</div>
-    <div class="vc-section-body">
-      Fatal cap bikin founder berhenti logging ketika hasil paling jelek. Data dari Sifted 2024:
-    </div>
-    <div style="margin:10px 0;display:flex;flex-wrap:wrap;gap:6px">
-      <span class="vc-data-point"><span class="vc-dp-val">85%</span> founder laporkan high stress tahun lalu</span>
-      <span class="vc-data-point"><span class="vc-dp-val">45%</span> rasa mental health mereka "bad/very bad"</span>
-    </div>
-    <div class="vc-quote">
-      "Dalam konteks itu, skor merah permanen dari tool manual bisa terasa seperti hukuman, bukan panduan. Malah trigger learned helplessness."
-    </div>
-    <div class="vc-section-body">
-      <strong>Solusi di v6:</strong> <strong>Tidak ada fatal capping.</strong> Scoring behavior-friendly. Wins ditampilkan duluan. Framing "satu hal untuk diperbaiki minggu ini", bukan "startup kamu mau mati".
-    </div>
-  </div>
-
-  <div class="vc-section">
-    <div class="vc-section-title">3. Competitive Gap</div>
-    <div class="vc-section-body">
-      Tanpa integrasi API, CocoBlast cuma UI layer di atas data yang sudah ada di ProfitWell, ChartMogul, Mixpanel, Datadog. Differensiator nyata CocoBlast cuma dua:
-    </div>
-    <div style="margin:10px 0 12px">
-      <div class="vc-data-point" style="display:block;margin-bottom:6px">
-        <span style="color:var(--accent);font-weight:700">①</span> Framework kurasi 5 Core + AI Moat angle yang relevan untuk 2025–2026
+  <div id="hasil-content" style="display:none">
+    <!-- Verdict -->
+    <div id="verdict-wrap"></div>
+    <!-- Killer Risk -->
+    <div id="killer-wrap"></div>
+    <!-- 4 Output Wajib notice -->
+    <div class="notice"><span class="dot" style="background:var(--blue);box-shadow:0 0 6px var(--blue)"></span><span data-i="four_outputs">4 Output Wajib: Breakdown — Killer Risk — 90-Hari Roadmap — Resilience Score</span></div>
+    <!-- Score Breakdown -->
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+      <div style="padding:12px 16px;background:var(--s3);border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--txt2)" data-i="breakdown_title">5-CORE SCORING BREAKDOWN</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">MAX 100</span>
+          <span style="font-family:var(--display);font-size:26px;font-weight:900;color:var(--accent)" id="total-score-display">—</span>
+        </div>
       </div>
-      <div class="vc-data-point" style="display:block">
-        <span style="color:var(--accent);font-weight:700">②</span> AI sparring yang surfacing actionable next steps — bukan sekadar skor
+      <table class="score-tbl">
+        <thead>
+          <tr>
+            <th data-i="th_core">CORE</th>
+            <th data-i="th_sistem">SISTEM</th>
+            <th data-i="th_kondisi">KONDISI</th>
+            <th data-i="th_severity">SEVERITY</th>
+            <th data-i="th_bar">PROGRESS</th>
+            <th data-i="th_score">SCORE</th>
+          </tr>
+        </thead>
+        <tbody id="score-tbody"></tbody>
+      </table>
+    </div>
+    <!-- Audit Log (transparency) -->
+    <div class="card">
+      <div class="card-hd" data-i="audit_title">SCORING AUDIT LOG <span class="accent">— Transparansi Perhitungan</span></div>
+      <div id="audit-log"></div>
+    </div>
+    <!-- 90-Day Roadmap -->
+    <div id="roadmap-wrap"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ TAB: RESILIENSI -->
+<div id="tab-resiliensi" class="tab-panel">
+  <div id="res-empty" style="text-align:center;padding:60px 20px">
+    <div style="font-family:var(--display);font-size:48px;color:var(--b3)">⬢</div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:10px" data-i="no_resilience">Jalankan diagnosis untuk lihat Resilience Score.</div>
+  </div>
+  <div id="res-content" style="display:none">
+    <div class="card">
+      <div class="card-hd" data-i="res_title">DISRUPTION RESILIENCE SCORE <span class="accent">— AI vs Bisnis Lo</span></div>
+      <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+        <div class="res-ring" id="res-ring">
+          <div class="res-num" id="res-num">—</div>
+          <div class="res-label">/100</div>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div id="res-level-label" style="font-family:var(--display);font-size:26px;font-weight:900;margin-bottom:6px">—</div>
+          <div id="res-desc" style="font-family:var(--body);font-size:13px;color:var(--txt2);line-height:1.5"></div>
+          <div style="margin-top:12px" id="res-breakdown"></div>
+        </div>
       </div>
     </div>
-    <div class="vc-section-body">
-      <strong>Posisi yang benar:</strong> Bukan pengganti analytics tools, tapi <em>diagnostic layer yang ngasih tau apa yang harus diprioritasin dari semua data itu.</em>
+
+    <div class="card">
+      <div class="card-hd" data-i="ai_risk_title">AI SUBSTITUTION RISK — 2026-2028</div>
+      <div id="ai-risk-content"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-hd" data-i="moat_boost">MOAT BOOST ACTIONS</div>
+      <div id="moat-actions"></div>
     </div>
   </div>
+</div>
 
-  <div class="vc-section">
-    <div class="vc-section-title">4. Siapa yang Cocok Pakai CocoBlast?</div>
-    <div class="vc-section-body" style="margin-bottom:10px">Zona ROI nyata:</div>
-    <div class="card" style="margin-bottom:10px;border-color:var(--green)">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--green);font-weight:700;margin-bottom:8px">✓ FIT TERBAIK</div>
-      <ul style="font-size:12px;color:var(--txt2);line-height:2;padding-left:16px">
-        <li>Post-PMF SaaS founders: Pre-Seed → Series A</li>
-        <li>AI-native founders yang obsesi sama "moat" tapi belum punya framework ngukurnya</li>
-        <li>Founders yang ikut weekly review ritual (VC portfolio, accelerator cohort)</li>
-        <li>Tim yang butuh satu bahasa bersama soal kesehatan produk</li>
-      </ul>
+<!-- ══════════════════════════════════════ TAB: SPARRING AI -->
+<div id="tab-sparring" class="tab-panel">
+  <div class="card">
+    <div class="card-hd">SPARRING AI <span class="accent">— HuggingFace / Mistral</span></div>
+    <div class="notice">
+      <span class="dot"></span>
+      <span data-i="sparring_notice">Bukan yes-man. Tidak simpan histori. Setiap sesi baru. Privacy terjaga.</span>
     </div>
-    <div class="card" style="border-color:var(--red)">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--red);font-weight:700;margin-bottom:8px">✗ HINDARI</div>
-      <ul style="font-size:12px;color:var(--txt2);line-height:2;padding-left:16px">
-        <li>Pre-PMF / pre-revenue: metrik belum bermakna, bikin false sense of control</li>
-        <li>E-commerce / marketplace tanpa adaptasi KPI-nya</li>
-        <li>Founders yang belum track churn/activation sama sekali — fix behaviour dulu</li>
-      </ul>
+    <div id="context-info" style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:10px;display:none"></div>
+    <div class="chat-wrap" id="chat-messages"></div>
+    <div class="chat-input-row">
+      <textarea class="form-textarea" id="chat-input" rows="2" placeholder="Tanya soal bisnis lo..." style="flex:1;min-height:42px" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendSparring()}"></textarea>
+      <button class="btn btn-primary" onclick="sendSparring()" style="align-self:flex-end" id="send-btn">
+        <span data-i="btn_send">KIRIM</span>
+      </button>
     </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px" data-i="sparring_note">Enter = kirim · Shift+Enter = baris baru · AI tidak mengingat percakapan sebelumnya</div>
   </div>
 
-  <div class="vc-section">
-    <div class="vc-section-title">5. Roadmap Validasi (dari VC)</div>
-    <div class="vc-section-body">Kalau mau pressure-test ini lebih jauh:</div>
-    <ol style="font-size:13px;color:var(--txt2);line-height:2.2;padding-left:18px;margin-top:8px">
-      <li>Fokus ke <strong>Post-PMF SaaS + AI-native founders</strong> — jangan coba cover semua stage dulu</li>
-      <li>Embed CocoBlast ke <strong>weekly founder review ritual</strong> — Notion + Slack reminder</li>
-      <li><strong>A/B test</strong> capped vs non-capped scoring, ukur 60-day retention dan "action taken"</li>
-      <li>True north-star metric: <strong>apakah founder balik minggu depan?</strong> — bukan skor tinggi</li>
-    </ol>
-  </div>
-
-</div>
-</section>
-
-</div><!-- /shell -->
-
-<!-- ════════════════════════════════════════════════════════════
-     AI SPARRING MODAL
-════════════════════════════════════════════════════════════ -->
-<div class="modal-bg" id="sparModal" onclick="bgClose(event)">
-<div class="modal-box">
-  <div class="modal-title" id="spar-title">✦ AI Sparring</div>
-
-  <div class="modal-ctx-label" id="spar-ctx-lbl">Konteks — Priority Card kamu</div>
-  <div class="modal-ctx" id="spar-ctx"></div>
-
-  <textarea id="spar-prompt" rows="3" id="sparPrompt"
-    placeholder="Tambah konteks: misal 'Kami B2B SaaS, ICP-nya CFO fintech, runway 8 bulan'..."></textarea>
-
-  <div class="modal-token-row">
-    <label id="spar-token-lbl">HuggingFace Token</label>
-    <input type="password" id="spar-token" placeholder="hf_...">
-  </div>
-
-  <div class="spar-loader" id="spar-loader">⟳ Lagi mikir...</div>
-  <div class="spar-response" id="spar-response"></div>
-
-  <div class="modal-footer">
-    <button class="btn-ghost" onclick="closeSparring()" id="spar-close-btn">Tutup</button>
-    <button class="btn-primary" onclick="runSparring()" id="spar-run-btn">Kirim →</button>
+  <div class="card">
+    <div class="card-hd" data-i="starter_title">STARTER QUESTIONS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px" id="starter-list"></div>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════ TAB: HISTORI -->
+<div id="tab-histori" class="tab-panel">
+  <div class="card">
+    <div class="card-hd">
+      <span data-i="hist_title">HISTORI DIAGNOSIS</span>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-ghost btn-sm" onclick="exportHistory()" data-i="btn_export">⬇ Export CSV</button>
+        <button class="btn btn-danger" onclick="clearHistory()" data-i="btn_clear">✕ Hapus</button>
+      </div>
+    </div>
+    <div id="hist-empty" style="text-align:center;padding:30px;font-family:var(--mono);font-size:11px;color:var(--muted)" data-i="hist_empty">Belum ada data. Jalankan diagnosis pertama.</div>
+    <div id="hist-spark" style="display:none">
+      <div class="sec-title" data-i="hist_trend">TREND SCORE</div>
+      <div style="display:flex;align-items:flex-end;gap:3px;height:40px;margin-bottom:4px" id="sparkline"></div>
+      <div id="stagnation-alert" style="display:none;font-family:var(--mono);font-size:10px;color:var(--yellow);margin-bottom:8px"></div>
+    </div>
+    <div id="hist-list"></div>
+  </div>
 </div>
 
-<!-- ════════════════════════════════════════════════════════════
-     JAVASCRIPT
-════════════════════════════════════════════════════════════ -->
+</div><!-- /main -->
+
 <script>
-'use strict';
-
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let lang       = localStorage.getItem('cb_lang') || 'id';
-let hfToken    = localStorage.getItem('cb_hf_token') || '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';
-let sessions   = [];
-let pendingSnap = null;
-let currentDiag = null;
-
-// ── BILINGUAL TEXTS ───────────────────────────────────────────────────────────
-const T = {
-  id: {
-    // Nav
-    'n-dashboard': 'Dashboard', 'n-input': 'Input Data',
-    'n-history': 'Riwayat', 'n-vc': 'VC Briefing',
-    // Settings
-    's-title': 'Pengaturan', 's-hf-lbl': 'HuggingFace Token (AI Sparring)',
-    // Dashboard empty
-    'de-title': 'Belum ada data',
-    'de-sub': 'Upload CSV atau isi manual dulu biar CocoBlast bisa kasih diagnosis kamu.',
-    'de-btn': 'Mulai Input →',
-    // Meta
-    'm-date-lbl': 'Tanggal', 'm-stage-lbl': 'Stage',
-    'm-overall-lbl': 'Overall', 'm-verdict-lbl': 'Status',
-    // Priority
-    'ot-eyebrow': 'Fokus Minggu Ini', 'ot-action-lbl': '→ Satu aksi minggu ini',
-    // Sections
-    'wins-lbl': 'Yang lagi bagus', 'cores-lbl': '5 Area Kesehatan Startup',
-    'risk-lbl': 'Yang perlu diperbaiki', 'bench-lbl': 'Benchmark target',
-    'vc-signal-lbl': '💡 VC Signal',
-    // Cores
-    'c1': 'Revenue', 'c2': 'Product', 'c3': 'Operasional',
-    'c4': 'Unit Ekonomi', 'c5': 'AI Moat',
-    // Input
-    'it-manual': 'Input Manual',
-    'dz-title': 'Upload file CSV kamu',
-    'dz-sub': 'Drag ke sini atau klik untuk pilih',
-    'prev-lbl': 'Preview Data',
-    'csv-submit-btn': 'Analisis →', 'csv-cancel-btn': 'Batal',
-    'tpl-lbl': 'Template CSV',
-    'tpl-desc': 'Buat file CSV dengan kolom di bawah ini. Satu baris = satu snapshot mingguan.',
-    // Labels
-    'lbl-date': 'Tanggal Snapshot', 'lbl-stage': 'Stage Startup',
-    'sep-rev': '📈 Revenue', 'lbl-growth': 'MRR Growth MoM (%)',
-    'sep-prod': '🎯 Product', 'lbl-d30': 'Day-30 Retention (%)',
-    'lbl-onb': 'Onboarding (hari)',
-    'sep-ops': '⚙️ Operasional', 'lbl-bugs': 'Bug per Minggu',
-    'sep-eco': '💰 Unit Economics', 'lbl-burn': 'Burn Rate (% of MRR)',
-    'sep-ai': '🤖 AI Moat', 'lbl-airisk': 'Risiko Digantikan AI',
-    'lbl-agentic': 'Agentic Readiness (1–6)',
-    'hint-mrr': 'Monthly Recurring Revenue kamu saat ini',
-    'hint-churn': '% user yang berhenti dalam sebulan',
-    'hint-act': '% user baru yang capai "aha moment"',
-    'submit-manual-btn': '⚡ Analisis Sekarang',
-    // History
-    'hist-title': 'Riwayat Snapshot', 'clear-btn': 'Hapus semua',
-    'hist-empty': 'Belum ada riwayat.',
-    // Sparring
-    'spar-title': '✦ AI Sparring', 'spar-ctx-lbl': 'Konteks — Priority Card kamu',
-    'spar-token-lbl': 'HuggingFace Token',
-    'spar-close-btn': 'Tutup', 'spar-run-btn': 'Kirim →',
-    'spar-open-btn': '✦ Tanya AI Sparring',
-    'spar-open-btn': '✦ Tanya AI Sparring',
-    // Bands
-    'band-green': 'Sehat', 'band-yellow': 'Perhatian', 'band-red': 'Perlu aksi',
-    // Verdict
-    'v-great': 'Sehat 💪', 'v-ok': 'Lumayan 👍', 'v-warn': 'Perlu perhatian ⚠️', 'v-bad': 'Butuh aksi 🔴',
-    // Spar
-    'loader-txt': '⟳ Lagi mikir...',
-    'spar-prompt-ph': 'Tambah konteks: misal "Kami B2B SaaS, ICP-nya CFO fintech, runway 8 bulan"...',
-    'spar-err-key': 'Token HuggingFace tidak valid atau kosong.',
-    'spar-err-generic': 'Gagal connect ke AI. Cek token dan coba lagi.',
+// ═══════════════════════════════════════════════════════════════════
+// i18n
+// ═══════════════════════════════════════════════════════════════════
+const LANG = {
+  id:{
+    tab_diagnosa:'⬡ DIAGNOSA', tab_hasil:'◉ HASIL', tab_resiliensi:'⬢ RESILIENSI',
+    tab_sparring:'◈ SPARRING AI', tab_histori:'◎ HISTORI',
+    setup_title:'SETUP DIAGNOSIS', industry_label:'Industri Bisnis',
+    import_label:'Import Data', btn_template:'⬇ Template',
+    drop_text:'Drop CSV / PDF di sini, atau klik untuk upload',
+    agentic_title:'AGENTIC READINESS — 5 SIGNAL',
+    agentic_desc:'Berapa signal yang sudah lo miliki? (dipakai untuk Core 05)',
+    whatif_title:'WHAT-IF SIMULATOR',whatif_desc:'Ubah 1 metric, lihat dampak ke score (tidak disimpan)',
+    whatif_metric:'Pilih Metric',whatif_newval:'Nilai Baru',
+    current_score:'Score Saat Ini',new_score:'Score Jika Diubah',
+    btn_diagnose:'BEDAH BISNIS',
+    no_result:'Belum ada diagnosis. Jalankan diagnosis dulu.',
+    go_diagnose:'→ Ke Diagnosa',
+    four_outputs:'4 Output Wajib: Breakdown — Killer Risk — 90-Hari Roadmap — Resilience Score',
+    breakdown_title:'5-CORE SCORING BREAKDOWN',
+    th_core:'CORE',th_sistem:'SISTEM',th_kondisi:'KONDISI',th_severity:'SEVERITY',th_bar:'PROGRESS',th_score:'SCORE',
+    audit_title:'SCORING AUDIT LOG',
+    no_resilience:'Jalankan diagnosis untuk lihat Resilience Score.',
+    res_title:'DISRUPTION RESILIENCE SCORE',
+    ai_risk_title:'AI SUBSTITUTION RISK — 2026-2028',
+    moat_boost:'MOAT BOOST ACTIONS',
+    sparring_notice:'Bukan yes-man. Tidak simpan histori. Setiap sesi baru. Privacy terjaga.',
+    btn_send:'KIRIM',
+    sparring_note:'Enter = kirim · Shift+Enter = baris baru · AI tidak mengingat percakapan sebelumnya',
+    starter_title:'STARTER QUESTIONS',
+    hist_title:'HISTORI DIAGNOSIS', btn_export:'⬇ Export CSV', btn_clear:'✕ Hapus',
+    hist_empty:'Belum ada data. Jalankan diagnosis pertama.',
+    hist_trend:'TREND SCORE',
+    stagnation:'⚠ Score stagnan {n} minggu — ada sesuatu yang macet',
+    privacy_text:'Data tidak keluar dari browser',
+    verdict_label:{ready:'READY TO SCALE',fix:'FIX DULU',pivot:'PIVOT REQUIRED',collapse:'SYSTEM COLLAPSE'},
+    verdict_desc:{
+      ready:'Moat kuat, sistem siap ekspansi agresif.',
+      fix:'System debt terdeteksi. 30-hari cleanup wajib.',
+      pivot:'Moat tidak cukup kuat vs AI 2027. Pivot fundamental.',
+      collapse:'Model tidak sustainable. Stop burn. Rebuild sekarang.'
+    },
+    condition:{
+      solid:'SOLID',acceptable:'ACCEPTABLE',fragile:'FRAGILE',collapse_risk:'COLLAPSE RISK',
+      compounding:'COMPOUNDING',functional:'FUNCTIONAL',leaking:'LEAKING',bucket:'BUCKET WITH HOLES',
+      high_velocity:'HIGH VELOCITY',chaos:'CHAOS',
+      scale_ready:'SCALE-READY',almost_ready:'ALMOST READY',not_ready:'NOT READY',danger:'DANGER ZONE',
+      strong_moat:'MOAT KUAT',weak_moat:'MOAT LEMAH',
+    },
+    severity:{kritis:'KRITIS',serius:'SERIUS',perlu:'PERLU PERHATIAN',aman:'AMAN'},
+    level:{sehat:'SEHAT',warning:'WARNING',kritis:'KRITIS'},
+    roadmap_title:'90-HARI SURVIVAL ROADMAP',
+    phase:{
+      phase1:'FASE 1 — QUICK WIN (0-30 Hari)',
+      phase2:'FASE 2 — MOAT BUILDING (30-60 Hari)',
+      phase3:'FASE 3 — AGENTIC FOUNDATION (60-90 Hari)'
+    },
+    killer_label:'⚡ KILLER RISK #1',
+    res_level:{low:'AMAN — MOAT KUAT',medium:'WASPADA — WINDOW CLOSING',high:'BAHAYA — KRITIS'},
+    res_level_desc:{
+      low:'Data proprietary + feedback loop aktif. Sistem lo membaik otomatis dari data user. LLM tidak bisa replikasi tanpa akses ke data lo.',
+      medium:'API wrapper + beberapa data unik. Bisa ditiru kompetitor bermodal dalam 6-12 bulan. Window untuk membangun moat masih ada — tapi makin sempit.',
+      high:'Feature-only, tanpa data unik. Bisa direplikasi LLM + RAG dalam waktu singkat. User tidak kehilangan apapun jika pindah ke kompetitor.'
+    },
+    agentic_signals:[
+      'Event-driven architecture (proses berjalan otomatis saat kondisi terpenuhi)',
+      'Real-time operational dashboard (data live, bukan laporan manual mingguan)',
+      'Automated task audit log (semua aksi tercatat otomatis dengan timestamp)',
+      'External action trigger (notifikasi/API dipicu oleh data, bukan manusia)',
+      'Feedback loop ke model/sistem (output improve input bulan berikutnya)'
+    ],
+    starters:[
+      'Apa yang paling kritis harus gw fix bulan ini?',
+      'Gimana cara bangun moat yang defensibel dari posisi gw sekarang?',
+      'Apakah bisnis gw siap scale atau masih terlalu dini?',
+      'Bagaimana cara reduce churn tanpa nambah budget marketing?',
+      'Apa killer risk #1 yang bisa bunuh bisnis gw dalam 12 bulan?'
+    ]
   },
-  en: {
-    'n-dashboard': 'Dashboard', 'n-input': 'Input Data',
-    'n-history': 'History', 'n-vc': 'VC Briefing',
-    's-title': 'Settings', 's-hf-lbl': 'HuggingFace Token (AI Sparring)',
-    'de-title': 'No data yet',
-    'de-sub': 'Upload a CSV or fill in manually so CocoBlast can diagnose your startup.',
-    'de-btn': 'Start Input →',
-    'm-date-lbl': 'Date', 'm-stage-lbl': 'Stage',
-    'm-overall-lbl': 'Overall', 'm-verdict-lbl': 'Status',
-    'ot-eyebrow': 'Focus This Week', 'ot-action-lbl': '→ One action this week',
-    'wins-lbl': 'Where you\'re doing well', 'cores-lbl': '5 Startup Health Areas',
-    'risk-lbl': 'Needs improvement', 'bench-lbl': 'Benchmark targets',
-    'vc-signal-lbl': '💡 VC Signal',
-    'c1': 'Revenue', 'c2': 'Product', 'c3': 'Operations',
-    'c4': 'Unit Economics', 'c5': 'AI Moat',
-    'it-manual': 'Manual Input',
-    'dz-title': 'Upload your CSV file',
-    'dz-sub': 'Drag file here or click to select',
-    'prev-lbl': 'Data Preview',
-    'csv-submit-btn': 'Analyze →', 'csv-cancel-btn': 'Cancel',
-    'tpl-lbl': 'CSV Template',
-    'tpl-desc': 'Create a CSV file with the columns below. One row = one weekly snapshot.',
-    'lbl-date': 'Snapshot Date', 'lbl-stage': 'Startup Stage',
-    'sep-rev': '📈 Revenue', 'lbl-growth': 'MRR Growth MoM (%)',
-    'sep-prod': '🎯 Product', 'lbl-d30': 'Day-30 Retention (%)',
-    'lbl-onb': 'Onboarding (days)',
-    'sep-ops': '⚙️ Operations', 'lbl-bugs': 'Bugs per Week',
-    'sep-eco': '💰 Unit Economics', 'lbl-burn': 'Burn Rate (% of MRR)',
-    'sep-ai': '🤖 AI Moat', 'lbl-airisk': 'AI Substitution Risk',
-    'lbl-agentic': 'Agentic Readiness (1–6)',
-    'hint-mrr': 'Your current Monthly Recurring Revenue',
-    'hint-churn': '% users who churned this month',
-    'hint-act': '% new users who reached "aha moment"',
-    'submit-manual-btn': '⚡ Analyze Now',
-    'hist-title': 'Snapshot History', 'clear-btn': 'Clear all',
-    'hist-empty': 'No history yet.',
-    'spar-title': '✦ AI Sparring', 'spar-ctx-lbl': 'Context — Your Priority Card',
-    'spar-token-lbl': 'HuggingFace Token',
-    'spar-close-btn': 'Close', 'spar-run-btn': 'Send →',
-    'spar-open-btn': '✦ Ask AI Sparring',
-    'band-green': 'Healthy', 'band-yellow': 'Watch', 'band-red': 'Act now',
-    'v-great': 'Healthy 💪', 'v-ok': 'Decent 👍', 'v-warn': 'Needs attention ⚠️', 'v-bad': 'Urgent action 🔴',
-    'loader-txt': '⟳ Thinking...',
-    'spar-prompt-ph': 'Add context: e.g. "B2B SaaS, ICP is fintech CFO, 8 months runway"...',
-    'spar-err-key': 'Invalid or missing HuggingFace token.',
-    'spar-err-generic': 'Failed to reach AI. Check token and retry.',
+  en:{
+    tab_diagnosa:'⬡ DIAGNOSE',tab_hasil:'◉ RESULTS',tab_resiliensi:'⬢ RESILIENCE',
+    tab_sparring:'◈ AI SPARRING',tab_histori:'◎ HISTORY',
+    setup_title:'DIAGNOSIS SETUP',industry_label:'Business Industry',
+    import_label:'Import Data',btn_template:'⬇ Template',
+    drop_text:'Drop CSV / PDF here, or click to upload',
+    agentic_title:'AGENTIC READINESS — 5 SIGNALS',
+    agentic_desc:'How many signals do you have? (used for Core 05)',
+    whatif_title:'WHAT-IF SIMULATOR',whatif_desc:'Change 1 metric, see score impact (not saved)',
+    whatif_metric:'Select Metric',whatif_newval:'New Value',
+    current_score:'Current Score',new_score:'Score If Changed',
+    btn_diagnose:'RUN DIAGNOSIS',
+    no_result:'No diagnosis yet. Run your first diagnosis.',
+    go_diagnose:'→ Go to Diagnose',
+    four_outputs:'4 Required Outputs: Breakdown — Killer Risk — 90-Day Roadmap — Resilience Score',
+    breakdown_title:'5-CORE SCORING BREAKDOWN',
+    th_core:'CORE',th_sistem:'SYSTEM',th_kondisi:'CONDITION',th_severity:'SEVERITY',th_bar:'PROGRESS',th_score:'SCORE',
+    audit_title:'SCORING AUDIT LOG',
+    no_resilience:'Run diagnosis to see Resilience Score.',
+    res_title:'DISRUPTION RESILIENCE SCORE',
+    ai_risk_title:'AI SUBSTITUTION RISK — 2026-2028',
+    moat_boost:'MOAT BOOST ACTIONS',
+    sparring_notice:'Not a yes-man. No history saved. New session each time. Privacy protected.',
+    btn_send:'SEND',
+    sparring_note:'Enter = send · Shift+Enter = new line · AI does not remember previous conversations',
+    starter_title:'STARTER QUESTIONS',
+    hist_title:'DIAGNOSIS HISTORY',btn_export:'⬇ Export CSV',btn_clear:'✕ Clear',
+    hist_empty:'No data yet. Run your first diagnosis.',
+    hist_trend:'SCORE TREND',
+    stagnation:'⚠ Score stagnant {n} weeks — something is stuck',
+    privacy_text:'Data stays in browser',
+    verdict_label:{ready:'READY TO SCALE',fix:'FIX FIRST',pivot:'PIVOT REQUIRED',collapse:'SYSTEM COLLAPSE'},
+    verdict_desc:{
+      ready:'Strong moat, system ready to scale aggressively.',
+      fix:'System debt detected. 30-day cleanup required.',
+      pivot:'Moat insufficient vs AI 2027. Fundamental pivot needed.',
+      collapse:'Unsustainable model. Stop burn. Rebuild now.'
+    },
+    condition:{
+      solid:'SOLID',acceptable:'ACCEPTABLE',fragile:'FRAGILE',collapse_risk:'COLLAPSE RISK',
+      compounding:'COMPOUNDING',functional:'FUNCTIONAL',leaking:'LEAKING',bucket:'BUCKET WITH HOLES',
+      high_velocity:'HIGH VELOCITY',chaos:'CHAOS',
+      scale_ready:'SCALE-READY',almost_ready:'ALMOST READY',not_ready:'NOT READY',danger:'DANGER ZONE',
+      strong_moat:'STRONG MOAT',weak_moat:'WEAK MOAT',
+    },
+    severity:{kritis:'CRITICAL',serius:'SERIOUS',perlu:'NEEDS ATTENTION',aman:'SAFE'},
+    level:{sehat:'HEALTHY',warning:'WARNING',kritis:'CRITICAL'},
+    roadmap_title:'90-DAY SURVIVAL ROADMAP',
+    phase:{
+      phase1:'PHASE 1 — QUICK WIN (0-30 Days)',
+      phase2:'PHASE 2 — MOAT BUILDING (30-60 Days)',
+      phase3:'PHASE 3 — AGENTIC FOUNDATION (60-90 Days)'
+    },
+    killer_label:'⚡ KILLER RISK #1',
+    res_level:{low:'SAFE — STRONG MOAT',medium:'CAUTION — WINDOW CLOSING',high:'DANGER — CRITICAL'},
+    res_level_desc:{
+      low:'Proprietary data + active feedback loop. Your system improves automatically from user data. LLM cannot replicate without access to your data.',
+      medium:'API wrapper + some unique data. Can be replicated by well-funded competitors in 6-12 months. Window to build moat still open — but narrowing.',
+      high:'Feature-only, no meaningful unique data. Replicable by LLM + RAG quickly. Users lose nothing if they switch to a competitor.'
+    },
+    agentic_signals:[
+      'Event-driven architecture (processes run automatically when conditions are met)',
+      'Real-time operational dashboard (live data, not weekly manual reports)',
+      'Automated task audit log (all actions auto-recorded with timestamp)',
+      'External action trigger (notifications/API triggered by data, not humans)',
+      'Feedback loop to model/system (output improves next month input)'
+    ],
+    starters:[
+      'What\'s the most critical thing I need to fix this month?',
+      'How do I build a defensible moat from my current position?',
+      'Is my business ready to scale or is it too early?',
+      'How do I reduce churn without increasing marketing budget?',
+      'What\'s the #1 killer risk that could kill my business in 12 months?'
+    ]
   }
 };
 
-function t(key) { return T[lang][key] || T['id'][key] || key; }
-
-// ── INIT ──────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-  loadSessions();
-  populateSettings();
-  applyLang();
-  setToday();
-  renderHistory();
-
-  const last = sessions[sessions.length - 1];
-  if (last) renderDashboard(last);
-});
-
-function setToday() {
-  const d = document.getElementById('f-date');
-  if (d && !d.value) d.value = new Date().toISOString().split('T')[0];
+let lang = 'id';
+function t(key){ const keys=key.split('.'); let v=LANG[lang]; for(const k of keys) v=v?.[k]; return v||key; }
+function toggleLang(){
+  lang = lang==='id'?'en':'id';
+  document.getElementById('lang-btn').textContent = lang==='id'?'🇮🇩 ID':'🇺🇸 EN';
+  document.getElementById('privacy-text').textContent = t('privacy_text');
+  document.querySelectorAll('[data-i]').forEach(el=>{ const v=t(el.dataset.i); if(v!==el.dataset.i) el.textContent=v; });
+  renderAgenticChecklist();
+  renderStarterQuestions();
+  if(lastResult) renderAllResults(lastResult);
 }
 
-// ── LANGUAGE ──────────────────────────────────────────────────────────────────
-function toggleLang() {
-  lang = lang === 'id' ? 'en' : 'id';
-  localStorage.setItem('cb_lang', lang);
-  applyLang();
-  if (currentDiag) renderDashboard(currentDiag);
-}
+// ═══════════════════════════════════════════════════════════════════
+// INDUSTRY DATA
+// ═══════════════════════════════════════════════════════════════════
+const IND_FIELDS = {
+  saas:{
+    c01:[
+      {k:'sopCoverage',    li:'SOP Coverage',     le:'SOP Coverage',     u:'%',  mi:0,ma:100,df:50, hi:'>80% sehat',   he:'>80% healthy'},
+      {k:'automationRate', li:'Automation Rate',   le:'Automation Rate',  u:'%',  mi:0,ma:100,df:40, hi:'>60% sehat',   he:'>60% healthy'},
+      {k:'csat',           li:'CSAT Score',        le:'CSAT Score',       u:'%',  mi:0,ma:100,df:70, hi:'>80% sehat',   he:'>80% healthy'},
+      {k:'onboardingDays', li:'Onboarding Time',   le:'Onboarding Time',  u:'hari',mi:1,ma:60,df:7,  hi:'<3 hari sehat',he:'<3 days healthy'},
+      {k:'ticketBacklog',  li:'Ticket Backlog/mgg',le:'Ticket Backlog/wk',u:'tiket',mi:0,ma:200,df:20,hi:'<10 sehat',  he:'<10 healthy'},
+      {k:'resolutionHours',li:'Resolution Time',   le:'Resolution Time',  u:'jam',mi:1,ma:200,df:36, hi:'<24jam sehat', he:'<24h healthy'},
+    ],
+    c02:[
+      {k:'nrr',           li:'NRR (%)',            le:'NRR (%)',           u:'%',mi:0,ma:200,df:95,  hi:'>106% sehat',  he:'>106% healthy'},
+      {k:'trialToPaid',   li:'Trial-to-Paid',      le:'Trial-to-Paid',    u:'%',mi:0,ma:100,df:15,  hi:'>20% sehat',   he:'>20% healthy'},
+      {k:'monthlyChurn',  li:'Monthly Churn',      le:'Monthly Churn',    u:'%',mi:0,ma:50, df:5,   hi:'<3% sehat',    he:'<3% healthy'},
+      {k:'ltvCac',        li:'LTV:CAC Ratio',      le:'LTV:CAC Ratio',    u:'x', mi:0,ma:20, df:2.5, hi:'>3x sehat',    he:'>3x healthy'},
+      {k:'week2Retention',li:'Week-2 Retention',   le:'Week-2 Retention', u:'%',mi:0,ma:100,df:40,  hi:'>50% sehat',   he:'>50% healthy'},
+    ],
+    c04extra:[
+      {k:'bugRate',              li:'Bug Rate/mgg',      le:'Bug Rate/wk',      u:'bugs',mi:0,ma:100,df:10, hi:'<5 sehat',      he:'<5 healthy'},
+      {k:'headcountGrowthRatio', li:'Headcount/Rev Ratio',le:'Headcount/Rev',   u:'x',   mi:0,ma:5,  df:0.8, hi:'<0.5x sehat',  he:'<0.5x healthy'},
+    ]
+  },
+  ecom:{
+    c01:[
+      {k:'sopCoverage',   li:'SOP Coverage',    le:'SOP Coverage',   u:'%',  mi:0,ma:100,df:50, hi:'>80% sehat',he:'>80% healthy'},
+      {k:'automationRate',li:'Automation Rate',  le:'Automation Rate',u:'%',  mi:0,ma:100,df:40, hi:'>60% sehat',he:'>60% healthy'},
+      {k:'csat',          li:'CSAT Score',       le:'CSAT Score',     u:'%',  mi:0,ma:100,df:70, hi:'>80% sehat',he:'>80% healthy'},
+      {k:'onboardingDays',li:'Fulfillment SLA',  le:'Fulfillment SLA',u:'jam',mi:1,ma:200,df:48, hi:'<24jam',   he:'<24h'},
+      {k:'ticketBacklog', li:'Ticket Backlog/mgg',le:'Ticket Backlog/wk',u:'tiket',mi:0,ma:200,df:30,hi:'<10 sehat',he:'<10 healthy'},
+      {k:'resolutionHours',li:'Resolution Time', le:'Resolution Time',u:'jam',mi:1,ma:200,df:36, hi:'<24jam sehat',he:'<24h healthy'},
+    ],
+    c02:[
+      {k:'repeatPurchase',li:'Repeat Purchase Rate',le:'Repeat Purchase Rate',u:'%',mi:0,ma:100,df:20,hi:'>35% sehat',he:'>35% healthy'},
+      {k:'roas',          li:'ROAS Main Channel', le:'ROAS Main Channel',    u:'x', mi:0,ma:20, df:2, hi:'>3x sehat',  he:'>3x healthy'},
+      {k:'monthlyChurn',  li:'Monthly Churn',     le:'Monthly Churn',        u:'%',mi:0,ma:50, df:8, hi:'<5% sehat',  he:'<5% healthy'},
+      {k:'ltvCac',        li:'LTV:CAC Ratio',     le:'LTV:CAC Ratio',        u:'x', mi:0,ma:20, df:2, hi:'>3x sehat',  he:'>3x healthy'},
+    ],
+    c04extra:[
+      {k:'skuMargin',li:'Margin per SKU',le:'SKU Margin',u:'%',mi:0,ma:100,df:12,hi:'>20% sehat',he:'>20% healthy'},
+    ]
+  },
+  fintech:{
+    c01:[
+      {k:'sopCoverage',   li:'SOP Coverage',     le:'SOP Coverage',    u:'%', mi:0,ma:100,df:50,hi:'>80% sehat',he:'>80% healthy'},
+      {k:'automationRate',li:'Automation Rate',   le:'Automation Rate', u:'%', mi:0,ma:100,df:40,hi:'>60% sehat',he:'>60% healthy'},
+      {k:'csat',          li:'CSAT Score',        le:'CSAT Score',      u:'%', mi:0,ma:100,df:70,hi:'>80% sehat',he:'>80% healthy'},
+      {k:'onboardingDays',li:'Approval Time',     le:'Approval Time',   u:'jam',mi:1,ma:200,df:48,hi:'<24jam sehat',he:'<24h healthy'},
+      {k:'ticketBacklog', li:'Compliance Incidents/kuartal',le:'Compliance Incidents/qtr',u:'insiden',mi:0,ma:20,df:3,hi:'<2 sehat',he:'<2 healthy'},
+      {k:'resolutionHours',li:'Resolution Time',  le:'Resolution Time', u:'jam',mi:1,ma:200,df:36,hi:'<24jam sehat',he:'<24h healthy'},
+    ],
+    c02:[
+      {k:'day30Retention',li:'Day-30 Retention',le:'Day-30 Retention',u:'%',mi:0,ma:100,df:40,hi:'>50% sehat',he:'>50% healthy'},
+      {k:'referralRate',  li:'Referral Rate',    le:'Referral Rate',   u:'%',mi:0,ma:50, df:2, hi:'>4% sehat', he:'>4% healthy'},
+      {k:'monthlyChurn',  li:'Monthly Churn',    le:'Monthly Churn',   u:'%',mi:0,ma:50, df:5, hi:'<3% sehat', he:'<3% healthy'},
+      {k:'ltvCac',        li:'LTV:CAC Ratio',    le:'LTV:CAC Ratio',   u:'x', mi:0,ma:20, df:2, hi:'>3x sehat', he:'>3x healthy'},
+    ],
+    c04extra:[
+      {k:'bugRate',             li:'Compliance Incidents/qtr',le:'Compliance Incidents/qtr',u:'insiden',mi:0,ma:20,df:3,hi:'<2 sehat',he:'<2 healthy'},
+      {k:'headcountGrowthRatio',li:'Headcount/Rev Ratio',     le:'Headcount/Rev',           u:'x',     mi:0,ma:5, df:0.8,hi:'<0.5x sehat',he:'<0.5x healthy'},
+    ]
+  },
+  fb:{
+    c01:[
+      {k:'sopCoverage',   li:'SOP Coverage',         le:'SOP Coverage',         u:'%',   mi:0,ma:100,df:50, hi:'>80% sehat',    he:'>80% healthy'},
+      {k:'automationRate',li:'Automation Rate',       le:'Automation Rate',       u:'%',   mi:0,ma:100,df:30, hi:'>60% sehat',    he:'>60% healthy'},
+      {k:'csat',          li:'CSAT / Rating Internal',le:'CSAT / Internal Rating',u:'%',   mi:0,ma:100,df:70, hi:'>80% sehat',    he:'>80% healthy'},
+      {k:'onboardingDays',li:'Service Time',          le:'Service Time',          u:'menit',mi:1,ma:120,df:18,hi:'<15 menit sehat',he:'<15 min healthy'},
+      {k:'ticketBacklog', li:'Complaint/bulan',       le:'Complaints/month',      u:'kasus',mi:0,ma:200,df:15,hi:'<5 sehat',      he:'<5 healthy'},
+      {k:'resolutionHours',li:'Food Waste Rate',      le:'Food Waste Rate',       u:'%',   mi:0,ma:50, df:10, hi:'<8% sehat',     he:'<8% healthy'},
+    ],
+    c02:[
+      {k:'repeatVisit',   li:'Repeat Visit Rate',  le:'Repeat Visit Rate', u:'%', mi:0,ma:100,df:22, hi:'>35% sehat',  he:'>35% healthy'},
+      {k:'platformRating',li:'Rating Platform',     le:'Platform Rating',   u:'/5',mi:1,ma:5,  df:3.9, hi:'>4.3 sehat', he:'>4.3 healthy'},
+      {k:'ltvCac',        li:'LTV:CAC Ratio',       le:'LTV:CAC Ratio',     u:'x', mi:0,ma:20, df:2,   hi:'>3x sehat',  he:'>3x healthy'},
+    ],
+    c04extra:[
+      {k:'cogsRatio',li:'COGS Ratio (Food Cost)',le:'COGS Ratio (Food Cost)',u:'%',mi:0,ma:100,df:42,hi:'<35% sehat',he:'<35% healthy'},
+    ]
+  },
+  healthcare:{
+    c01:[
+      {k:'sopCoverage',   li:'SOP Coverage',          le:'SOP Coverage',         u:'%',   mi:0,ma:100,df:50, hi:'>80% sehat',    he:'>80% healthy'},
+      {k:'automationRate',li:'Automation Rate',        le:'Automation Rate',       u:'%',   mi:0,ma:100,df:30, hi:'>60% sehat',    he:'>60% healthy'},
+      {k:'csat',          li:'Patient Satisfaction',   le:'Patient Satisfaction',  u:'%',   mi:0,ma:100,df:70, hi:'>80% sehat',    he:'>80% healthy'},
+      {k:'onboardingDays',li:'Wait Time Pasien',       le:'Patient Wait Time',     u:'menit',mi:1,ma:180,df:45,hi:'<25 menit sehat',he:'<25 min healthy'},
+      {k:'ticketBacklog', li:'Appointment Cancel Rate',le:'Appointment Cancel Rate',u:'%',  mi:0,ma:100,df:22, hi:'<10% sehat',    he:'<10% healthy'},
+      {k:'resolutionHours',li:'Rekam Medis Digital %', le:'Digital Records %',     u:'%',   mi:0,ma:100,df:40, hi:'>80% sehat',    he:'>80% healthy'},
+    ],
+    c02:[
+      {k:'patientRetention',  li:'Patient Retention Rate',  le:'Patient Retention Rate',  u:'%',mi:0,ma:100,df:45,hi:'>58% sehat',he:'>58% healthy'},
+      {k:'noShow',            li:'No-Show Rate',             le:'No-Show Rate',             u:'%',mi:0,ma:100,df:22,hi:'<15% sehat',he:'<15% healthy'},
+      {k:'followUpCompliance',li:'Follow-Up Compliance',     le:'Follow-Up Compliance',     u:'%',mi:0,ma:100,df:40,hi:'>70% sehat',he:'>70% healthy'},
+      {k:'referralRate',      li:'Referral Rate',            le:'Referral Rate',            u:'%',mi:0,ma:50, df:8, hi:'>12% sehat',he:'>12% healthy'},
+    ],
+    c04extra:[
+      {k:'occupancyRate',li:'Occupancy Rate Klinik',le:'Clinic Occupancy Rate',u:'%',mi:0,ma:100,df:60,hi:'>75% sehat',he:'>75% healthy'},
+    ]
+  }
+};
 
-function applyLang() {
-  document.getElementById('langBtn').textContent = lang === 'id' ? 'EN' : 'ID';
-  document.documentElement.lang = lang;
-  Object.keys(T[lang]).forEach(k => {
-    const el = document.getElementById(k);
-    if (!el) return;
-    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-      if (T[lang][k + '-ph']) el.placeholder = T[lang][k + '-ph'];
-    } else {
-      el.textContent = t(k);
+const UNIVERSAL_C03 = [
+  {k:'founderOpsHours',    li:'Jam Ops Founder/mgg',   le:'Founder Ops Hours/wk', u:'jam',  mi:0,ma:80, df:30, hi:'<20 jam sehat',   he:'<20h healthy'},
+  {k:'sprintCompletion',   li:'Sprint Completion Rate', le:'Sprint Completion Rate',u:'%',  mi:0,ma:100,df:65, hi:'>80% sehat',      he:'>80% healthy'},
+  {k:'revenuePerHeadcount',li:'Revenue per Headcount',  le:'Revenue per Headcount', u:'juta IDR',mi:0,ma:500,df:30, hi:'>50 juta sehat', he:'>50M IDR healthy'},
+  {k:'meetingHours',       li:'Meeting Hours/mgg',      le:'Meeting Hours/wk',      u:'jam',mi:0,ma:40, df:12, hi:'<8 jam sehat',     he:'<8h healthy'},
+  {k:'aiProficiency',      li:'AI Proficiency (0-5)',   le:'AI Proficiency (0-5)',  u:'/5',  mi:0,ma:5,  df:2,  hi:'>=3 sehat',       he:'>=3 healthy'},
+];
+const UNIVERSAL_C04 = [
+  {k:'systemUptime',      li:'System Uptime',        le:'System Uptime',        u:'%',mi:0,ma:100,df:98,hi:'>99% sehat',he:'>99% healthy'},
+  {k:'automationCoverage',li:'Automation Coverage',  le:'Automation Coverage',  u:'%',mi:0,ma:100,df:35,hi:'>60% sehat',he:'>60% healthy'},
+  {k:'burnRateVsRevenue', li:'Burn Rate vs Revenue', le:'Burn Rate vs Revenue', u:'%',mi:0,ma:200,df:30,hi:'<20% sehat',he:'<20% healthy'},
+];
+const UNIVERSAL_C05 = [
+  {k:'dataDepth',       li:'Proprietary Data Depth (0-10)',  le:'Proprietary Data Depth (0-10)', u:'/10',mi:0,ma:10,df:4, hi:'>7 = tidak bisa di-scrape',    he:'>7 = cannot be scraped'},
+  {k:'feedbackLoop',    li:'Feedback Loop Aktif (0-10)',     le:'Feedback Loop Active (0-10)',   u:'/10',mi:0,ma:10,df:3, hi:'>6 = sistem makin pintar',     he:'>6 = system gets smarter'},
+  {k:'switchingCost',   li:'Switching Cost Score (0-10)',    le:'Switching Cost Score (0-10)',   u:'/10',mi:0,ma:10,df:4, hi:'>7 = user rugi besar jika pergi',he:'>7 = user loses a lot if they leave'},
+  {k:'agenticReadiness',li:'Agentic Readiness (0-5 signal)', le:'Agentic Readiness (0-5 signals)',u:'/5',mi:0,ma:5, df:1, hi:'isi dari checklist di bawah',  he:'fill from checklist below'},
+];
+
+const ROADMAPS = {
+  saas:{
+    p1:{
+      id:{actions:['Dokumentasi 3 SOP kritis (onboarding, complaint, eskalasi)','Audit onboarding drop-off — identifikasi titik terbesar','Setup PM tool + async standup 3 kalimat/hari','Definisikan 1 activation metric dalam 7 hari pertama'],kpi:['SOP adoption >80%','Task visibility 100%','Baseline CSAT terukur']},
+      en:{actions:['Document 3 critical SOPs (onboarding, complaint, escalation)','Audit onboarding drop-off — identify biggest drop point','Setup PM tool + async standup 3 lines/day','Define 1 activation metric in first 7 days'],kpi:['SOP adoption >80%','Task visibility 100%','CSAT baseline measured']},
+    },
+    p2:{
+      id:{actions:['Onboarding playbook live per user segment','Email sequence + NPS trigger aktif','User health score per user (login + usage + NPS)','Decision delegation — founder bukan bottleneck'],kpi:['Onboarding <5 hari','Activation rate >40%','Founder ops <28 jam/mgg']},
+      en:{actions:['Onboarding playbook live per user segment','Email sequence + NPS trigger active','User health score per user (login + usage + NPS)','Decision delegation — founder not bottleneck'],kpi:['Onboarding <5 days','Activation rate >40%','Founder ops <28h/wk']},
+    },
+    p3:{
+      id:{actions:['Full automation workflow aktif','Churn dashboard real-time + feedback loop','Outcome tracking per user workflow','Deploy 1 agentic signal: event-driven atau audit log otomatis'],kpi:['Churn <5%','CSAT >80%','NRR >100%']},
+      en:{actions:['Full automation workflow active','Real-time churn dashboard + feedback loop','Outcome tracking per user workflow','Deploy 1 agentic signal: event-driven or automated audit log'],kpi:['Churn <5%','CSAT >80%','NRR >100%']},
     }
-  });
-  // Prompt placeholder
-  const sp = document.getElementById('spar-prompt');
-  if (sp) sp.placeholder = t('spar-prompt-ph');
-}
-
-// ── NAVIGATION ────────────────────────────────────────────────────────────────
-const VIEWS = ['dash', 'input', 'history', 'vc'];
-function switchView(v) {
-  VIEWS.forEach(id => {
-    document.getElementById('view-' + id).classList.toggle('active', id === v);
-    document.getElementById('nb-' + id).classList.toggle('active', id === v);
-  });
-  if (v === 'history') renderHistory();
-}
-
-function switchITab(t) {
-  ['csv', 'manual'].forEach(id => {
-    document.getElementById('itab-' + id).classList.toggle('active', id === t);
-    document.getElementById('ic-' + id).classList.toggle('active', id === t);
-  });
-}
-
-// ── SETTINGS ──────────────────────────────────────────────────────────────────
-function toggleSettings() {
-  document.getElementById('settingsDrawer').classList.toggle('open');
-}
-
-function populateSettings() {
-  document.getElementById('hfTokenInput').value = hfToken;
-  document.getElementById('spar-token').value = hfToken;
-}
-
-function saveToken(v) {
-  hfToken = v.trim();
-  localStorage.setItem('cb_hf_token', hfToken);
-  document.getElementById('spar-token').value = hfToken;
-  const msg = document.getElementById('settingsSaved');
-  msg.style.display = 'block';
-  setTimeout(() => msg.style.display = 'none', 1800);
-}
-
-// ── STORAGE ───────────────────────────────────────────────────────────────────
-function loadSessions() {
-  try { sessions = JSON.parse(localStorage.getItem('cb_sessions') || '[]'); }
-  catch { sessions = []; }
-}
-function saveSessions() { localStorage.setItem('cb_sessions', JSON.stringify(sessions)); }
-function clearHistory() {
-  if (!confirm(lang === 'id' ? 'Hapus semua riwayat?' : 'Delete all history?')) return;
-  sessions = [];
-  saveSessions();
-  renderHistory();
-}
-
-// ════════════════════════════════════════════════════════════════════════════════
-// SCORING ENGINE v6 — BEHAVIOR-FRIENDLY (NO FATAL CAP)
-// ════════════════════════════════════════════════════════════════════════════════
-
-function score(val, thresholds) {
-  // thresholds: [[value, points], ...] sorted desc
-  for (const [thresh, pts] of thresholds) {
-    if (val >= thresh) return pts;
+  },
+  ecom:{
+    p1:{
+      id:{actions:['Audit fulfillment flow + fix bottleneck terbesar','Konsolidasi inventory ke satu tool','SOP fulfillment per channel','Setup post-purchase tracking'],kpi:['Fulfillment SLA <48 jam','Return rate baseline','Delay rate -20%']},
+      en:{actions:['Audit fulfillment flow + fix biggest bottleneck','Consolidate inventory to one tool','SOP fulfillment per channel','Setup post-purchase tracking'],kpi:['Fulfillment SLA <48h','Return rate baseline measured','Delay rate -20%']},
+    },
+    p2:{
+      id:{actions:['Post-purchase loop otomatis + loyalty trigger aktif','Segmentasi RFM (Recency, Frequency, Monetary)','CAC vs LTV dashboard live','Win-back sequence untuk lapsed customer'],kpi:['Repeat purchase +15%','CAC turun >10%','Repeat purchase >28%']},
+      en:{actions:['Automated post-purchase loop + loyalty trigger active','RFM segmentation (Recency, Frequency, Monetary)','CAC vs LTV dashboard live','Win-back sequence for lapsed customers'],kpi:['Repeat purchase +15%','CAC down >10%','Repeat purchase >28%']},
+    },
+    p3:{
+      id:{actions:['Retention > akuisisi ratio sehat','Margin per SKU terpantau otomatis','Prediction model next purchase date per pelanggan','Channel profitability gate live'],kpi:['Gross margin >35%','NPS >30','ROAS >3x']},
+      en:{actions:['Retention > acquisition ratio healthy','SKU margin auto-monitored','Next purchase date prediction model per customer','Channel profitability gate live'],kpi:['Gross margin >35%','NPS >30','ROAS >3x']},
+    }
+  },
+  fintech:{
+    p1:{
+      id:{actions:['Approval workflow digital + timestamp otomatis','Compliance calendar dengan 30-hari reminder','Audit trail SOP: siapa, apa, kapan, kenapa','Hitung CAC dan LTV aktual per cohort'],kpi:['Compliance gap = 0','Approval time <24 jam','CAC:LTV baseline terukur']},
+      en:{actions:['Digital approval workflow + automatic timestamps','Compliance calendar with 30-day reminders','Audit trail SOP: who, what, when, why','Calculate actual CAC and LTV per cohort'],kpi:['Compliance gap = 0','Approval time <24h','CAC:LTV baseline measured']},
+    },
+    p2:{
+      id:{actions:['Trust content calendar live (edukasi bukan promosi)','Milestone trigger: user capai tujuan → auto-celebrate','Onboarding friction dihapus per user segment','Dokumentasi compliance moat sebagai asset'],kpi:['Month-1 retention >60%','Referral rate >5%','Burn rate <25%']},
+      en:{actions:['Trust content calendar live (education not promotion)','Milestone trigger: user achieves goal → auto-celebrate','Remove onboarding friction per user segment','Document compliance moat as asset'],kpi:['Month-1 retention >60%','Referral rate >5%','Burn rate <25%']},
+    },
+    p3:{
+      id:{actions:['Unit economics dashboard real-time','Scaling gate aktif berbasis CAC:LTV','Trust data layer: track tiap touchpoint yang convert','NRR tracking per cohort otomatis'],kpi:['NRR >100%','Burn rate terkontrol','CAC:LTV >1:3']},
+      en:{actions:['Real-time unit economics dashboard','Scaling gate active based on CAC:LTV','Trust data layer: track every converting touchpoint','NRR tracking per cohort automatically'],kpi:['NRR >100%','Burn rate controlled','CAC:LTV >1:3']},
+    }
+  },
+  fb:{
+    p1:{
+      id:{actions:['Dokumentasi resep dengan foto step-by-step','Par level per bahan baku + alert stok otomatis','Daily checklist opening/closing 15 item/station','Waste tracking sheet aktif'],kpi:['Food cost <35%','Waste turun >20%','Resep 100% terdokumentasi']},
+      en:{actions:['Document recipes with step-by-step photos','Par level per ingredient + automatic stock alerts','Daily opening/closing checklist 15 items/station','Waste tracking sheet active'],kpi:['Food cost <35%','Waste down >20%','Recipes 100% documented']},
+    },
+    p2:{
+      id:{actions:['WhatsApp loyalty loop aktif (max 50 pelanggan paling loyal)','Shift handover log: stok sisa, masalah, pending','Staff scorecard mingguan 10 item SOP compliance','Identifikasi 50 pelanggan loyal — database pertama'],kpi:['Repeat visit +20%','Complaint <5/bulan','Platform rating >4.2']},
+      en:{actions:['WhatsApp loyalty loop active (max 50 most loyal customers)','Shift handover log: remaining stock, issues, pending','Weekly staff scorecard 10 SOP items','Identify 50 loyal customers — first database'],kpi:['Repeat visit +20%','Complaints <5/month','Platform rating >4.2']},
+    },
+    p3:{
+      id:{actions:['Outlet-ready kit untuk cabang baru (franchise-readiness test)','Food cost & margin dashboard real-time','Outlet bisa run 2 minggu tanpa founder','Expansion checklist 20 kriteria semuanya hijau'],kpi:['Outlet readiness >80%','Margin bersih >20%','COGS <35% konsisten']},
+      en:{actions:['Outlet-ready kit for new branch (franchise-readiness test)','Real-time food cost & margin dashboard','Outlet can run 2 weeks without founder','Expansion checklist 20 criteria all green'],kpi:['Outlet readiness >80%','Net margin >20%','COGS <35% consistently']},
+    }
+  },
+  healthcare:{
+    p1:{
+      id:{actions:['Audit patient journey: dari daftar sampai keluar','Implementasi digital appointment system + reminder H-1','Staff handover checklist per shift','Compliance checklist harian 10 item'],kpi:['Wait time <30 menit','No-show rate <15%','Appointment reminder live']},
+      en:{actions:['Audit patient journey: from registration to exit','Implement digital appointment system + day-before reminder','Staff handover checklist per shift','Daily compliance checklist 10 items'],kpi:['Wait time <30 min','No-show rate <15%','Appointment reminder live']},
+    },
+    p2:{
+      id:{actions:['Reminder otomatis + health tip sequence per diagnosis','Follow-up call protokol 3 hari post-visit pasien kronis','Rekam medis digital untuk semua pasien baru','Referral program: pasien refer → priority booking'],kpi:['Follow-up compliance >70%','Complaint turun >30%','Patient retention >58%']},
+      en:{actions:['Auto reminders + health tip sequence per diagnosis','Follow-up call protocol 3 days post-visit for chronic patients','Digital medical records for all new patients','Referral program: patients refer → priority booking'],kpi:['Follow-up compliance >70%','Complaints down >30%','Patient retention >58%']},
+    },
+    p3:{
+      id:{actions:['Clinical ops manual siap replikasi ke klinik baru','Patient retention dashboard live','Longitudinal tracking untuk 50 pasien kronis','Dokumentasi compliance moat: akreditasi, SIP, audit history'],kpi:['Retention rate >65%','Referral rate >10%','Occupancy >75%']},
+      en:{actions:['Clinical ops manual ready to replicate to new clinic','Patient retention dashboard live','Longitudinal tracking for 50 chronic patients','Compliance moat docs: accreditation, SIP, audit history'],kpi:['Retention rate >65%','Referral rate >10%','Occupancy >75%']},
+    }
   }
-  return thresholds[thresholds.length - 1][1];
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
+let industry = 'saas';
+let metrics = {};
+let lastResult = null;
+let agenticCount = 0;
+
+function getFields(ind){
+  const d = IND_FIELDS[ind]||IND_FIELDS.saas;
+  return {c01:d.c01||[], c02:d.c02||[], c03:UNIVERSAL_C03, c04:[...UNIVERSAL_C04,...(d.c04extra||[])], c05:UNIVERSAL_C05};
+}
+function getDefault(ind){
+  const f=getFields(ind); const m={};
+  [...f.c01,...f.c02,...f.c03,...f.c04,...f.c05].forEach(fd=>{ m[fd.k]=fd.df; });
+  return m;
 }
 
-function clamp(v, min = 0, max = 100) { return Math.max(min, Math.min(max, v)); }
-function bandOf(s) { return s >= 72 ? 'green' : s >= 45 ? 'yellow' : 'red'; }
-
-/* CORE 01 — Revenue Health
-   Signal: MRR level (40pts) + MRR growth (25pts) + churn (35pts) */
-function scoreC1(s) {
-  const mrr    = parseFloat(s.mrr_usd || 0);
-  const growth = parseFloat(s.mrr_growth_pct || 0);
-  const churn  = parseFloat(s.churn_rate_pct || 5);
-
-  const mrrPts    = score(mrr,    [[50000,40],[20000,33],[10000,26],[5000,19],[2000,12],[500,6],[0,3]]);
-  const growthPts = score(growth, [[20,25],[12,20],[7,15],[3,9],[0,4],[-99,0]]);
-  const churnPts  = score(-churn, [[-0.5,35],[-1,30],[-2,24],[-3,17],[-5,10],[-8,4],[-99,0]]);
-
-  const total = Math.round(mrrPts + growthPts + churnPts);
-  return {
-    score: clamp(total),
-    band: bandOf(total),
-    detail: `MRR $${mrr.toLocaleString()} · Churn ${churn}% · Growth ${growth > 0 ? '+':''}${growth}%`,
-    bench: lang === 'id' ? 'Target: churn <2%, growth >10% MoM' : 'Target: churn <2%, growth >10% MoM',
-    label: t('c1'),
-  };
+// ═══════════════════════════════════════════════════════════════════
+// SCORING ENGINE (exact from PDF)
+// ═══════════════════════════════════════════════════════════════════
+function mapM(v, sehatFn, warnFn){
+  const n=parseFloat(v)||0;
+  if(sehatFn(n)) return {pts:3,lvl:'sehat'};
+  if(warnFn(n))  return {pts:1.5,lvl:'warning'};
+  return {pts:0,lvl:'kritis'};
 }
+function norm(raw,maxP){ return maxP?Math.min(20,Math.round((raw/maxP)*20)):0; }
 
-/* CORE 02 — Product Engagement
-   Signal: activation (40pts) + day-30 retention (35pts) + onboarding speed (25pts) */
-function scoreC2(s) {
-  const act = parseFloat(s.activation_rate_pct || 0);
-  const d30 = parseFloat(s.d30_retention_pct || s.day30_retention || 0);
-  const onb = parseFloat(s.onboarding_days || 30);
-
-  const actPts  = score(act, [[60,40],[45,32],[30,22],[20,13],[10,6],[0,2]]);
-  const d30Pts  = d30 > 0 ? score(d30, [[50,35],[35,28],[25,20],[15,12],[5,5],[0,2]]) : 18; // neutral if blank
-  const onbPts  = score(-onb, [[-3,25],[-7,20],[-14,14],[-30,8],[-99,3]]);
-
-  const total = Math.round(actPts + d30Pts + onbPts);
-  return {
-    score: clamp(total),
-    band: bandOf(total),
-    detail: `Activation ${act}%${d30 > 0 ? ` · D30 ${d30}%` : ''} · Onb ${onb}d`,
-    bench: lang === 'id' ? 'Target: activation >50%, D30 retention >30%' : 'Target: activation >50%, D30 retention >30%',
-    label: t('c2'),
-  };
-}
-
-/* CORE 03 — Operational Reliability
-   Signal: uptime (55pts) + bug rate (45pts) */
-function scoreC3(s) {
-  const uptime = parseFloat(s.uptime_pct || 95);
-  const bugs   = parseFloat(s.bug_rate_weekly || 10);
-
-  const uptimePts = score(uptime,  [[99.9,55],[99.5,46],[99,37],[97,25],[95,14],[0,4]]);
-  const bugPts    = score(-bugs,   [[-1,45],[-3,36],[-5,27],[-10,17],[-20,8],[-99,2]]);
-
-  const total = Math.round(uptimePts + bugPts);
-  return {
-    score: clamp(total),
-    band: bandOf(total),
-    detail: `Uptime ${uptime}% · ${bugs} bug/wk`,
-    bench: lang === 'id' ? 'Target: uptime >99.5%, bug <3/minggu' : 'Target: uptime >99.5%, bugs <3/week',
-    label: t('c3'),
-  };
-}
-
-/* CORE 04 — Unit Economics
-   Signal: LTV:CAC (50pts) + burn efficiency (50pts) */
-function scoreC4(s) {
-  const cac   = parseFloat(s.cac_usd || 0);
-  const ltv   = parseFloat(s.ltv_usd || 0);
-  const burn  = parseFloat(s.burn_rate_pct || 50);
-  const ratio = cac > 0 ? ltv / cac : 0;
-
-  const ltvCacPts = ratio > 0 ? score(ratio, [[5,50],[3,40],[2,28],[1,16],[0.5,8],[0,2]]) : 20; // neutral if blank
-  const burnPts   = score(-burn, [[-10,50],[-20,40],[-30,30],[-50,18],[-80,8],[-99,2]]);
-
-  const total = Math.round(ltvCacPts + burnPts);
-  return {
-    score: clamp(total),
-    band: bandOf(total),
-    detail: ratio > 0 ? `LTV:CAC ${ratio.toFixed(1)}x · Burn ${burn}%` : `Burn ${burn}%`,
-    bench: lang === 'id' ? 'Target: LTV:CAC >3x, burn <20% MRR' : 'Target: LTV:CAC >3x, burn <20% MRR',
-    label: t('c4'),
-  };
-}
-
-/* CORE 05 — AI Moat
-   Signal: substitution risk (50pts) + agentic depth (50pts) */
-function scoreC5(s) {
-  const risk     = (s.ai_substitution_risk || 'high').toLowerCase();
-  const agentic  = parseInt(s.agentic_readiness || 2);
-
-  const riskPts    = risk === 'low' ? 50 : risk === 'medium' ? 30 : 8;
-  const agenticPts = clamp((agentic - 1) * 10, 0, 50);
-
-  const total = Math.round(riskPts + agenticPts);
-  return {
-    score: clamp(total),
-    band: bandOf(total),
-    detail: `${lang === 'id' ? 'Risiko AI' : 'AI risk'}: ${risk === 'low' ? (lang === 'id' ? 'Rendah' : 'Low') : risk === 'medium' ? (lang === 'id' ? 'Sedang' : 'Medium') : (lang === 'id' ? 'Tinggi' : 'High')} · Agentic ${agentic}/6`,
-    bench: lang === 'id' ? 'Target: AI risk rendah, agentic readiness >4' : 'Target: AI risk low, agentic readiness >4',
-    label: t('c5'),
-  };
-}
-
-/* PRIORITY CARD — picks lowest core, frames as "1 thing" */
-function buildPriority(cores, snap) {
-  const isId = lang === 'id';
-  const entries = Object.entries(cores);
-
-  // Sorted by score asc
-  const sorted = [...entries].sort((a, b) => a[1].score - b[1].score);
-  const [lowKey, lowCore]   = sorted[0];
-  const [, highCore]        = entries.reduce((a, b) => a[1].score > b[1].score ? a : b);
-  const overall = Math.round(entries.reduce((s, [,c]) => s + c.score, 0) / 5);
-
-  const coreActions = {
-    c1: {
-      id: { title: 'Revenue butuh dorongan', ctx: `Core Revenue kamu di ${lowCore.score}/100. Churn atau growth jadi bottleneck terbesar minggu ini.`, action: 'Hubungi 5 customer aktif — tanya 1 alasan mereka masih pakai produkmu. Dari situ, identifikasi 1 fitur yang bisa dipertahankan / ditingkatkan minggu ini.' },
-      en: { title: 'Revenue needs a push', ctx: `Your Revenue core is at ${lowCore.score}/100. Churn or growth is the main bottleneck this week.`, action: 'Reach out to 5 active customers — ask 1 reason they still use your product. Use that to identify 1 feature to retain or improve this week.' }
-    },
-    c2: {
-      id: { title: 'Produk belum "ngeklik" ke user', ctx: `Core Product di ${lowCore.score}/100. Activation rate atau retention masih belum optimal — user belum nemu "aha moment" mereka.`, action: 'Track 10 user baru minggu ini dari signup sampai first value. Cari titik mana yang paling banyak drop-off, lalu eliminasi 1 friction point itu.' },
-      en: { title: 'Product not clicking for users', ctx: `Product core is ${lowCore.score}/100. Activation or retention not optimal — users haven't found their "aha moment" yet.`, action: 'Track 10 new users this week from signup to first value. Find where most drop off, then eliminate that 1 friction point.' }
-    },
-    c3: {
-      id: { title: 'Stabilitas teknis perlu dijaga', ctx: `Core Operasional di ${lowCore.score}/100. Uptime atau bug rate masih jadi masalah yang bisa merusak trust user.`, action: 'Set up monitoring alert sekarang jika belum ada. Kalau sudah, targetkan close 3 bug tertinggi severity minggu ini sebelum hal lain.' },
-      en: { title: 'Technical stability needs attention', ctx: `Operations core is ${lowCore.score}/100. Uptime or bug rate is hurting user trust.`, action: 'Set up monitoring alerts now if you haven\'t. If you have, target closing your 3 highest-severity bugs this week before anything else.' }
-    },
-    c4: {
-      id: { title: 'Unit ekonomi masih belum efisien', ctx: `Core Unit Ekonomi di ${lowCore.score}/100. LTV:CAC ratio atau burn rate masih perlu diperbaiki sebelum scale.`, action: 'Hitung ulang LTV dan CAC pakai data aktual bulan ini. Kalau LTV:CAC < 2x, stop semua paid acquisition sampai angkanya fixed.' },
-      en: { title: 'Unit economics need optimization', ctx: `Unit Economics core is ${lowCore.score}/100. LTV:CAC ratio or burn rate needs fixing before you scale.`, action: 'Recalculate LTV and CAC with current month\'s actual data. If LTV:CAC < 2x, pause all paid acquisition until the numbers are fixed.' }
-    },
-    c5: {
-      id: { title: 'AI moat perlu diperkuat', ctx: `Core AI Moat di ${lowCore.score}/100. Produk kamu rentan digantikan tools AI generik atau belum memanfaatkan agentic capabilities.`, action: 'Identifikasi 1 use case di produkmu yang bisa diubah jadi agentic workflow minggu ini. Mulai dari proses yang paling repetitif untuk user.' },
-      en: { title: 'AI moat needs strengthening', ctx: `AI Moat core is ${lowCore.score}/100. Your product is vulnerable to replacement by generic AI tools, or isn\'t leveraging agentic capabilities.`, action: 'Identify 1 use case in your product that can become an agentic workflow this week. Start with the most repetitive process for users.' }
-    },
-  };
-
-  const act = coreActions[lowKey]?.[isId ? 'id' : 'en'] || {
-    title: isId ? 'Area kritis ditemukan' : 'Critical area found',
-    ctx: isId ? `Core ${lowCore.label} ada di ${lowCore.score}/100.` : `${lowCore.label} core is at ${lowCore.score}/100.`,
-    action: isId ? 'Fokuskan 80% waktu ke area ini minggu ini.' : 'Focus 80% of your time on this area this week.'
-  };
-
-  const badge = lowCore.band === 'green' ? 'b-green' :
-                lowCore.band === 'yellow' ? 'b-yellow' : 'b-red';
-  const badgeText = lowCore.band === 'green' ? t('band-green') :
-                    lowCore.band === 'yellow' ? t('band-yellow') : t('band-red');
-
-  const vcSignals = {
-    id: [
-      overall >= 72 ? 'Startup kamu dalam kondisi sehat. Sekarang waktu yang tepat untuk scale — tapi pastikan unit ekonomi positif sebelum gas full.' : null,
-      overall >= 55 && overall < 72 ? 'Ada beberapa area kuat, tapi ada satu bottleneck yang bisa jadi blocker growth. Fix itu dulu sebelum nambah resource.' : null,
-      overall < 55 ? 'Banyak area yang butuh perhatian sekarang. Jangan coba fix semuanya sekaligus — pilih satu, selesaikan, lalu lanjut ke berikutnya.' : null,
-      snap.stage === 'pre-seed' ? 'Di Pre-Seed, metrik product engagement (activation, retention) lebih penting dari revenue. Fokus ke product-market fit dulu.' : null,
-      snap.stage === 'series-a' ? 'Di Series A, investor lihat repeatability. MRR growth consistency dan churn rate jadi sinyal utama.' : null,
-    ].filter(Boolean)[0] || 'Jalankan weekly review rutin. Konsistensi tracking lebih valuable dari skor sempurna.',
-    en: [
-      overall >= 72 ? 'Your startup is healthy. This is the right time to scale — but make sure unit economics are positive before going full throttle.' : null,
-      overall >= 55 && overall < 72 ? 'Some strong areas, but one bottleneck could block growth. Fix that first before adding resources.' : null,
-      overall < 55 ? 'Multiple areas need attention now. Don\'t try to fix everything at once — pick one, finish it, then move to the next.' : null,
-      snap.stage === 'pre-seed' ? 'At Pre-Seed, product engagement metrics (activation, retention) matter more than revenue. Focus on product-market fit first.' : null,
-      snap.stage === 'series-a' ? 'At Series A, investors look for repeatability. MRR growth consistency and churn rate are the primary signals.' : null,
-    ].filter(Boolean)[0] || 'Run a weekly review consistently. Regular tracking is more valuable than a perfect score.',
-  };
-
-  return {
-    title: act.title, context: act.ctx, action: act.action,
-    badge, badgeText, overall, lowestCore: lowKey,
-    vcSignal: vcSignals[lang],
-    sparringContext: `${act.title}\n\n${act.ctx}\n\nAksi: ${act.action}\n\nOverall: ${overall}/100\nCore terendah: ${lowCore.label} (${lowCore.score}/100)\nCore tertinggi: ${highCore.label} (${highCore.score}/100)`,
-  };
-}
-
-/* MASTER COMPUTE */
-function computeDiagnosis(snap) {
-  const cores = {
-    c1: scoreC1(snap), c2: scoreC2(snap), c3: scoreC3(snap),
-    c4: scoreC4(snap), c5: scoreC5(snap),
-  };
-  const overall = Math.round(Object.values(cores).reduce((s, c) => s + c.score, 0) / 5);
-  const priority = buildPriority(cores, snap);
-  return { snap, cores, overall, priority, ts: Date.now() };
-}
-
-// ── DASHBOARD RENDER ──────────────────────────────────────────────────────────
-function renderDashboard(diag) {
-  currentDiag = diag;
-  const { snap: s, cores, overall, priority: p } = diag;
-
-  // Show/hide
-  document.getElementById('dash-empty').style.display = 'none';
-  document.getElementById('dash-content').style.display = 'block';
-
-  // Meta
-  el('m-date-val').textContent  = s.snapshot_date || '—';
-  el('m-stage-val').textContent = (s.stage || 'seed').toUpperCase();
-
-  const ov = el('m-overall-val');
-  ov.textContent = `${overall}/100`;
-  ov.className   = `meta-overall sc-${bandOf(overall)}`;
-
-  const verdicts = {
-    id: overall >= 72 ? 'Sehat 💪' : overall >= 55 ? 'Lumayan 👍' : overall >= 40 ? 'Perlu perhatian ⚠️' : 'Butuh aksi 🔴',
-    en: overall >= 72 ? 'Healthy 💪' : overall >= 55 ? 'Decent 👍' : overall >= 40 ? 'Needs attention ⚠️' : 'Urgent action 🔴',
-  };
-  el('m-verdict-val').textContent = verdicts[lang];
-
-  // Priority card
-  el('ot-eyebrow').textContent   = t('ot-eyebrow');
-  el('ot-title').textContent     = p.title;
-  el('ot-context').textContent   = p.context;
-  el('ot-action-lbl').textContent= t('ot-action-lbl');
-  el('ot-action-txt').textContent= p.action;
-  el('ot-badge').textContent     = p.badgeText;
-  el('ot-badge').className       = `badge ${p.badge}`;
-
-  // Wins
-  const wins = Object.values(cores).filter(c => c.score >= 72);
-  const winsRow = el('wins-row');
-  winsRow.innerHTML = wins.length
-    ? wins.map(c => `<span class="win-chip">✓ ${c.label}</span>`).join('')
-    : `<span style="color:var(--muted);font-size:12px">${lang === 'id' ? 'Belum ada area yang sehat — terus tracking!' : 'No healthy areas yet — keep tracking!'}</span>`;
-
-  // 5 Cores
-  const grid = el('cores-grid');
-  grid.innerHTML = Object.entries(cores).map(([key, c], i) => {
-    const num = String(i + 1).padStart(2, '0');
-    const fill = `fill-${c.band}`;
-    return `<div class="core-card s-${c.band}" onclick="sparFromCore('${key}')">
-      <div class="core-num">${num}</div>
-      <div class="core-name">${c.label}</div>
-      <div class="core-score-row">
-        <span class="core-score-num sc-${c.band}">${c.score}</span>
-        <span class="core-score-denom">/100</span>
-      </div>
-      <div class="core-bar-track">
-        <div class="core-bar-fill ${fill}" style="width:${c.score}%"></div>
-      </div>
-      <div class="core-detail">${c.detail}</div>
-    </div>`;
-  }).join('');
-
-  // Risks (bottom 2 non-green)
-  const sorted = Object.values(cores).sort((a, b) => a.score - b.score);
-  const riskList = el('risk-list');
-  const risks = sorted.filter(c => c.score < 72).slice(0, 3);
-  riskList.innerHTML = risks.length
-    ? risks.map((c, i) =>
-        `<div class="risk-item">
-          <span class="risk-idx">0${i + 1}</span>
-          <span style="flex:1;font-size:12px">${c.label}</span>
-          <span class="risk-val sc-${c.band}">${c.score}/100</span>
-        </div>`).join('')
-    : `<p style="font-size:12px;color:var(--green)">✓ ${lang === 'id' ? 'Semua area dalam kondisi baik!' : 'All areas healthy!'}</p>`;
-
-  // Benchmarks
-  const benchList = el('bench-list');
-  benchList.innerHTML = Object.values(cores).map(c =>
-    `<div class="risk-item">
-      <span style="flex:1;font-size:11px;color:var(--txt2)">${c.bench}</span>
-    </div>`).join('');
-
-  // VC Signal
-  el('vc-signal-txt').textContent = p.vcSignal;
-  el('vc-signal-lbl').textContent = t('vc-signal-lbl');
-
-  // Store sparring context
-  window.__sparCtx = p.sparringContext;
-}
-
-// ── HISTORY ───────────────────────────────────────────────────────────────────
-function renderHistory() {
-  const list = el('hist-list');
-  if (!sessions.length) {
-    list.innerHTML = `<div class="hist-empty" id="hist-empty">${t('hist-empty')}</div>`;
-    return;
-  }
-  list.innerHTML = [...sessions].reverse().map((d, i) => {
-    const actual_i = sessions.length - 1 - i;
-    const b = bandOf(d.overall);
-    return `<div class="hist-item" onclick="loadSession(${actual_i})">
-      <span class="hist-date">${d.snap.snapshot_date || '—'}</span>
-      <span class="hist-overall sc-${b}">${d.overall}/100</span>
-      <span class="hist-action">${d.priority?.title || '—'}</span>
-      <span class="hist-badges">
-        ${Object.values(d.cores || {}).map(c =>
-          `<span class="badge b-${c.band === 'green' ? 'green' : c.band === 'yellow' ? 'yellow' : 'red'}">${c.score}</span>`
-        ).join('')}
-      </span>
-    </div>`;
-  }).join('');
-}
-
-function loadSession(i) {
-  renderDashboard(sessions[i]);
-  switchView('dash');
-}
-
-// ── CSV HANDLING ──────────────────────────────────────────────────────────────
-let pendingData = null;
-
-function dzOver(e) { e.preventDefault(); el('dropzone').classList.add('over'); }
-function dzLeave()  { el('dropzone').classList.remove('over'); }
-function dzDrop(e)  {
-  e.preventDefault(); el('dropzone').classList.remove('over');
-  const f = e.dataTransfer.files[0];
-  if (f) parseCSV(f);
-}
-function handleCSV(inp) { if (inp.files[0]) parseCSV(inp.files[0]); }
-
-function parseCSV(file) {
-  Papa.parse(file, {
-    header: true,
-    skipEmptyLines: true,
-    complete(res) {
-      const rows = res.data.filter(r => r.mrr_usd || r.snapshot_date);
-      if (!rows.length) { showCSVErr('CSV kosong atau format tidak dikenali.'); return; }
-      pendingData = rows[0];
-      renderPreview(pendingData);
-    },
-    error(e) { showCSVErr(e.message); }
-  });
-}
-
-function renderPreview(data) {
-  const keys = Object.keys(data).filter(k => data[k] !== '');
-  el('preview-rows').innerHTML = `<table class="ptbl"><tbody>
-    ${keys.map(k => `<tr><th>${k}</th><td>${data[k]}</td></tr>`).join('')}
-  </tbody></table>`;
-  el('csv-preview').classList.add('show');
-}
-
-function submitCSV() {
-  if (!pendingData) return;
-  const diag = computeDiagnosis(pendingData);
-  finalizeSession(diag);
-}
-
-function cancelCSV() {
-  pendingData = null;
-  el('csv-preview').classList.remove('show');
-}
-
-function showCSVErr(msg) {
-  el('preview-rows').innerHTML = `<p style="padding:14px;color:var(--red);font-family:var(--mono);font-size:11px">❌ ${msg}</p>`;
-  el('csv-preview').classList.add('show');
-}
-
-// ── MANUAL FORM ───────────────────────────────────────────────────────────────
-function submitManual(e) {
-  e.preventDefault();
-  const snap = {
-    snapshot_date:        fv('f-date'),
-    stage:                fv('f-stage'),
-    mrr_usd:              fv('f-mrr'),
-    mrr_growth_pct:       fv('f-growth'),
-    churn_rate_pct:       fv('f-churn'),
-    activation_rate_pct:  fv('f-act'),
-    d30_retention_pct:    fv('f-d30'),
-    onboarding_days:      fv('f-onb'),
-    uptime_pct:           fv('f-uptime'),
-    bug_rate_weekly:      fv('f-bugs'),
-    cac_usd:              fv('f-cac'),
-    ltv_usd:              fv('f-ltv'),
-    burn_rate_pct:        fv('f-burn'),
-    ai_substitution_risk: fv('f-airisk'),
-    agentic_readiness:    fv('f-agentic'),
-  };
-
-  const required = [
-    ['f-mrr', lang === 'id' ? 'MRR wajib diisi' : 'MRR is required'],
-    ['f-churn', lang === 'id' ? 'Churn rate wajib diisi' : 'Churn rate is required'],
-    ['f-act', lang === 'id' ? 'Activation rate wajib diisi' : 'Activation rate is required'],
-    ['f-uptime', lang === 'id' ? 'Uptime wajib diisi' : 'Uptime is required'],
+function scoreC01(m){
+  const rows=[
+    {k:'SOP Coverage',   ...mapM(m.sopCoverage,   v=>v>80,  v=>v>=40)},
+    {k:'Automation Rate',...mapM(m.automationRate, v=>v>60,  v=>v>=30)},
+    {k:'CSAT Score',     ...mapM(m.csat,           v=>v>80,  v=>v>=60)},
+    {k:'Onboarding',     ...mapM(m.onboardingDays, v=>v<3,   v=>v<=7)},
+    {k:'Ticket Backlog', ...mapM(m.ticketBacklog,  v=>v<10,  v=>v<=30)},
+    {k:'Resolution Time',...mapM(m.resolutionHours,v=>v<24,  v=>v<=48)},
   ];
-  for (const [id, msg] of required) {
-    if (!snap[id.replace('f-', '')] && !document.getElementById(id).value) {
-      showFormErr(msg); return;
-    }
+  const raw=rows.reduce((s,x)=>s+x.pts,0);
+  const score=norm(raw,rows.length*3);
+  return {score,rows,triggers:rows.filter(r=>r.lvl!=='sehat'),condition:c01cond(score)};
+}
+function c01cond(s){ return s>=17?'solid':s>=12?'acceptable':s>=7?'fragile':'collapse_risk'; }
+
+function scoreC02(m,ind){
+  let rows=[];
+  if(ind==='saas') rows=[
+    {k:'NRR',           ...mapM(m.nrr,           v=>v>106, v=>v>=90)},
+    {k:'Trial-to-Paid', ...mapM(m.trialToPaid,   v=>v>20,  v=>v>=10)},
+    {k:'Monthly Churn', ...mapM(m.monthlyChurn,  v=>v<3,   v=>v<=7)},
+    {k:'LTV:CAC',       ...mapM(m.ltvCac,        v=>v>3,   v=>v>=2)},
+    {k:'Week-2 Retention',...mapM(m.week2Retention,v=>v>50,v=>v>=30)},
+  ]; else if(ind==='ecom') rows=[
+    {k:'Repeat Purchase',...mapM(m.repeatPurchase,v=>v>35,v=>v>=20)},
+    {k:'ROAS',          ...mapM(m.roas,          v=>v>3,   v=>v>=2.5)},
+    {k:'Monthly Churn', ...mapM(m.monthlyChurn,  v=>v<5,   v=>v<=10)},
+    {k:'LTV:CAC',       ...mapM(m.ltvCac,        v=>v>3,   v=>v>=2)},
+  ]; else if(ind==='fintech') rows=[
+    {k:'Day-30 Retention',...mapM(m.day30Retention,v=>v>50,v=>v>=30)},
+    {k:'Referral Rate', ...mapM(m.referralRate,  v=>v>4,   v=>v>=2)},
+    {k:'Monthly Churn', ...mapM(m.monthlyChurn,  v=>v<3,   v=>v<=7)},
+    {k:'LTV:CAC',       ...mapM(m.ltvCac,        v=>v>3,   v=>v>=2)},
+  ]; else if(ind==='fb') rows=[
+    {k:'Repeat Visit',  ...mapM(m.repeatVisit,   v=>v>35,  v=>v>=25)},
+    {k:'Platform Rating',...mapM(m.platformRating,v=>v>4.3,v=>v>=3.8)},
+    {k:'LTV:CAC',       ...mapM(m.ltvCac,        v=>v>3,   v=>v>=2)},
+  ]; else rows=[ // healthcare
+    {k:'Patient Retention',...mapM(m.patientRetention,v=>v>58,v=>v>=50)},
+    {k:'No-Show Rate',  ...mapM(m.noShow,        v=>v<15,  v=>v<=20)},
+    {k:'Follow-Up',     ...mapM(m.followUpCompliance,v=>v>70,v=>v>=45)},
+    {k:'Referral Rate', ...mapM(m.referralRate,  v=>v>12,  v=>v>=10)},
+  ];
+  const raw=rows.reduce((s,x)=>s+x.pts,0);
+  const score=norm(raw,rows.length*3);
+  return {score,rows,triggers:rows.filter(r=>r.lvl!=='sehat'),condition:c02cond(score)};
+}
+function c02cond(s){ return s>=17?'compounding':s>=12?'functional':s>=7?'leaking':'bucket'; }
+
+function scoreC03(m){
+  const rows=[
+    {k:'Founder Ops Hours',   ...mapM(m.founderOpsHours,    v=>v<20,  v=>v<=35)},
+    {k:'Sprint Completion',   ...mapM(m.sprintCompletion,   v=>v>80,  v=>v>=60)},
+    {k:'Revenue/Headcount',   ...mapM(m.revenuePerHeadcount,v=>v>50,  v=>v>=20)},
+    {k:'Meeting Hours/wk',    ...mapM(m.meetingHours,       v=>v<8,   v=>v<=15)},
+    {k:'AI Proficiency (0-5)',...mapM(m.aiProficiency,      v=>v>=3,  v=>v>=2)},
+  ];
+  const raw=rows.reduce((s,x)=>s+x.pts,0);
+  const score=norm(raw,rows.length*3);
+  return {score,rows,triggers:rows.filter(r=>r.lvl!=='sehat'),condition:c03cond(score)};
+}
+function c03cond(s){ return s>=17?'high_velocity':s>=12?'functional':s>=7?'fragile':'chaos'; }
+
+function scoreC04(m,ind){
+  let rows=[
+    {k:'System Uptime',       ...mapM(m.systemUptime,       v=>v>99,  v=>v>=95)},
+    {k:'Automation Coverage', ...mapM(m.automationCoverage, v=>v>60,  v=>v>=30)},
+    {k:'Burn Rate vs Revenue',...mapM(m.burnRateVsRevenue,  v=>v<20,  v=>v<=40)},
+  ];
+  if(ind==='saas'||ind==='fintech'){
+    rows.push({k:'Bug/Compliance Rate',...mapM(m.bugRate,v=>v<5,v=>v<=15)});
+    rows.push({k:'Headcount/Rev Ratio',...mapM(m.headcountGrowthRatio,v=>v<0.5,v=>v<=1)});
   }
-  clearFormErr();
-  const diag = computeDiagnosis(snap);
-  finalizeSession(diag);
+  if(ind==='fb') rows.push({k:'COGS Ratio',...mapM(m.cogsRatio,v=>v<35,v=>v<=45)});
+  if(ind==='ecom') rows.push({k:'SKU Margin',...mapM(m.skuMargin,v=>v>20,v=>v>=15)});
+  if(ind==='healthcare') rows.push({k:'Occupancy Rate',...mapM(m.occupancyRate,v=>v>75,v=>v>=65)});
+  const raw=rows.reduce((s,x)=>s+x.pts,0);
+  const score=norm(raw,rows.length*3);
+  return {score,rows,triggers:rows.filter(r=>r.lvl!=='sehat'),condition:c04cond(score)};
+}
+function c04cond(s){ return s>=17?'scale_ready':s>=12?'almost_ready':s>=7?'not_ready':'danger'; }
+
+function scoreC05(m){
+  const dd=Math.min(10,Math.max(0,parseFloat(m.dataDepth)||0));
+  const fl=Math.min(10,Math.max(0,parseFloat(m.feedbackLoop)||0));
+  const sc=Math.min(10,Math.max(0,parseFloat(m.switchingCost)||0));
+  const ar=Math.min(5, Math.max(0,parseFloat(m.agenticReadiness)||0));
+  const score=Math.min(20,Math.round((dd/10*7)+(fl/10*5)+(sc/10*4)+(ar/5*4)));
+  const rows=[
+    {k:'Proprietary Data Depth',value:dd,max:10,weight:'35%',lvl:dd>7?'sehat':dd>=5?'warning':'kritis'},
+    {k:'Feedback Loop Active',  value:fl,max:10,weight:'25%',lvl:fl>6?'sehat':fl>=4?'warning':'kritis'},
+    {k:'Switching Cost Score',  value:sc,max:10,weight:'20%',lvl:sc>7?'sehat':sc>=5?'warning':'kritis'},
+    {k:'Agentic Readiness',     value:ar,max:5, weight:'20%',lvl:ar>=3?'sehat':ar>=2?'warning':'kritis'},
+  ];
+  const riskLevel=score>=14?'low':score>=9?'medium':'high';
+  return {score,rows,triggers:rows.filter(r=>r.lvl!=='sehat'),condition:c05cond(score),riskLevel,raw:{dd,fl,sc,ar}};
+}
+function c05cond(s){ return s>=17?'strong_moat':s>=12?'functional':s>=7?'weak_moat':'danger'; }
+
+function calcResilience(m){
+  const dd=Math.min(10,Math.max(0,parseFloat(m.dataDepth)||0));
+  const fl=Math.min(10,Math.max(0,parseFloat(m.feedbackLoop)||0));
+  const sc=Math.min(10,Math.max(0,parseFloat(m.switchingCost)||0));
+  const ar=Math.min(5, Math.max(0,parseFloat(m.agenticReadiness)||0));
+  return Math.round((dd/10*35)+(fl/10*25)+(sc/10*20)+(ar/5*20));
 }
 
-function fv(id) { return document.getElementById(id)?.value?.trim() || ''; }
-function showFormErr(msg) { const e = el('form-err'); e.textContent = msg; e.style.display = 'block'; }
-function clearFormErr()   { el('form-err').style.display = 'none'; }
+function getVerdict(total){ return total>=86?'ready':total>=70?'fix':total>=50?'pivot':'collapse'; }
 
-function finalizeSession(diag) {
-  sessions.push(diag);
-  saveSessions();
-  renderDashboard(diag);
-  switchView('dash');
+function detectKillerRisk(cores){
+  const {c01,c02,c03,c04,c05}=cores;
+  if(c05.score<9) return {core:'05',urgency:'kritis',
+    title:lang==='id'?'TIDAK ADA MOAT — RISIKO DISINTERMEDIATION':'NO MOAT — DISINTERMEDIATION RISK',
+    desc:lang==='id'?'Bisnis lo bisa digantikan Claude/GPT+RAG dalam 12-18 bulan. Tanpa proprietary data, lo tidak punya bisnis — hanya fitur yang menunggu di-copy.':'Your business can be replaced by Claude/GPT+RAG within 12-18 months. Without proprietary data, you have no business — just a feature waiting to be copied.'};
+  const ranked=[{core:'01',score:c01.score},{core:'02',score:c02.score},{core:'03',score:c03.score},{core:'04',score:c04.score},{core:'05',score:c05.score}].sort((a,b)=>a.score-b.score);
+  const w=ranked[0];
+  const map={
+    '01':{kritis:lang==='id'?'SYSTEM DEBT KRITIS':'CRITICAL SYSTEM DEBT',serius:lang==='id'?'SYSTEM DEBT TERDETEKSI':'SYSTEM DEBT DETECTED',
+          desc:{id:'Proses bergantung pada orang, bukan sistem. Saat founder tidak ada, bisnis collapse.',en:'Processes depend on people, not systems. When founder is absent, business collapses.'}},
+    '02':{kritis:lang==='id'?'EMBER BOCOR — AKUISISI SIA-SIA':'LEAKY BUCKET — WASTED ACQUISITION',serius:lang==='id'?'RETENTION LEMAH':'WEAK RETENTION',
+          desc:{id:'Churn lebih cepat dari akuisisi. Semakin agresif marketing, semakin besar kerugian.',en:'Churn outpaces acquisition. More aggressive marketing = bigger losses.'}},
+    '03':{kritis:lang==='id'?'FOUNDER BOTTLENECK — VELOCITY NOL':'FOUNDER BOTTLENECK — ZERO VELOCITY',serius:lang==='id'?'EXECUTION FRAGILE':'FRAGILE EXECUTION',
+          desc:{id:'Semua keputusan lewat founder. Tim tidak bisa execute tanpa approval.',en:'All decisions go through founder. Team cannot execute without approval.'}},
+    '04':{kritis:lang==='id'?'SCALE = BUNUH DIRI':'SCALE = SUICIDE',serius:lang==='id'?'UNIT ECONOMICS BELUM PROVEN':'UNIT ECONOMICS NOT PROVEN',
+          desc:{id:'Unit economics belum proven. Setiap customer baru memperburuk posisi keuangan.',en:'Unit economics not proven. Every new customer worsens financial position.'}},
+    '05':{kritis:lang==='id'?'TIDAK ADA MOAT — WINDOW MENUTUP':'NO MOAT — WINDOW CLOSING',serius:lang==='id'?'MOAT LEMAH — WASPADA':'WEAK MOAT — CAUTION',
+          desc:{id:'Kompetitor AI-native bisa replikasi dalam 6-12 bulan.',en:'AI-native competitors can replicate in 6-12 months.'}},
+  };
+  const urgency = w.score<7?'kritis':'serius';
+  const entry=map[w.core];
+  return {core:w.core,urgency,title:entry[urgency],desc:entry.desc[lang]||entry.desc.id};
 }
 
-// ── AI SPARRING ───────────────────────────────────────────────────────────────
-const HF_MODEL = 'mistralai/Mistral-7B-Instruct-v0.3';
-
-function openSparring() {
-  el('spar-ctx').textContent  = window.__sparCtx || t('spar-ctx-lbl');
-  el('spar-token').value      = hfToken;
-  el('spar-prompt').value     = '';
-  el('spar-response').classList.remove('show');
-  el('sparModal').classList.add('open');
+function fullDiagnosis(){
+  const c01=scoreC01(metrics); const c02=scoreC02(metrics,industry);
+  const c03=scoreC03(metrics); const c04=scoreC04(metrics,industry);
+  const c05=scoreC05(metrics);
+  const totalScore=c01.score+c02.score+c03.score+c04.score+c05.score;
+  const verdict=getVerdict(totalScore);
+  const resilienceScore=calcResilience(metrics);
+  const killerRisk=detectKillerRisk({c01,c02,c03,c04,c05});
+  return {c01,c02,c03,c04,c05,totalScore,verdict,resilienceScore,killerRisk,industry,timestamp:Date.now()};
 }
 
-function closeSparring() {
-  el('sparModal').classList.remove('open');
+// ═══════════════════════════════════════════════════════════════════
+// RENDER FORM
+// ═══════════════════════════════════════════════════════════════════
+function renderForm(){
+  const f=getFields(industry);
+  const coreKeys=['c01','c02','c03','c04','c05'];
+  const coreTitles=['CORE 01 — OPERATIONAL SYSTEMS','CORE 02 — GROWTH & RETENTION',
+    'CORE 03 — TEAM & EXECUTION','CORE 04 — SCALING INFRASTRUCTURE','CORE 05 — MOAT & AI RESILIENCE'];
+  let html='';
+  coreKeys.forEach((ck,i)=>{
+    const fields=f[ck];
+    if(!fields||!fields.length) return;
+    html+=`<div class="core-wrap" id="wrap-${ck}">
+      <div class="core-hd" onclick="toggleCore('${ck}')">
+        <span class="core-num">CORE 0${i+1}</span>
+        <span class="core-title">${coreTitles[i]}</span>
+        <span class="chevron open" id="chev-${ck}">▾</span>
+      </div>
+      <div class="core-body open" id="body-${ck}">
+        <div class="g2">`;
+    fields.forEach(fd=>{
+      const lbl=lang==='id'?fd.li:fd.le;
+      const hint=lang==='id'?fd.hi:fd.he;
+      const val=metrics[fd.k]!==undefined?metrics[fd.k]:fd.df;
+      html+=`<div class="form-group">
+        <label class="form-label">${lbl} <span>${fd.u}</span></label>
+        <input type="number" class="form-input" min="${fd.mi}" max="${fd.ma}" step="0.1"
+          value="${val}" onchange="setMetric('${fd.k}',this.value)"
+          oninput="setMetric('${fd.k}',this.value)"/>
+        <div class="form-hint">${hint}</div>
+      </div>`;
+    });
+    html+=`</div></div></div>`;
+  });
+  document.getElementById('core-inputs').innerHTML=html;
+  renderWhatIfSel();
 }
 
-function bgClose(e) {
-  if (e.target === el('sparModal')) closeSparring();
+function toggleCore(id){
+  const body=document.getElementById('body-'+id);
+  const chev=document.getElementById('chev-'+id);
+  body.classList.toggle('open');
+  chev.classList.toggle('open');
 }
 
-function sparFromCore(coreKey) {
-  if (!currentDiag) return;
-  const core = currentDiag.cores[coreKey];
-  window.__sparCtx = `Core ${core.label}: ${core.score}/100\n${core.detail}\n\nAksi: ${currentDiag.priority.action}`;
-  openSparring();
+function renderAgenticChecklist(){
+  const signals=t('agentic_signals');
+  let html='';
+  signals.forEach((sig,i)=>{
+    html+=`<div class="ag-item" id="ag-${i}" onclick="toggleAgentic(${i})">
+      <input type="checkbox" id="agchk-${i}" onclick="event.stopPropagation();toggleAgentic(${i})"/>
+      <span>${sig}</span>
+    </div>`;
+  });
+  document.getElementById('agentic-list').innerHTML=html;
 }
 
-async function runSparring() {
-  const token    = el('spar-token').value.trim() || hfToken;
-  const userMsg  = el('spar-prompt').value.trim();
-  const ctx      = el('spar-ctx').textContent;
-  const resp     = el('spar-response');
-  const loader   = el('spar-loader');
+function toggleAgentic(i){
+  const chk=document.getElementById('agchk-'+i);
+  const item=document.getElementById('ag-'+i);
+  chk.checked=!chk.checked;
+  item.classList.toggle('checked',chk.checked);
+  const count=document.querySelectorAll('.ag-item input:checked').length;
+  agenticCount=count;
+  setMetric('agenticReadiness',count);
+}
 
-  if (!token || !token.startsWith('hf_')) {
-    resp.innerHTML = `<span class="spar-err">❌ ${t('spar-err-key')}</span>`;
-    resp.classList.add('show'); return;
+function renderStarterQuestions(){
+  const starters=t('starters');
+  let html='';
+  starters.forEach(s=>{
+    html+=`<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:6px 12px;font-family:var(--body);text-transform:none;letter-spacing:0"
+      onclick="useStarter(this.textContent)">${s}</button>`;
+  });
+  document.getElementById('starter-list').innerHTML=html;
+}
+
+function useStarter(txt){
+  document.getElementById('chat-input').value=txt;
+  switchTab('sparring',document.querySelectorAll('.nav-btn')[3]);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// WHAT-IF SIMULATOR
+// ═══════════════════════════════════════════════════════════════════
+function renderWhatIfSel(){
+  const f=getFields(industry);
+  const all=[...f.c01,...f.c02,...f.c03,...f.c04,...f.c05];
+  let opts='<option value="">— pilih metric —</option>';
+  all.forEach(fd=>{ opts+=`<option value="${fd.k}">${lang==='id'?fd.li:fd.le}</option>`; });
+  document.getElementById('whatif-sel').innerHTML=opts;
+  document.getElementById('whatif-result').style.display='none';
+}
+
+function runWhatIf(){
+  const sel=document.getElementById('whatif-sel').value;
+  const val=document.getElementById('whatif-val').value;
+  if(!sel||val==='') { document.getElementById('whatif-result').style.display='none'; return; }
+  const orig=metrics[sel]||0;
+  const modified={...metrics,[sel]:parseFloat(val)||0};
+  const r1=fullDiagnosis();
+  const m2=metrics; metrics=modified;
+  const r2=fullDiagnosis(); metrics=m2;
+  const delta=r2.totalScore-r1.totalScore;
+  const deltaColor=delta>0?'var(--green)':delta<0?'var(--red)':'var(--txt2)';
+  document.getElementById('wi-current').textContent=r1.totalScore;
+  const wiNew=document.getElementById('wi-new');
+  wiNew.textContent=r2.totalScore; wiNew.style.color=deltaColor;
+  document.getElementById('wi-delta').textContent=
+    delta===0?(lang==='id'?'Tidak ada perubahan score':'No score change'):
+    `${delta>0?'+':''}${delta} pts (${r1.verdict} → ${r2.verdict})`;
+  document.getElementById('wi-delta').style.color=deltaColor;
+  document.getElementById('whatif-result').style.display='block';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RUN DIAGNOSIS
+// ═══════════════════════════════════════════════════════════════════
+function runDiagnosis(){
+  const btn=document.getElementById('diagnose-btn');
+  btn.disabled=true;
+  btn.innerHTML=`<span style="animation:pulse 1s infinite">◌</span> ${lang==='id'?'MENGANALISA...':'ANALYZING...'}`;
+  setTimeout(()=>{
+    lastResult=fullDiagnosis();
+    saveHistory(lastResult);
+    renderAllResults(lastResult);
+    switchTab('hasil',document.querySelectorAll('.nav-btn')[1]);
+    btn.disabled=false;
+    btn.innerHTML=`⬡ <span data-i="btn_diagnose">${lang==='id'?'BEDAH BISNIS':'RUN DIAGNOSIS'}</span>`;
+    renderHistoryTab();
+  },400);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER RESULTS
+// ═══════════════════════════════════════════════════════════════════
+function renderAllResults(r){
+  document.getElementById('hasil-empty').style.display='none';
+  document.getElementById('hasil-content').style.display='block';
+  document.getElementById('res-empty').style.display='none';
+  document.getElementById('res-content').style.display='block';
+
+  renderVerdict(r); renderKillerRisk(r); renderScoreTable(r); renderAuditLog(r);
+  renderRoadmap(r); renderResilience(r);
+  updateContextInfo(r);
+  document.getElementById('total-score-display').textContent=r.totalScore;
+}
+
+function scoreColor(s){ return s>=14?'var(--green)':s>=9?'var(--yellow)':'var(--red)'; }
+
+function renderVerdict(r){
+  const cls={ready:'v-ready',fix:'v-fix',pivot:'v-pivot',collapse:'v-collapse'}[r.verdict];
+  const icon={ready:'▲',fix:'△',pivot:'◇',collapse:'▽'}[r.verdict];
+  const range={ready:'86–100',fix:'70–85',pivot:'50–69',collapse:'<50'}[r.verdict];
+  const barW=Math.min(100,r.totalScore);
+  const barColor={ready:'var(--green)',fix:'var(--yellow)',pivot:'var(--accent)',collapse:'var(--red)'}[r.verdict];
+  document.getElementById('verdict-wrap').innerHTML=`
+    <div class="verdict-card ${cls} fade-in" style="margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <div class="v-num">${r.totalScore}</div>
+        <div style="flex:1;min-width:180px">
+          <div style="font-family:var(--mono);font-size:9px;opacity:.6;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px">VERDICT</div>
+          <div class="v-label">${icon} ${t('verdict_label.'+r.verdict)}</div>
+          <div class="v-desc">${t('verdict_desc.'+r.verdict)}</div>
+          <div style="font-family:var(--mono);font-size:9px;opacity:.5;margin-top:5px">RANGE ${range} · MAX 100</div>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="prog-track" style="height:6px">
+          <div class="prog-fill" style="width:${barW}%;background:${barColor}"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:3px">
+          ${[0,25,50,70,86,100].map(v=>`<span style="font-family:var(--mono);font-size:8px;color:var(--muted)">${v}</span>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderKillerRisk(r){
+  const kr=r.killerRisk;
+  const urgColor=kr.urgency==='kritis'?'var(--red)':'var(--yellow)';
+  const urgBg=kr.urgency==='kritis'?'var(--red-dim)':'var(--yel-dim)';
+  document.getElementById('killer-wrap').innerHTML=`
+    <div class="killer-card fade-in" style="border-color:${urgColor};background:${urgBg}">
+      <div style="display:flex;align-items:flex-start;gap:12px">
+        <div style="font-family:var(--mono);font-size:9px;font-weight:700;color:${urgColor};border:1px solid ${urgColor};padding:3px 8px;border-radius:3px;white-space:nowrap;flex-shrink:0">
+          CORE ${kr.core} · ${t('severity.'+kr.urgency).toUpperCase()}
+        </div>
+        <div>
+          <div style="font-family:var(--mono);font-size:10px;font-weight:700;color:${urgColor};margin-bottom:6px">${t('killer_label')}</div>
+          <div class="killer-sub" style="color:${urgColor}">${kr.title}</div>
+          <div class="killer-desc">${kr.desc}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderScoreTable(r){
+  const cores=[
+    {num:'01',title:'OPERATIONAL SYSTEMS',data:r.c01},
+    {num:'02',title:'GROWTH & RETENTION',data:r.c02},
+    {num:'03',title:'TEAM & EXECUTION',data:r.c03},
+    {num:'04',title:'SCALING INFRASTRUCTURE',data:r.c04},
+    {num:'05',title:'MOAT & AI RESILIENCE',data:r.c05},
+  ];
+  const cond_map={
+    solid:'SOLID',acceptable:'ACCEPTABLE',fragile:'FRAGILE',collapse_risk:lang==='id'?'COLLAPSE RISK':'COLLAPSE RISK',
+    compounding:'COMPOUNDING',functional:'FUNCTIONAL',leaking:'LEAKING',bucket:lang==='id'?'BUCKET WITH HOLES':'BUCKET WITH HOLES',
+    high_velocity:lang==='id'?'HIGH VELOCITY':'HIGH VELOCITY',chaos:'CHAOS',
+    scale_ready:lang==='id'?'SCALE-READY':'SCALE-READY',almost_ready:lang==='id'?'ALMOST READY':'ALMOST READY',
+    not_ready:lang==='id'?'NOT READY':'NOT READY',danger:'DANGER ZONE',
+    strong_moat:lang==='id'?'MOAT KUAT':'STRONG MOAT',weak_moat:lang==='id'?'MOAT LEMAH':'WEAK MOAT',
+  };
+  let rows='';
+  cores.forEach(({num,title,data})=>{
+    const s=data.score;
+    const cColor=scoreColor(s);
+    const sev=s>=17?'aman':s>=12?'perlu':s>=7?'serius':'kritis';
+    const sevPill=`pill-${sev==='aman'?'sehat':sev==='perlu'?'info':sev==='serius'?'warning':'kritis'}`;
+    const cond=cond_map[data.condition]||data.condition;
+    const barW=Math.round(s/20*100);
+    rows+=`<tr>
+      <td style="color:var(--accent);font-weight:700">CORE ${num}</td>
+      <td>${title}</td>
+      <td style="color:${cColor};font-weight:700">${cond}</td>
+      <td><span class="pill ${sevPill}">${t('severity.'+sev)}</span></td>
+      <td>
+        <div class="prog-track">
+          <div class="prog-fill" style="width:${barW}%;background:${cColor}"></div>
+        </div>
+      </td>
+      <td style="color:${cColor};font-family:var(--display);font-size:20px;font-weight:900">${s}<span style="font-family:var(--mono);font-size:9px;color:var(--muted)">/20</span></td>
+    </tr>`;
+  });
+  document.getElementById('score-tbody').innerHTML=rows;
+}
+
+function renderAuditLog(r){
+  const cores=[
+    {num:'01',data:r.c01},{num:'02',data:r.c02},
+    {num:'03',data:r.c03},{num:'04',data:r.c04},{num:'05',data:r.c05}
+  ];
+  let html='';
+  cores.forEach(({num,data})=>{
+    const lvlPill={sehat:'pill-sehat',warning:'pill-warning',kritis:'pill-kritis'};
+    const lbl={sehat:t('level.sehat'),warning:t('level.warning'),kritis:t('level.kritis')};
+    let rowsHtml='';
+    const rows=data.rows||data.metrics||[];
+    const maxPts=(rows.length)*3;
+    const rawPts=rows.reduce((s,r)=>s+r.pts,0);
+    rows.forEach(row=>{
+      const pill=lvlPill[row.lvl]||'pill-muted';
+      const valStr=row.value!==undefined?`${row.value}/${row.max}`:'';
+      rowsHtml+=`<div class="m-row">
+        <span class="m-name">${row.k}</span>
+        ${valStr?`<span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${valStr}</span>`:''}
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">+${row.pts} pts</span>
+        <span class="pill ${pill}">${lbl[row.lvl]||row.lvl}</span>
+      </div>`;
+    });
+    html+=`<div style="border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden;margin-bottom:8px">
+      <div style="background:var(--s3);padding:9px 12px;display:flex;align-items:center;gap:8px;cursor:pointer"
+        onclick="this.nextElementSibling.classList.toggle('open')">
+        <span style="font-family:var(--mono);font-size:9px;color:var(--accent);font-weight:700">CORE ${num}</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--txt);flex:1">${scoreColor(data.score)}</span>
+        <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">Raw: ${rawPts}/${maxPts} pts</span>
+        <span style="font-family:var(--display);font-size:18px;font-weight:900;color:${scoreColor(data.score)}">${data.score}/20</span>
+        <span style="color:var(--muted);font-size:10px">▾</span>
+      </div>
+      <div class="core-body" style="padding:10px 12px">${rowsHtml}</div>
+    </div>`;
+  });
+  document.getElementById('audit-log').innerHTML=html;
+}
+
+function renderRoadmap(r){
+  const rm=ROADMAPS[r.industry]||ROADMAPS.saas;
+  const phases=[
+    {key:'p1',color:'var(--blue)',   icon:'◉',title:t('phase.phase1')},
+    {key:'p2',color:'var(--accent)', icon:'◈',title:t('phase.phase2')},
+    {key:'p3',color:'var(--purple)', icon:'⬡',title:t('phase.phase3')},
+  ];
+  const worstCore=['c01','c02','c03','c04','c05'].map(k=>({k,s:r[k].score})).sort((a,b)=>a.s-b.s)[0];
+  let html=`<div class="card" style="margin-bottom:12px">
+    <div class="card-hd" data-i="roadmap_title">${t('roadmap_title')}</div>
+    <div style="font-family:var(--body);font-size:12px;color:var(--txt2);margin-bottom:14px">
+      ${lang==='id'?`Prioritas: Core ${worstCore.k.slice(1)} (score ${worstCore.s}/20) — fix ini dulu.`
+        :`Priority: Core ${worstCore.k.slice(1)} (score ${worstCore.s}/20) — fix this first.`}
+    </div>`;
+  phases.forEach(({key,color,icon,title})=>{
+    const pd=(rm[key]?.[lang]||rm[key]?.id||{actions:[],kpi:[]});
+    const actions=pd.actions||[]; const kpi=pd.kpi||[];
+    html+=`<div class="phase-card" style="border-color:${color};background:var(--s2);border-top-width:3px">
+      <div class="phase-hd" style="color:${color}">${icon} ${title}</div>
+      ${actions.map((a,i)=>`<label class="phase-action" style="color:${color};">
+        <input type="checkbox" style="accent-color:${color}"/>
+        <span style="color:var(--txt2)">${a}</span>
+      </label>`).join('')}
+      <div class="kpi-wrap">${kpi.map(k=>`<span class="kpi-tag" style="color:${color};border-color:${color};background:transparent">${k}</span>`).join('')}</div>
+    </div>`;
+  });
+  html+=`<div class="quote-bar">
+    <div class="quote-text">"${lang==='id'?'Diagnosis tanpa roadmap adalah autopsi — berguna, tapi terlambat.':'Diagnosis without a roadmap is an autopsy — useful, but too late.'}"</div>
+    <div class="quote-src">— Ferry Hidayanto, CocoBlast OS v3.0</div>
+  </div></div>`;
+  document.getElementById('roadmap-wrap').innerHTML=html;
+}
+
+function renderResilience(r){
+  const s=r.resilienceScore;
+  const level=s>=70?'low':s>=40?'medium':'high';
+  const levelColor={low:'var(--green)',medium:'var(--yellow)',high:'var(--red)'}[level];
+  const ring=document.getElementById('res-ring');
+  ring.style.borderColor=levelColor; ring.style.color=levelColor;
+  document.getElementById('res-num').textContent=s;
+  document.getElementById('res-level-label').textContent=t('res_level.'+level);
+  document.getElementById('res-level-label').style.color=levelColor;
+  document.getElementById('res-desc').textContent=t('res_level_desc.'+level);
+
+  // Component breakdown
+  const raw=r.c05.raw;
+  const items=[
+    {label:'Proprietary Data Depth',value:raw.dd,max:10,weight:'35%'},
+    {label:'Feedback Loop Active',  value:raw.fl,max:10,weight:'25%'},
+    {label:'Switching Cost Score',  value:raw.sc,max:10,weight:'20%'},
+    {label:'Agentic Readiness',     value:raw.ar,max:5, weight:'20%'},
+  ];
+  let brkHtml='';
+  items.forEach(it=>{
+    const pct=Math.round((it.value/it.max)*100);
+    const c=pct>=70?'var(--green)':pct>=40?'var(--yellow)':'var(--red)';
+    brkHtml+=`<div class="m-row">
+      <span class="m-name">${it.label}</span>
+      <span style="font-family:var(--mono);font-size:9px;color:var(--muted)">${it.weight}</span>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:700;color:${c}">${it.value}/${it.max}</span>
+    </div>`;
+  });
+  document.getElementById('res-breakdown').innerHTML=brkHtml;
+
+  // AI Risk content
+  const riskLevel=r.c05.riskLevel;
+  const riskColor={low:'var(--green)',medium:'var(--yellow)',high:'var(--red)'}[riskLevel];
+  const riskLabel={low:lang==='id'?'LOW RISK — AMAN':'LOW RISK — SAFE',medium:lang==='id'?'MEDIUM RISK — WASPADA':'MEDIUM RISK — CAUTION',high:lang==='id'?'HIGH RISK — BAHAYA':'HIGH RISK — DANGER'}[riskLevel];
+  document.getElementById('ai-risk-content').innerHTML=`
+    <div style="border:1px solid ${riskColor};border-radius:var(--r2);padding:14px;background:transparent;margin-bottom:10px">
+      <div style="font-family:var(--display);font-size:22px;font-weight:900;color:${riskColor};margin-bottom:6px">${riskLabel}</div>
+      <div style="font-family:var(--body);font-size:12px;color:var(--txt2);line-height:1.5">${t('res_level_desc.'+riskLevel)}</div>
+    </div>
+    <div style="font-family:var(--mono);font-size:10px;color:var(--muted)">${lang==='id'?'Formula: (DataDepth/10×7) + (FeedbackLoop/10×5) + (SwitchingCost/10×4) + (AgenticReady/5×4) → Scale 0–20':'Formula: (DataDepth/10×7) + (FeedbackLoop/10×5) + (SwitchingCost/10×4) + (AgenticReady/5×4) → Scale 0–20'}</div>`;
+
+  // Moat actions
+  const actions=[
+    {t:lang==='id'?'HARI INI':'TODAY', d:lang==='id'?'Audit posisi lo: buka spreadsheet, list semua data yang lo kumpulkan — tandai mana yang benar-benar unik vs bisa dibeli dari data provider lain.':'Audit your position: open a spreadsheet, list all data you collect — mark what\'s truly unique vs what can be bought from data providers.'},
+    {t:lang==='id'?'MINGGU INI':'THIS WEEK', d:lang==='id'?'Identifikasi 1 feedback loop yang bisa ditutup tanpa infrastruktur baru — output diagnosis minggu lalu → dipakai improve prompt minggu ini.':'Identify 1 feedback loop that can be closed without new infrastructure — last week\'s diagnosis output → used to improve this week\'s prompt.'},
+    {t:lang==='id'?'BULAN INI':'THIS MONTH', d:lang==='id'?'Bangun outcome tracking: catat hasil aktual dari setiap output atau rekomendasi yang lo berikan — ini adalah foundation dari proprietary data lo.':'Build outcome tracking: record actual results from every output or recommendation you give — this is the foundation of your proprietary data.'},
+    {t:lang==='id'?'KUARTAL INI':'THIS QUARTER', d:lang==='id'?'Deploy 1 agentic signal dari checklist. Mulai dari yang paling mudah: real-time dashboard atau automated audit log. Ini yang akan 2x efisiensi operasional lo.':'Deploy 1 agentic signal from the checklist. Start with the easiest: real-time dashboard or automated audit log. This will 2x your operational efficiency.'},
+  ];
+  let mHtml='';
+  actions.forEach(a=>{
+    mHtml+=`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--b1)">
+      <span style="font-family:var(--mono);font-size:9px;font-weight:700;color:var(--accent);white-space:nowrap;padding-top:1px">${a.t}</span>
+      <span style="font-family:var(--body);font-size:12px;color:var(--txt2);line-height:1.4">${a.d}</span>
+    </div>`;
+  });
+  document.getElementById('moat-actions').innerHTML=mHtml;
+}
+
+function updateContextInfo(r){
+  const el=document.getElementById('context-info');
+  el.style.display='block';
+  el.textContent=`[Context: Score ${r.totalScore}/100 · ${r.verdict} · ${r.industry} · Killer: Core ${r.killerRisk?.core}]`;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════════════════
+const HKEY='cocoblast_history_v7';
+function saveHistory(r){
+  const h=loadHistory();
+  const entry={id:r.timestamp,timestamp:r.timestamp,industry:r.industry,
+    totalScore:r.totalScore,verdict:r.verdict,resilienceScore:r.resilienceScore,
+    cores:{c01:r.c01.score,c02:r.c02.score,c03:r.c03.score,c04:r.c04.score,c05:r.c05.score},
+    killerRisk:r.killerRisk?.core||null};
+  const updated=[entry,...h].slice(0,52);
+  try{localStorage.setItem(HKEY,JSON.stringify(updated));}catch(e){}
+}
+function loadHistory(){ try{const r=localStorage.getItem(HKEY);return r?JSON.parse(r):[]}catch{return []} }
+function clearHistory(){ localStorage.removeItem(HKEY); renderHistoryTab(); }
+
+function exportHistory(){
+  const h=loadHistory();
+  if(!h.length){alert(lang==='id'?'Tidak ada histori':'No history');return;}
+  const header='date,industry,totalScore,verdict,resilienceScore,c01,c02,c03,c04,c05';
+  const rows=h.map(e=>{
+    const d=new Date(e.timestamp).toLocaleDateString();
+    return `${d},${e.industry},${e.totalScore},${e.verdict},${e.resilienceScore||''},${e.cores.c01},${e.cores.c02},${e.cores.c03},${e.cores.c04},${e.cores.c05}`;
+  });
+  const csv=header+'\n'+rows.join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`cocoblast_history_${Date.now()}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function renderHistoryTab(){
+  const h=loadHistory();
+  const emptyEl=document.getElementById('hist-empty');
+  const sparkWrap=document.getElementById('hist-spark');
+  const listEl=document.getElementById('hist-list');
+
+  if(!h.length){
+    emptyEl.style.display='block'; sparkWrap.style.display='none'; listEl.innerHTML=''; return;
+  }
+  emptyEl.style.display='none'; sparkWrap.style.display='block';
+
+  // Sparkline
+  const scores=h.slice(0,12).reverse().map(e=>e.totalScore);
+  const maxS=Math.max(...scores,1);
+  const sparkEl=document.getElementById('sparkline');
+  sparkEl.innerHTML=scores.map(s=>{
+    const h=Math.max(4,Math.round((s/maxS)*36));
+    const c=s>=86?'var(--green)':s>=70?'var(--yellow)':s>=50?'var(--accent)':'var(--red)';
+    return `<div style="flex:1;height:${h}px;background:${c};border-radius:1px 1px 0 0;min-width:6px" title="${s}"></div>`;
+  }).join('');
+
+  // Stagnation
+  const stagEl=document.getElementById('stagnation-alert');
+  if(h.length>=3){
+    const recent=h.slice(0,3).map(e=>e.totalScore);
+    const range=Math.max(...recent)-Math.min(...recent);
+    if(range<=3){
+      stagEl.style.display='block';
+      stagEl.textContent=t('stagnation').replace('{n}',h.length>=3?'3':'');
+    }else stagEl.style.display='none';
   }
 
-  loader.textContent = t('loader-txt');
-  loader.classList.add('show');
-  resp.classList.remove('show');
+  // List
+  const vColors={ready:'var(--green)',fix:'var(--yellow)',pivot:'var(--accent)',collapse:'var(--red)'};
+  const indLabels={saas:'SaaS',ecom:'E-Com',fintech:'Fintech',fb:'F&B',healthcare:'Health'};
+  let lHtml='';
+  h.forEach((e,i)=>{
+    const d=new Date(e.timestamp);
+    const ds=d.toLocaleDateString(lang==='id'?'id-ID':'en-US',{day:'2-digit',month:'short',year:'numeric'});
+    const ts=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    const vColor=vColors[e.verdict]||'var(--txt2)';
+    const trend=i<h.length-1?e.totalScore-h[i+1].totalScore:null;
+    const trendStr=trend!=null?(trend>0?`↑${trend}`:trend<0?`↓${Math.abs(trend)}`:'→'):'';
+    const trendColor=trend>0?'var(--green)':trend<0?'var(--red)':'var(--muted)';
+    lHtml+=`<div class="hist-item" onclick="loadHistoryItem(${i})">
+      <div>
+        <div class="hist-date">${ds}</div>
+        <div style="font-family:var(--mono);font-size:8px;color:var(--muted)">${ts}</div>
+      </div>
+      <div class="hist-industry">${indLabels[e.industry]||e.industry}</div>
+      <div class="hist-score" style="color:${vColor}">${e.totalScore}</div>
+      <span class="pill" style="color:${vColor};border:1px solid ${vColor};background:transparent">${e.verdict?.toUpperCase()}</span>
+      ${trend!=null?`<span style="font-family:var(--mono);font-size:10px;font-weight:700;color:${trendColor}">${trendStr}</span>`:'<span></span>'}
+    </div>`;
+  });
+  listEl.innerHTML=lHtml;
+}
 
-  const isId = lang === 'id';
-  const sysPrompt = isId
-    ? `Kamu adalah sparring partner strategis untuk founder startup AI-native (Pre-Seed hingga Series A). Berikan saran konkret, actionable, dan singkat dalam Bahasa Indonesia yang natural (bukan formal kaku). Fokus ke satu aksi yang bisa dilakukan minggu ini. Format: **🔥 AKSI UTAMA** (1-2 kalimat konkret), **📊 DAMPAK** (metrik yang akan improve), **⚡ PERHATIAN** (1 risiko jika diabaikan). Maks 200 kata.`
-    : `You are a strategic sparring partner for AI-native startup founders (Pre-Seed to Series A). Give concrete, actionable advice in plain conversational English. Focus on one action doable this week. Format: **🔥 MAIN ACTION** (1-2 concrete sentences), **📊 IMPACT** (which metrics will improve), **⚡ WATCH OUT** (1 risk if ignored). Max 200 words.`;
+function loadHistoryItem(i){
+  // just show the stored scores — future: could re-render full result
+  const h=loadHistory();
+  const e=h[i];
+  alert(`Score: ${e.totalScore}/100\nVerdict: ${e.verdict}\nC01:${e.cores.c01} C02:${e.cores.c02} C03:${e.cores.c03} C04:${e.cores.c04} C05:${e.cores.c05}`);
+}
 
-  const fullPrompt = `[SYSTEM]: ${sysPrompt}\n\n[CONTEXT]:\n${ctx}\n\n[FOUNDER]: ${userMsg || (isId ? 'Gimana cara paling efektif buat improve area ini minggu ini?' : 'What\'s the most effective way to improve this area this week?')}`;
+// ═══════════════════════════════════════════════════════════════════
+// AI SPARRING (HuggingFace)
+// ═══════════════════════════════════════════════════════════════════
+const HF_KEY='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';
+const HF_MODEL='mistralai/Mistral-7B-Instruct-v0.3';
+const SYSTEM_ID=`Kamu adalah CocoBlast AI Sparring Partner — bukan yes-man. Kamu mitra kritis untuk founder startup Indonesia.
 
-  try {
-    const res = await fetch(
-      `https://api-inference.huggingface.co/models/${HF_MODEL}/v1/chat/completions`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: HF_MODEL,
-          messages: [
-            { role: 'system', content: sysPrompt },
-            { role: 'user', content: `[CONTEXT]:\n${ctx}\n\n${userMsg || (isId ? 'Gimana cara paling efektif buat improve area ini minggu ini?' : 'What\'s the most effective way to improve this area this week?')}` }
-          ],
-          max_tokens: 400,
-          temperature: 0.7,
-          stream: false,
-        }),
-      }
-    );
+Framework: CocoBlast OS 5-core (Ferry Hidayanto, Jember, Indonesia)
+- Core 01: Operational Systems
+- Core 02: Growth & Retention  
+- Core 03: Team & Execution
+- Core 04: Scaling Infrastructure
+- Core 05: Moat & AI Resilience (PALING KRITIS)
 
-    if (!res.ok) {
-      // Try legacy endpoint as fallback
-      const legacyRes = await fetch(
-        `https://api-inference.huggingface.co/models/${HF_MODEL}`,
-        {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            inputs: fullPrompt,
-            parameters: { max_new_tokens: 400, temperature: 0.7, return_full_text: false },
-          }),
+Philosophy: "Systems Over Specs. Moat atau mati. Scale saat sistem siap."
+
+Cara jawab: jujur, berbasis data, konkret (kasih angka/timeline), singkat dan dense.
+TIDAK menyimpan histori. Setiap query standalone.`;
+
+const SYSTEM_EN=`You are the CocoBlast AI Sparring Partner — not a yes-man. You are a critical thinking partner for startup founders.
+
+Framework: CocoBlast OS 5-core (Ferry Hidayanto, Jember, Indonesia)
+- Core 01: Operational Systems
+- Core 02: Growth & Retention
+- Core 03: Team & Execution
+- Core 04: Scaling Infrastructure
+- Core 05: Moat & AI Resilience (MOST CRITICAL)
+
+Philosophy: "Systems Over Specs. Build the moat or die. Scale when the system is ready."
+
+How to answer: honest, data-based, concrete (give numbers/timelines), concise and dense.
+NO history saved. Each query is standalone.`;
+
+async function sendSparring(){
+  const input=document.getElementById('chat-input');
+  const msg=input.value.trim();
+  if(!msg) return;
+  const btn=document.getElementById('send-btn');
+  input.value=''; btn.disabled=true;
+  addBubble(msg,'user');
+  addBubble(lang==='id'?'Menganalisa...':'Analyzing...','thinking');
+  try{
+    const ctxInfo=lastResult?`\n[Context: Score ${lastResult.totalScore}/100, Verdict: ${lastResult.verdict}, Industry: ${lastResult.industry}, Killer: Core ${lastResult.killerRisk?.core}, C05: ${lastResult.c05.score}/20]`:'';
+    const system=(lang==='id'?SYSTEM_ID:SYSTEM_EN)+ctxInfo;
+    const resp=await fetch(`https://api-inference.huggingface.co/models/${HF_MODEL}/v1/chat/completions`,{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+HF_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({model:HF_MODEL,max_tokens:500,temperature:0.7,
+        messages:[{role:'system',content:system},{role:'user',content:msg}]})
+    });
+    const data=await resp.json();
+    const text=data?.choices?.[0]?.message?.content||'';
+    removeThinking(); addBubble(text||'No response','ai');
+  }catch(e){
+    removeThinking();
+    addBubble(lang==='id'?`Error: ${e.message}. Coba lagi.`:`Error: ${e.message}. Try again.`,'ai');
+  }
+  btn.disabled=false;
+}
+
+function addBubble(text,type){
+  const wrap=document.getElementById('chat-messages');
+  const el=document.createElement('div');
+  el.className=`bubble ${type}`;
+  el.textContent=text;
+  wrap.appendChild(el);
+  wrap.scrollTop=wrap.scrollHeight;
+}
+function removeThinking(){
+  const el=document.querySelector('.bubble.thinking');
+  if(el) el.remove();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FILE IMPORT
+// ═══════════════════════════════════════════════════════════════════
+function handleCSV(input){ if(input.files[0]) parseCSVFile(input.files[0]); }
+function handlePDF(input){ if(input.files[0]) parsePDFFile(input.files[0]); }
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('dropzone').classList.remove('drag-over');
+  const file=e.dataTransfer.files[0];
+  if(!file) return;
+  if(file.name.endsWith('.csv')) parseCSVFile(file);
+  else if(file.name.endsWith('.pdf')) parsePDFFile(file);
+}
+
+function setFileStatus(msg){
+  const el=document.getElementById('file-status');
+  el.style.display='block'; el.textContent=msg;
+}
+
+function parseCSVFile(file){
+  setFileStatus(lang==='id'?'Memproses CSV...':'Processing CSV...');
+  Papa.parse(file,{
+    header:true,skipEmptyLines:true,dynamicTyping:true,
+    complete:(r)=>{
+      if(!r.data.length){setFileStatus('✗ CSV kosong'); return;}
+      const row=r.data[0];
+      let count=0;
+      Object.entries(row).forEach(([k,v])=>{
+        const key=k.trim();
+        if(metrics.hasOwnProperty(key)||getDefault(industry).hasOwnProperty(key)){
+          metrics[key]=parseFloat(v)||0; count++;
+          const el=document.querySelector(`[onchange="setMetric('${key}',this.value)"]`);
+          if(el) el.value=metrics[key];
         }
-      );
-      if (!legacyRes.ok) throw new Error(`HTTP ${legacyRes.status}`);
-      const legacyData = await legacyRes.json();
-      const text = Array.isArray(legacyData) ? legacyData[0]?.generated_text || '' : legacyData?.generated_text || '';
-      resp.textContent = text.trim() || (isId ? 'Tidak ada respons dari AI.' : 'No response from AI.');
-    } else {
-      const data = await res.json();
-      const text = data?.choices?.[0]?.message?.content || '';
-      resp.textContent = text.trim() || (isId ? 'Tidak ada respons.' : 'No response.');
-    }
-
-    // Save token if worked
-    localStorage.setItem('cb_hf_token', token);
-    hfToken = token;
-
-  } catch (err) {
-    resp.innerHTML = `<span class="spar-err">❌ ${t('spar-err-generic')}</span><br><span class="spar-tip">${err.message}</span>`;
-  } finally {
-    loader.classList.remove('show');
-    resp.classList.add('show');
-  }
+      });
+      setFileStatus(`✓ CSV: ${count} metrics loaded`);
+      runWhatIf();
+    },
+    error:(e)=>setFileStatus('✗ CSV Error: '+e.message)
+  });
 }
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
-function el(id) { return document.getElementById(id); }
-function bandOf(s) { return s >= 72 ? 'green' : s >= 45 ? 'yellow' : 'red'; }
-</script>
+async function parsePDFFile(file){
+  if(typeof pdfjsLib==='undefined'){ setFileStatus('✗ PDF.js tidak loaded'); return; }
+  setFileStatus(lang==='id'?'Membaca PDF...':'Reading PDF...');
+  const reader=new FileReader();
+  reader.onload=async(e)=>{
+    try{
+      const arr=new Uint8Array(e.target.result);
+      const pdf=await pdfjsLib.getDocument({data:arr}).promise;
+      let text='';
+      for(let i=1;i<=Math.min(pdf.numPages,5);i++){
+        const page=await pdf.getPage(i);
+        const content=await page.getTextContent();
+        text+=content.items.map(x=>x.str).join(' ')+'\n';
+      }
+      const kvRe=/([a-zA-Z][a-zA-Z0-9_]+)\s*[:=]\s*([\d.]+)/g;
+      let m; let count=0;
+      while((m=kvRe.exec(text))!==null){
+        const key=m[1].trim(); const val=parseFloat(m[2]);
+        if(!isNaN(val)&&(metrics.hasOwnProperty(key)||getDefault(industry).hasOwnProperty(key))){
+          metrics[key]=val; count++;
+        }
+      }
+      setFileStatus(count?`✓ PDF: ${count} values extracted`:(lang==='id'?'⚠ Tidak ada nilai ditemukan':'⚠ No values found'));
+    }catch(err){ setFileStatus('✗ PDF Error: '+err.message); }
+  };
+  reader.readAsArrayBuffer(file);
+}
 
+function downloadTemplate(){
+  const f=getFields(industry);
+  const all=[...f.c01,...f.c02,...f.c03,...f.c04,...f.c05];
+  const header=all.map(fd=>fd.k).join(',');
+  const values=all.map(fd=>fd.df).join(',');
+  const csv=`${header}\n${values}`;
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=`cocoblast_template_${industry}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INDUSTRY CHANGE
+// ═══════════════════════════════════════════════════════════════════
+function onIndustryChange(val){
+  industry=val;
+  metrics=getDefault(val);
+  renderForm();
+  agenticCount=0;
+}
+function setMetric(key,val){ metrics[key]=parseFloat(val)||0; }
+
+// ═══════════════════════════════════════════════════════════════════
+// TAB SWITCH
+// ═══════════════════════════════════════════════════════════════════
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(name==='histori') renderHistoryTab();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  if(typeof pdfjsLib!=='undefined') pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  industry='saas';
+  metrics=getDefault('saas');
+  renderForm();
+  renderAgenticChecklist();
+  renderStarterQuestions();
+  renderHistoryTab();
+  document.getElementById('privacy-text').textContent=t('privacy_text');
+
+  // Auto-add starter bubble
+  setTimeout(()=>{
+    addBubble(lang==='id'?'Halo! Gw CocoBlast AI Sparring Partner. Bukan yes-man — gw di sini untuk pressure-test bisnis lo. Tanya apa saja tentang diagnosis, moat, churn, scaling, atau apa yang lo hadapi sekarang.':'Hi! I\'m the CocoBlast AI Sparring Partner. Not a yes-man — I\'m here to pressure-test your business. Ask me anything about your diagnosis, moat, churn, scaling, or what you\'re facing right now.','ai');
+  },300);
+});
+</script>
 </body>
 </html>
